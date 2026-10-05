@@ -6,7 +6,7 @@ Fem faner, alltid synlige inne i en hytte: **Hjem**, **Gjøremål**, **Feil**, *
 
 Under **Mer** ligger: Dokumenter, Info og koder, Sjekklister, Medlemmer og Mine hytter, i den rekkefølgen. Info og koder ligger øverst etter Dokumenter fordi den brukes mest ved ankomst. Under en skillelinje kommer de kommende funksjonene som grå rader merket «Kommer», slik at de har en fast plass: Kalender, Historikk og Varsler.
 
-Hjem har to store snarveier (`ShortcutTile`): «Noe som må fikses?» (primær, åpner «Meld feil») og «Ankomst / Avreise» (sekundær). Det gjør at de to viktigste handlingene på hytta aldri ligger mer enn ett trykk unna, selv om sjekklistene bor under Mer.
+Hjem har to store snarveier (`ShortcutTile`): «Noe som mangler eller må fikses?» (primær, åpner «Meld feil») og «Ankomst / Avreise» (sekundær). Det gjør at de to viktigste handlingene på hytta aldri ligger mer enn ett trykk unna, selv om sjekklistene bor under Mer.
 
 ## Hyttevelger
 
@@ -19,7 +19,7 @@ Hyttenavnet står øverst på Hjem (`CabinSwitcher`). Er du med i flere hytter, 
 | 1 | Velkommen | Opprett bruker (sekundær: Logg inn) |
 | 2 | Ingen hytte ennå | Opprett hytte (sekundær: Jeg har fått en invitasjonslenke) |
 | 3 | Bli med i [hyttenavn] | Bli med |
-| 4 | Hjem | Noe som må fikses? |
+| 4 | Hjem | Noe som mangler eller må fikses? |
 | 5 | Gjøremål | Nytt gjøremål. Filter: Alle · Gjøremål · Vedlikehold |
 | 6 | Feil og mangler | Meld feil. Status: Ny, Pågår, Fikset |
 | 7 | Handleliste | Hurtiginnlegging øverst, avkryssing gir «Kjøpt av» |

@@ -38,7 +38,7 @@ export function Home() {
         <div className="tiles">
           <button type="button" className="ha-tile ha-tile-primary" onClick={() => navigate('/feil/ny')}>
             <Wrench className="ha-ico" aria-hidden="true" />
-            Noe som må fikses?
+            Noe som mangler eller må fikses?
           </button>
           <button type="button" className="ha-tile ha-tile-secondary" onClick={() => navigate('/mer/sjekkliste')}>
             <DoorOpen className="ha-ico" aria-hidden="true" />
