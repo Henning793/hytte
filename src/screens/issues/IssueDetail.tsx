@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
+import { ConfirmSheet } from '../../components/ConfirmSheet'
 import { Segmented } from '../../components/Segmented'
 import { TopBar } from '../../components/TopBar'
 import { useToast } from '../../components/Toast'
@@ -24,6 +26,7 @@ export function IssueDetail() {
   const { rows } = useTable<Issue>('issues', cabin.id)
   const name = useNames(cabin.id)
   const issue = rows?.find((i) => i.id === id)
+  const [confirming, setConfirming] = useState(false)
 
   if (!rows) return <TopBar backTo="/feil" backLabel="Feil og mangler" />
   if (!issue) {
@@ -85,7 +88,7 @@ export function IssueDetail() {
           />
         </div>
         {canDelete ? (
-          <button type="button" className="ha-btn ha-btn-danger ha-btn-block" onClick={() => remove(issue)}>
+          <button type="button" className="ha-btn ha-btn-danger ha-btn-block" onClick={() => setConfirming(true)}>
             Slett feilmeldingen
           </button>
         ) : (
@@ -94,6 +97,11 @@ export function IssueDetail() {
           </p>
         )}
       </div>
+      {confirming && (
+        <ConfirmSheet title="Slette feilmeldingen?" confirmLabel="Slett feilmeldingen" onConfirm={() => remove(issue)} onClose={() => setConfirming(false)}>
+          «{issue.title}» blir borte for alle, også bildet.
+        </ConfirmSheet>
+      )}
     </>
   )
 }

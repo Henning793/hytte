@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { CheckBox } from '../components/CheckBox'
+import { ConfirmSheet } from '../components/ConfirmSheet'
 import { PendingMark } from '../components/OfflineBanner'
 import { useToast } from '../components/Toast'
 import { useCurrentCabin } from '../lib/cabins'
@@ -17,6 +18,7 @@ export function Shopping() {
   const name = useNames(cabin.id)
   const pending = usePendingIds()
   const [text, setText] = useState('')
+  const [confirming, setConfirming] = useState(false)
 
   const open = (rows ?? []).filter((i) => !i.done).sort((a, b) => a.created_at.localeCompare(b.created_at))
   const bought = (rows ?? []).filter((i) => i.done).sort((a, b) => (b.bought_at ?? '').localeCompare(a.bought_at ?? ''))
@@ -92,11 +94,21 @@ export function Shopping() {
           <h2 className="list-h">Kjøpt</h2>
           <div className="ha-list">{bought.map(item)}</div>
           <div>
-            <button type="button" className="ha-btn ha-btn-ghost" style={{ paddingLeft: 0 }} onClick={clearBought}>
+            <button type="button" className="ha-btn ha-btn-ghost" style={{ paddingLeft: 0 }} onClick={() => setConfirming(true)}>
               Fjern kjøpte varer
             </button>
           </div>
         </>
+      )}
+      {confirming && (
+        <ConfirmSheet
+          title={`Fjerne ${count(bought.length, 'kjøpt vare', 'kjøpte varer')}?`}
+          confirmLabel="Fjern kjøpte varer"
+          onConfirm={clearBought}
+          onClose={() => setConfirming(false)}
+        >
+          De blir borte fra listen for alle.
+        </ConfirmSheet>
       )}
     </div>
   )

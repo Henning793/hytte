@@ -179,17 +179,19 @@ select tests.login('00000000-0000-0000-0000-00000000000b');
 select tests.ok(tests.affected($$update cabin_info set keybox_code = '4711', keybox_location = 'Under trappa'$$) = 1,
   'medlemmer kan redigere info og koder');
 select tests.ok((select updated_by from cabin_info) = auth.uid(), 'info husker hvem som endret sist');
-select tests.fails($$insert into checklist_items (cabin_id, kind, text) values
-  ('aaaaaaaa-0000-0000-0000-000000000001', 'ankomst', 'Skru på vannet')$$, 'medlemmer kan ikke legge til sjekkpunkter');
+insert into checklist_items (id, cabin_id, kind, text, position) values
+  ('44444444-0000-0000-0000-00000000000b', 'aaaaaaaa-0000-0000-0000-000000000001', 'ankomst', 'Tenn i peisen', 2);
+select tests.ok(tests.rows($$select 1 from checklist_items where created_by = auth.uid()$$) = 1, 'medlemmer legger til sjekkpunkter');
 
 select tests.login('00000000-0000-0000-0000-00000000000a');
 insert into checklist_items (id, cabin_id, kind, text, position) values
   ('44444444-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000001', 'ankomst', 'Skru på vannet', 1);
-select tests.ok(tests.rows('select 1 from checklist_items') = 1, 'admin legger til sjekkpunkter');
+select tests.ok(tests.rows('select 1 from checklist_items') = 2, 'admin legger til sjekkpunkter');
 
 select tests.login('00000000-0000-0000-0000-00000000000b');
-select tests.ok(tests.affected($$delete from checklist_items$$) = 0, 'medlemmer kan ikke fjerne sjekkpunkter');
-select tests.ok(tests.affected($$update checklist_items set text = 'Annet'$$) = 0, 'medlemmer kan ikke endre sjekkpunkter');
+select tests.ok(tests.affected($$update checklist_items set position = 3 - position$$) = 2, 'medlemmer endrer rekkefølgen på alle punkter');
+select tests.ok(tests.affected($$delete from checklist_items where created_by <> auth.uid()$$) = 0, 'medlemmer kan ikke fjerne andres sjekkpunkter');
+select tests.ok(tests.affected($$delete from checklist_items where created_by = auth.uid()$$) = 1, 'medlemmer fjerner egne sjekkpunkter');
 insert into checklist_runs (cabin_id, kind) values ('aaaaaaaa-0000-0000-0000-000000000001', 'ankomst');
 select tests.ok(tests.rows($$select 1 from checklist_runs where completed_by = auth.uid()$$) = 1, 'medlemmer logger gjennomgang');
 select tests.ok(tests.affected($$delete from checklist_runs$$) = 0, 'medlemmer kan ikke slette gjennomganger');
