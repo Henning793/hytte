@@ -28,7 +28,7 @@ export function BottomNav({ openIssues = 0, shoppingItems = 0 }: Props) {
           </span>
           {label}
           {count ? (
-            <span className="dot" aria-label={`${count} ${label === 'Feil' ? 'åpne' : 'varer'}`}>
+            <span className={label === 'Feil' ? 'dot' : 'dot dot-neutral'} aria-label={`${count} ${label === 'Feil' ? 'åpne' : 'varer'}`}>
               {count}
             </span>
           ) : null}

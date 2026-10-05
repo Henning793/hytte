@@ -13,7 +13,14 @@ import { Members } from './screens/cabins/Members'
 import { MyCabins } from './screens/cabins/MyCabins'
 import { NoCabin } from './screens/cabins/NoCabin'
 import { Home } from './screens/Home'
+import { IssueDetail } from './screens/issues/IssueDetail'
+import { IssueNew } from './screens/issues/IssueNew'
+import { Issues } from './screens/issues/Issues'
 import { More } from './screens/More'
+import { Shopping } from './screens/Shopping'
+import { TaskDetail } from './screens/tasks/TaskDetail'
+import { TaskForm } from './screens/tasks/TaskForm'
+import { Tasks } from './screens/tasks/Tasks'
 import { Welcome } from './screens/Welcome'
 
 // Stiene er på norsk fordi de vises i adressefeltet og i invitasjonslenker.
@@ -46,9 +53,14 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Home /> },
-      { path: 'gjoremal', element: <Placeholder title="Gjøremål" step={5} /> },
-      { path: 'feil', element: <Placeholder title="Feil og mangler" step={5} /> },
-      { path: 'handleliste', element: <Placeholder title="Handleliste" step={5} /> },
+      { path: 'gjoremal', element: <Tasks /> },
+      { path: 'gjoremal/ny', element: <TaskForm /> },
+      { path: 'gjoremal/:id', element: <TaskDetail /> },
+      { path: 'gjoremal/:id/endre', element: <TaskForm /> },
+      { path: 'feil', element: <Issues /> },
+      { path: 'feil/ny', element: <IssueNew /> },
+      { path: 'feil/:id', element: <IssueDetail /> },
+      { path: 'handleliste', element: <Shopping /> },
       { path: 'mer', element: <More /> },
       { path: 'mer/dokumenter', element: <Placeholder title="Dokumenter og manualer" step={6} backTo="/mer" /> },
       { path: 'mer/info', element: <Placeholder title="Info og koder" step={6} backTo="/mer" /> },

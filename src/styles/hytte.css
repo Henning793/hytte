@@ -121,6 +121,7 @@ div.ha-li { cursor:default; }
 .ha-nav [aria-current="page"] { color:var(--ink); }
 .ha-nav [aria-current="page"] .pill { background:var(--primary-soft); color:var(--on-primary-soft); }
 .ha-nav .dot { position:absolute; top:4px; left:calc(50% + 10px); min-width:20px; height:20px; padding:0 5px; border-radius:10px; background:var(--danger); color:var(--surface-raised); font-size:12px; line-height:20px; font-weight:700; }
+.ha-nav .dot-neutral { background:var(--primary); color:var(--on-primary); }
 
 /* Offline */
 .offline-wrap { display:flex; justify-content:center; padding:6px 16px 0; }
