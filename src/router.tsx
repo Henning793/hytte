@@ -5,6 +5,9 @@ import { ForgotPassword } from './screens/auth/ForgotPassword'
 import { Login } from './screens/auth/Login'
 import { NewPassword } from './screens/auth/NewPassword'
 import { Signup } from './screens/auth/Signup'
+import { Calendar } from './screens/calendar/Calendar'
+import { EventForm } from './screens/calendar/EventForm'
+import { StayForm } from './screens/calendar/StayForm'
 import { Checklist } from './screens/checklist/Checklist'
 import { DocumentView } from './screens/docs/DocumentView'
 import { Documents } from './screens/docs/Documents'
@@ -16,6 +19,9 @@ import { JoinHelp } from './screens/cabins/JoinHelp'
 import { Members } from './screens/cabins/Members'
 import { MyCabins } from './screens/cabins/MyCabins'
 import { NoCabin } from './screens/cabins/NoCabin'
+import { History } from './screens/history/History'
+import { HistoryDetail } from './screens/history/HistoryDetail'
+import { HistoryForm } from './screens/history/HistoryForm'
 import { Home } from './screens/Home'
 import { IssueDetail } from './screens/issues/IssueDetail'
 import { IssueNew } from './screens/issues/IssueNew'
@@ -71,6 +77,15 @@ export const router = createBrowserRouter([
       { path: 'mer/info', element: <Info /> },
       { path: 'mer/info/endre', element: <InfoEdit /> },
       { path: 'mer/sjekkliste', element: <Checklist /> },
+      { path: 'mer/kalender', element: <Calendar /> },
+      { path: 'mer/kalender/opphold/ny', element: <StayForm /> },
+      { path: 'mer/kalender/opphold/:id', element: <StayForm /> },
+      { path: 'mer/kalender/hendelse/ny', element: <EventForm /> },
+      { path: 'mer/kalender/hendelse/:id', element: <EventForm /> },
+      { path: 'mer/historikk', element: <History /> },
+      { path: 'mer/historikk/ny', element: <HistoryForm /> },
+      { path: 'mer/historikk/:id', element: <HistoryDetail /> },
+      { path: 'mer/historikk/:id/endre', element: <HistoryForm /> },
       { path: 'mer/medlemmer', element: <Members /> },
       { path: 'mer/hytter', element: <MyCabins /> },
     ],

@@ -197,6 +197,72 @@ select tests.ok(tests.rows($$select 1 from checklist_runs where completed_by = a
 select tests.ok(tests.affected($$delete from checklist_runs$$) = 0, 'medlemmer kan ikke slette gjennomganger');
 
 -- ---------------------------------------------------------------------------
+-- Kalender: opphold, hendelser og farge
+-- ---------------------------------------------------------------------------
+select tests.login('00000000-0000-0000-0000-00000000000b');  -- Kari
+insert into stays (id, cabin_id, user_id, start_date, end_date) values
+  ('55555555-0000-0000-0000-00000000000b', 'aaaaaaaa-0000-0000-0000-000000000001', auth.uid(), '2026-10-10', '2026-10-14');
+insert into stays (cabin_id, guest_name, start_date, end_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000001', 'Mormor', '2026-10-10', '2026-10-12');
+select tests.ok(tests.rows($$select 1 from stays where guest_name = 'Mormor'$$) = 1, 'opphold kan gjelde noen som ikke bruker appen');
+select tests.fails($$insert into stays (cabin_id, start_date, end_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000001', '2026-10-10', '2026-10-12')$$, 'opphold må gjelde noen');
+select tests.fails($$insert into stays (cabin_id, user_id, guest_name, start_date, end_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000001', auth.uid(), 'Mormor', '2026-10-10', '2026-10-12')$$, 'opphold gjelder enten et medlem eller et navn');
+delete from stays where guest_name = 'Mormor';
+insert into stays (id, cabin_id, user_id, start_date, end_date) values
+  ('55555555-0000-0000-0000-00000000000c', 'aaaaaaaa-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a', '2026-10-12', '2026-10-13');
+select tests.ok(tests.rows('select 1 from stays') = 2, 'medlemmer kan legge inn opphold for andre i hytta, også samtidig');
+select tests.fails($$insert into stays (cabin_id, user_id, start_date, end_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000c', '2026-10-12', '2026-10-13')$$,
+  'opphold kan ikke gjelde noen utenfor hytta');
+select tests.fails($$insert into stays (cabin_id, user_id, start_date, end_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000001', auth.uid(), '2026-10-12', '2026-10-11')$$, 'opphold kan ikke slutte før det starter');
+insert into calendar_events (id, cabin_id, title, start_date, end_date) values
+  ('66666666-0000-0000-0000-00000000000b', 'aaaaaaaa-0000-0000-0000-000000000001', 'Dugnad', '2026-10-17', '2026-10-17');
+select tests.ok(tests.affected($$update profiles set color = '#2d5a47' where id = auth.uid()$$) = 1, 'egen farge kan endres');
+select tests.ok(tests.affected($$update profiles set color = '#000000' where id <> auth.uid()$$) = 0, 'andres farge kan ikke endres');
+select tests.fails($$update profiles set color = 'rød' where id = auth.uid()$$, 'farge må være en hex-kode');
+
+select tests.login('00000000-0000-0000-0000-00000000000a');  -- Ola, admin
+insert into calendar_events (id, cabin_id, title, start_date, end_date) values
+  ('66666666-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000001', 'Vinterferie', '2027-02-22', '2027-02-26');
+select tests.ok(tests.affected($$update stays set end_date = '2026-10-15' where id = '55555555-0000-0000-0000-00000000000b'$$) = 1,
+  'medlemmer kan endre andres opphold');
+select tests.ok(tests.affected($$delete from stays where id = '55555555-0000-0000-0000-00000000000c'$$) = 1,
+  'den oppholdet gjelder kan slette det');
+
+select tests.login('00000000-0000-0000-0000-00000000000b');  -- Kari
+select tests.ok(tests.affected($$update calendar_events set title = 'Vinterferie (uke 8)' where id = '66666666-0000-0000-0000-00000000000a'$$) = 1,
+  'medlemmer kan endre andres hendelser');
+select tests.ok(tests.affected($$delete from calendar_events where id = '66666666-0000-0000-0000-00000000000a'$$) = 0,
+  'medlemmer kan ikke slette andres hendelser');
+select tests.ok(tests.affected($$delete from calendar_events where id = '66666666-0000-0000-0000-00000000000b'$$) = 1,
+  'medlemmer kan slette egne hendelser');
+
+select tests.login('00000000-0000-0000-0000-00000000000a');
+select tests.ok(tests.affected($$delete from calendar_events$$) = 1, 'admin kan slette andres hendelser');
+
+-- ---------------------------------------------------------------------------
+-- Historikk
+-- ---------------------------------------------------------------------------
+select tests.login('00000000-0000-0000-0000-00000000000b');  -- Kari
+insert into history_entries (id, cabin_id, happened_on, title) values
+  ('77777777-0000-0000-0000-00000000000b', 'aaaaaaaa-0000-0000-0000-000000000001', '2019-06-15', 'Malte hytta');
+select tests.ok(tests.rows($$select 1 from history_entries where created_by = auth.uid()$$) = 1, 'medlemmer skriver i historikken, også tilbake i tid');
+select tests.login('00000000-0000-0000-0000-00000000000a');  -- Ola, admin
+insert into history_entries (id, cabin_id, happened_on, title) values
+  ('77777777-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000001', '2024-08-01', 'Ny kledning på nordveggen');
+select tests.login('00000000-0000-0000-0000-00000000000b');
+select tests.ok(tests.affected($$update history_entries set title = 'Ny kledning, nord og vest' where id = '77777777-0000-0000-0000-00000000000a'$$) = 1,
+  'medlemmer kan endre andres oppføringer');
+select tests.ok(tests.affected($$delete from history_entries where id = '77777777-0000-0000-0000-00000000000a'$$) = 0,
+  'medlemmer kan ikke slette andres oppføringer');
+select tests.login('00000000-0000-0000-0000-00000000000a');
+select tests.ok(tests.affected($$delete from history_entries where id = '77777777-0000-0000-0000-00000000000b'$$) = 1,
+  'admin kan slette andres oppføringer');
+
+-- ---------------------------------------------------------------------------
 -- Andre hytter og utenforstående
 -- ---------------------------------------------------------------------------
 select tests.login('00000000-0000-0000-0000-00000000000c');  -- Per, admin i Fjellbu
@@ -207,6 +273,11 @@ select tests.ok(tests.rows('select 1 from shopping_items') = 0, 'Per ser ikke Fu
 select tests.ok(tests.rows($$select 1 from cabin_info where cabin_id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 0,
   'Per ser ikke Furulias koder');
 select tests.ok(tests.rows('select 1 from checklist_items') = 0, 'Per ser ikke Furulias sjekkliste');
+select tests.ok(tests.rows('select 1 from stays') = 0, 'Per ser ikke Furulias opphold');
+select tests.ok(tests.rows('select 1 from history_entries') = 0, 'Per ser ikke Furulias historikk');
+select tests.fails($$insert into calendar_events (cabin_id, title, start_date, end_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000001', 'Inntrenger', '2026-10-10', '2026-10-10')$$, 'Per kan ikke legge til hendelser i Furulia');
+select tests.ok(tests.affected($$delete from stays$$) = 0, 'Per kan ikke slette Furulias opphold');
 select tests.ok(tests.rows($$select 1 from cabin_members where cabin_id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 0,
   'Per ser ikke Furulias medlemmer');
 select tests.ok(tests.rows($$select 1 from profiles where id <> auth.uid()$$) = 0, 'Per ser ikke andres profiler');
