@@ -169,6 +169,8 @@ div.ha-li { cursor:default; }
 .doc-type { width:44px; height:52px; border-radius:var(--radius-sm); background:var(--danger-soft); color:var(--on-danger-soft); display:grid; place-items:center; font-size:13px; font-weight:700; flex:none; }
 .doc-type.img { background:var(--primary-soft); color:var(--on-primary-soft); }
 .switch { border:0; padding:0; cursor:pointer; width:52px; height:32px; border-radius:16px; background:var(--line-strong); position:relative; flex:none; }
+/* Usynlig trykkflate rundt bryteren, så den blir minst 56 px høy. */
+.switch::before { content:""; position:absolute; inset:-12px -8px; }
 .switch::after { transition:left .15s ease; content:""; position:absolute; top:4px; left:4px; width:24px; height:24px; border-radius:50%; background:var(--surface-raised); }
 .switch[aria-checked="true"], .switch.on { background:var(--primary); }
 .switch[aria-checked="true"]::after, .switch.on::after { left:24px; }
@@ -179,7 +181,7 @@ div.ha-li { cursor:default; }
 .done-card { background:var(--primary-soft); color:var(--on-primary-soft); border-radius:var(--radius-lg); padding:var(--space-4); display:flex; gap:var(--space-3); align-items:flex-start; }
 .code-row { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); }
 .mini-btn { min-height:48px; padding:0 16px; border-radius:var(--radius-md); border:2px solid var(--line-strong); background:var(--surface-raised); font-size:17px; font-weight:700; cursor:pointer; color:var(--ink); }
-.tel { color:var(--primary); font-weight:700; text-decoration:none; font-size:19px; }
+.tel { color:var(--primary); font-weight:700; text-decoration:none; font-size:19px; display:inline-flex; align-items:center; justify-content:flex-end; min-height:48px; min-width:56px; padding:0 4px; border-radius:var(--radius-md); }
 
 /* App-spesifikt */
 .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
