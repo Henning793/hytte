@@ -1,8 +1,8 @@
 // Felles regler for hvordan innholdet sorteres og beskrives, brukt av både listene og Hjem.
 import { useToast } from '../components/Toast'
 import { updateRow } from './data'
-import { formatDay } from './format'
-import type { Issue, IssueStatus, Task } from './types'
+import { formatDay, formatSize } from './format'
+import type { Doc, DocCategory, Issue, IssueStatus, Task } from './types'
 import { useMe } from './useMe'
 
 type NameOf = (id: string | null) => string
@@ -46,3 +46,11 @@ export function issueMeta(i: Issue, name: NameOf) {
 export function onlyDeleter(creatorName: string) {
   return creatorName === 'Tidligere medlem' || !creatorName ? 'admin' : creatorName
 }
+
+export const isPdf = (d: Doc) => d.mime_type === 'application/pdf'
+
+export function docMeta(d: Doc, name: NameOf) {
+  return `${formatSize(d.size_bytes)} · lagt til av ${name(d.created_by)}`
+}
+
+export const categoryLabel: Record<DocCategory, string> = { manualer: 'Manualer', dokumenter: 'Dokumenter' }

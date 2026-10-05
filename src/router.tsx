@@ -1,11 +1,15 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import { AppLayout } from './components/AppLayout'
 import { GuestOnly, RequireAuth, RequireCabin } from './components/Guards'
-import { Placeholder } from './components/Placeholder'
 import { ForgotPassword } from './screens/auth/ForgotPassword'
 import { Login } from './screens/auth/Login'
 import { NewPassword } from './screens/auth/NewPassword'
 import { Signup } from './screens/auth/Signup'
+import { Checklist } from './screens/checklist/Checklist'
+import { DocumentView } from './screens/docs/DocumentView'
+import { Documents } from './screens/docs/Documents'
+import { Info } from './screens/info/Info'
+import { InfoEdit } from './screens/info/InfoEdit'
 import { CreateCabin } from './screens/cabins/CreateCabin'
 import { Join } from './screens/cabins/Join'
 import { JoinHelp } from './screens/cabins/JoinHelp'
@@ -62,9 +66,11 @@ export const router = createBrowserRouter([
       { path: 'feil/:id', element: <IssueDetail /> },
       { path: 'handleliste', element: <Shopping /> },
       { path: 'mer', element: <More /> },
-      { path: 'mer/dokumenter', element: <Placeholder title="Dokumenter og manualer" step={6} backTo="/mer" /> },
-      { path: 'mer/info', element: <Placeholder title="Info og koder" step={6} backTo="/mer" /> },
-      { path: 'mer/sjekkliste', element: <Placeholder title="Sjekklister" step={6} backTo="/mer" /> },
+      { path: 'mer/dokumenter', element: <Documents /> },
+      { path: 'mer/dokumenter/:id', element: <DocumentView /> },
+      { path: 'mer/info', element: <Info /> },
+      { path: 'mer/info/endre', element: <InfoEdit /> },
+      { path: 'mer/sjekkliste', element: <Checklist /> },
       { path: 'mer/medlemmer', element: <Members /> },
       { path: 'mer/hytter', element: <MyCabins /> },
     ],

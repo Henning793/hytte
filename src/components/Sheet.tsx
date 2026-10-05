@@ -9,19 +9,24 @@ type Props = {
 /** Bunnark som glir opp over innholdet. Lukkes med bakgrunnen eller Esc. */
 export function Sheet({ label, onClose, children }: Props) {
   const ref = useRef<HTMLDivElement>(null)
+  // Siste onClose, så effekten under bare kjører når arket åpnes og lukkes.
+  const close = useRef(onClose)
+  useEffect(() => {
+    close.current = onClose
+  })
 
   useEffect(() => {
     const previous = document.activeElement as HTMLElement | null
     ref.current?.focus()
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') close.current()
     }
     document.addEventListener('keydown', onKey)
     return () => {
       document.removeEventListener('keydown', onKey)
       previous?.focus()
     }
-  }, [onClose])
+  }, [])
 
   return (
     <div className="overlay">

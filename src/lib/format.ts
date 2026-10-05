@@ -19,3 +19,9 @@ export function formatDay(value: string | Date): string {
 export function count(n: number, one: string, many: string) {
   return `${n} ${n === 1 ? one : many}`
 }
+
+/** «2,1 MB», «340 kB». */
+export function formatSize(bytes: number) {
+  if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toLocaleString('nb-NO', { maximumFractionDigits: 1 })} MB`
+  return `${Math.max(1, Math.round(bytes / 1024))} kB`
+}

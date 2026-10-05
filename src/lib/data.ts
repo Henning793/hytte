@@ -94,7 +94,7 @@ export function patchLocal<T>(key: string, change: (rows: T[]) => T[]): () => vo
 // Tabeller med innhold i en hytte
 // ---------------------------------------------------------------------------
 
-export type ContentTable = 'tasks' | 'issues' | 'shopping_items'
+export type ContentTable = 'tasks' | 'issues' | 'shopping_items' | 'documents' | 'checklist_items'
 type Row = { id: string; cabin_id: string; created_at: string }
 
 export const tableKey = (table: ContentTable, cabinId: string) => `${table}:${cabinId}`

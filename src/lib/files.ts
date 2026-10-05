@@ -32,6 +32,33 @@ export async function uploadImage(cabinId: string, folder: string, file: File): 
   return path
 }
 
+export const MAX_FILE_BYTES = 20 * 1024 * 1024
+
+/** PDF eller bilde til {cabinId}/{folder}/{uuid}.{ext}. Bilder krympes først. */
+export async function uploadFile(cabinId: string, folder: string, file: File) {
+  const ready = await compressImage(file)
+  if (ready.size > MAX_FILE_BYTES) throw new Error('too_large')
+  const ext = ready.type === 'application/pdf' ? 'pdf' : ready.type === 'image/jpeg' ? 'jpg' : (ready.name.split('.').pop() ?? 'bin')
+  const path = `${cabinId}/${folder}/${crypto.randomUUID()}.${ext}`
+  const { error } = await supabase.storage.from(BUCKET).upload(path, ready, { contentType: ready.type })
+  if (error) throw error
+  return { path, mime_type: ready.type, size_bytes: ready.size }
+}
+
+/** Sletter en fil. Feiler stille: raden er allerede borte, og filen er utilgjengelig uten den. */
+export function removeFile(path: string) {
+  return supabase.storage.from(BUCKET).remove([path]).then(
+    () => undefined,
+    () => undefined,
+  )
+}
+
+/** Lenke som laster ned filen med et lesbart navn. */
+export async function downloadUrl(path: string, filename: string): Promise<string | null> {
+  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, 600, { download: filename })
+  return data?.signedUrl ?? null
+}
+
 const signed = new Map<string, { url: Promise<string | null>; expires: number }>()
 
 function signedUrl(path: string): Promise<string | null> {
