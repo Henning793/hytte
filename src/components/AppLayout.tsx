@@ -3,6 +3,7 @@ import { useCurrentCabin } from '../lib/cabins'
 import { useTable } from '../lib/data'
 import type { Issue, ShoppingItem } from '../lib/types'
 import { BottomNav } from './BottomNav'
+import { OfflineBanner } from './OfflineBanner'
 
 /** Ramme for skjermene inne i en hytte: innhold øverst, bunnmeny nederst. */
 export function AppLayout() {
@@ -12,6 +13,7 @@ export function AppLayout() {
   return (
     <>
       <main className="screen">
+        <OfflineBanner />
         <Outlet />
       </main>
       <BottomNav

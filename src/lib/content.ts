@@ -31,7 +31,7 @@ export function useToggleTask() {
   const toast = useToast()
   return (t: Task) =>
     updateRow<Task>('tasks', t.cabin_id, t.id, { done: !t.done }, { done_by: t.done ? null : me }).catch(() =>
-      toast('Endringen ble ikke lagret. Sjekk at du har nett.'),
+      toast('Endringen ble ikke lagret. Prøv igjen.'),
     )
 }
 

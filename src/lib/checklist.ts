@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import { patchLocal, useQuery } from './data'
+import { insertLog, useQuery } from './data'
 import { supabase } from './supabase'
 import type { ChecklistKind, ChecklistRun } from './types'
 
@@ -65,12 +65,7 @@ export function useRuns(cabinId: string) {
   }).rows
 }
 
-export async function logRun(cabinId: string, kind: ChecklistKind, userId: string) {
+export function logRun(cabinId: string, kind: ChecklistKind, userId: string): Promise<void> {
   const run: ChecklistRun = { id: crypto.randomUUID(), cabin_id: cabinId, kind, completed_by: userId, completed_at: new Date().toISOString() }
-  const undo = patchLocal<ChecklistRun>(runsKey(cabinId), (rows) => [run, ...rows])
-  const { error } = await supabase.from('checklist_runs').insert(run as never)
-  if (error) {
-    undo()
-    throw error
-  }
+  return insertLog(runsKey(cabinId), 'checklist_runs', run)
 }

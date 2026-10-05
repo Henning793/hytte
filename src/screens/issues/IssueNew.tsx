@@ -6,7 +6,7 @@ import { TopBar } from '../../components/TopBar'
 import { useToast } from '../../components/Toast'
 import { useCurrentCabin } from '../../lib/cabins'
 import { insertRow } from '../../lib/data'
-import { uploadImage } from '../../lib/files'
+import { compressImage } from '../../lib/files'
 import { draftMeta, type Issue } from '../../lib/types'
 import { useMe } from '../../lib/useMe'
 
@@ -40,19 +40,18 @@ export function IssueNew() {
     setFormError(undefined)
     const draft = draftMeta(cabin.id, me)
     try {
-      const photo_path = photo ? await uploadImage(cabin.id, 'issues', photo) : null
-      await insertRow<Issue>('issues', {
-        ...draft,
-        title: title.trim(),
-        description: description.trim() || null,
-        status: 'ny',
-        photo_path,
-      })
+      // Bildet krympes nå og lastes opp sammen med feilmeldingen, også senere hvis det ikke er nett.
+      const image = photo ? await compressImage(photo) : null
+      await insertRow<Issue>(
+        'issues',
+        { ...draft, title: title.trim(), description: description.trim() || null, status: 'ny', photo_path: null },
+        image ? { file: image, folder: 'issues', field: 'photo_path' } : undefined,
+      )
       toast('Feilen er meldt')
       navigate('/feil', { replace: true })
     } catch {
       setBusy(false)
-      setFormError('Feilmeldingen ble ikke sendt. Sjekk at du har nett, og prøv igjen.')
+      setFormError('Feilmeldingen ble ikke lagret. Prøv igjen.')
     }
   }
 

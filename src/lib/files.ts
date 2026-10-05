@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import imageCompression from 'browser-image-compression'
+import { pendingFile } from './data'
+import { idbDel, idbGet, idbSet } from './idb'
 import { supabase } from './supabase'
 
 export const BUCKET = 'cabin-files'
@@ -34,52 +36,62 @@ export async function uploadImage(cabinId: string, folder: string, file: File): 
 
 export const MAX_FILE_BYTES = 20 * 1024 * 1024
 
-/** PDF eller bilde til {cabinId}/{folder}/{uuid}.{ext}. Bilder krympes først. */
-export async function uploadFile(cabinId: string, folder: string, file: File) {
-  const ready = await compressImage(file)
-  if (ready.size > MAX_FILE_BYTES) throw new Error('too_large')
-  const ext = ready.type === 'application/pdf' ? 'pdf' : ready.type === 'image/jpeg' ? 'jpg' : (ready.name.split('.').pop() ?? 'bin')
-  const path = `${cabinId}/${folder}/${crypto.randomUUID()}.${ext}`
-  const { error } = await supabase.storage.from(BUCKET).upload(path, ready, { contentType: ready.type })
-  if (error) throw error
-  return { path, mime_type: ready.type, size_bytes: ready.size }
-}
-
 /** Sletter en fil. Feiler stille: raden er allerede borte, og filen er utilgjengelig uten den. */
 export function removeFile(path: string) {
+  void idbDel(fileKey(path))
   return supabase.storage.from(BUCKET).remove([path]).then(
     () => undefined,
     () => undefined,
   )
 }
 
-/** Lenke som laster ned filen med et lesbart navn. */
-export async function downloadUrl(path: string, filename: string): Promise<string | null> {
-  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, 600, { download: filename })
+// ---------------------------------------------------------------------------
+// Visning av private filer, også uten nett
+// ---------------------------------------------------------------------------
+
+const fileKey = (path: string) => `f:${path}`
+const objectUrls = new Map<string, Promise<string | null>>()
+
+async function signedUrl(path: string, download?: string): Promise<string | null> {
+  const { data } = await supabase.storage.from(BUCKET).createSignedUrl(path, 3600, download ? { download } : undefined)
   return data?.signedUrl ?? null
 }
 
-const signed = new Map<string, { url: Promise<string | null>; expires: number }>()
+/** Filen som blob: fra utboksen, fra lagret kopi, eller hentet og lagret for neste gang. */
+async function fileBlob(path: string): Promise<Blob | null> {
+  if (path.startsWith('local:')) return pendingFile(path)
+  const saved = await idbGet<Blob>(fileKey(path))
+  if (saved) return saved
+  const url = await signedUrl(path).catch(() => null)
+  if (!url) return null
+  const res = await fetch(url).catch(() => null)
+  if (!res?.ok) return null
+  const blob = await res.blob()
+  void idbSet(fileKey(path), blob)
+  return blob
+}
 
-function signedUrl(path: string): Promise<string | null> {
-  const hit = signed.get(path)
-  if (hit && hit.expires > Date.now() + 60_000) return hit.url
-  const url = supabase.storage
-    .from(BUCKET)
-    .createSignedUrl(path, 3600)
-    .then(({ data }) => data?.signedUrl ?? null)
-  signed.set(path, { url, expires: Date.now() + 3600_000 })
+function objectUrl(path: string): Promise<string | null> {
+  let url = objectUrls.get(path)
+  if (!url) {
+    url = fileBlob(path).then((b) => (b ? URL.createObjectURL(b) : null))
+    // Mislykket henting prøves igjen neste gang skjermen vises.
+    void url.then((u) => {
+      if (!u) objectUrls.delete(path)
+    })
+    objectUrls.set(path, url)
+  }
   return url
 }
 
-/** Midlertidig adresse til en privat fil. Gjenbrukes til den nesten er utløpt. */
-export function useSignedUrl(path: string | null | undefined): string | null {
+/** Adresse til en privat fil (bilde eller PDF) som også virker uten nett når den er åpnet før. */
+export function useFileUrl(path: string | null | undefined): string | null {
   const [result, setResult] = useState<{ path: string; url: string | null } | null>(null)
 
   useEffect(() => {
     if (!path) return
     let active = true
-    signedUrl(path).then((url) => {
+    void objectUrl(path).then((url) => {
       if (active) setResult({ path, url })
     })
     return () => {
@@ -88,4 +100,19 @@ export function useSignedUrl(path: string | null | undefined): string | null {
   }, [path])
 
   return path && result?.path === path ? result.url : null
+}
+
+/** Laster ned filen med et lesbart navn. Gir false hvis den verken er lagret eller kan hentes. */
+export async function downloadFile(path: string, filename: string): Promise<boolean> {
+  const local = await objectUrl(path)
+  const href = local ?? (await signedUrl(path, filename).catch(() => null))
+  if (!href) return false
+  const a = document.createElement('a')
+  a.href = href
+  if (local) a.download = filename
+  a.rel = 'noopener'
+  document.body.append(a)
+  a.click()
+  a.remove()
+  return true
 }

@@ -1,9 +1,10 @@
 import { Link, useNavigate } from 'react-router'
 import { Camera } from 'lucide-react'
+import { PendingMark } from '../../components/OfflineBanner'
 import { StatusBadge } from '../../components/StatusBadge'
 import { useCurrentCabin } from '../../lib/cabins'
 import { issueMeta, newestFirst } from '../../lib/content'
-import { useTable } from '../../lib/data'
+import { usePendingIds, useTable } from '../../lib/data'
 import { useNames } from '../../lib/members'
 import type { Issue } from '../../lib/types'
 
@@ -12,6 +13,7 @@ export function Issues() {
   const navigate = useNavigate()
   const { rows } = useTable<Issue>('issues', cabin.id)
   const name = useNames(cabin.id)
+  const pending = usePendingIds()
   const open = (rows ?? []).filter((i) => i.status !== 'fikset').sort(newestFirst)
   const fixed = (rows ?? []).filter((i) => i.status === 'fikset').sort((a, b) => b.updated_at.localeCompare(a.updated_at))
 
@@ -19,7 +21,10 @@ export function Issues() {
     <button key={i.id} type="button" className="ha-li" onClick={() => navigate(`/feil/${i.id}`)}>
       <span className="ha-li-main">
         <span className="ha-li-title">{i.title}</span>
-        <span className="ha-li-meta">{issueMeta(i, name)}</span>
+        <span className="ha-li-meta">
+          <PendingMark show={pending.has(i.id)} />
+          {issueMeta(i, name)}
+        </span>
       </span>
       <StatusBadge status={i.status} />
     </button>

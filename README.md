@@ -50,3 +50,13 @@ Alle tabeller har Row Level Security. Kort fortalt:
 - Filer ligger i den private bucketen `cabin-files` under `{cabin_id}/…`, og bare hyttas medlemmer slipper til.
 
 `supabase/tests/rls_test.sql` beviser reglene og kjøres i CI mot en vanlig Postgres med en liten etterligning av Supabase (`supabase/tests/supabase_shim.sql`).
+
+## Uten nett
+
+- Service workeren cacher selve appen, så den åpner uten nett.
+- Siste kjente lister (gjøremål, feil, handleliste, dokumentliste, info og koder, sjekklister, medlemmer) lagres i IndexedDB og vises med en gang (`src/lib/data.ts`).
+- Alle endringer vises lokalt med en gang og legges i en utboks som lagres i IndexedDB og sendes i rekkefølge når det er nett. Bilder venter i utboksen som filer. Hvis serveren avviser en endring som ble gjort uten nett, vises en melding og listen hentes på nytt.
+- Bilder og PDF-er som er åpnet før, lagres og kan åpnes igjen uten nett.
+- Ved utlogging slettes alt som er lagret på telefonen, også endringer som ikke er sendt.
+
+Test: åpne appen, gå gjennom skjermene, slå av nettet i DevTools (*Network → Offline*) og last siden på nytt.

@@ -76,7 +76,7 @@ function TaskFormInner({ existing }: { existing?: Task }) {
       }
     } catch {
       setBusy(false)
-      setFormError('Gjøremålet ble ikke lagret. Sjekk at du har nett, og prøv igjen.')
+      setFormError('Gjøremålet ble ikke lagret. Prøv igjen.')
     }
   }
 

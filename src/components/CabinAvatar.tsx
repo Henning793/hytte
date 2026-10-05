@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useSignedUrl } from '../lib/files'
+import { useFileUrl } from '../lib/files'
 
 type Props = {
   name: string
@@ -10,7 +10,7 @@ type Props = {
 }
 
 export function CabinAvatar({ name, photoPath, alt, size }: Props) {
-  const url = useSignedUrl(photoPath)
+  const url = useFileUrl(photoPath)
   // Bildet kan mangle uten nett; da vises forbokstaven.
   const [broken, setBroken] = useState<string | null>(null)
   const style = size ? { width: size, height: size, fontSize: Math.round(size * 0.45) } : undefined

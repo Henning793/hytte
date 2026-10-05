@@ -7,7 +7,7 @@ import { useToast } from '../../components/Toast'
 import { useCurrentCabin } from '../../lib/cabins'
 import { categoryLabel } from '../../lib/content'
 import { insertRow } from '../../lib/data'
-import { MAX_FILE_BYTES, uploadFile } from '../../lib/files'
+import { MAX_FILE_BYTES, compressImage } from '../../lib/files'
 import { draftMeta, type Doc, type DocCategory } from '../../lib/types'
 import { useMe } from '../../lib/useMe'
 
@@ -51,16 +51,21 @@ export function UploadSheet({ onClose }: { onClose: () => void }) {
     setBusy(true)
     setError(undefined)
     try {
-      const uploaded = await uploadFile(cabin.id, 'documents', file)
-      await insertRow<Doc>('documents', { ...draftMeta(cabin.id, me), name: name.trim(), category, file_path: uploaded.path, mime_type: uploaded.mime_type, size_bytes: uploaded.size_bytes })
-      toast(`${uploaded.mime_type === 'application/pdf' ? 'PDF-en' : 'Bildet'} er lastet opp til ${categoryLabel[category]}`)
+      const ready = await compressImage(file)
+      if (ready.size > MAX_FILE_BYTES) throw new Error('too_large')
+      await insertRow<Doc>(
+        'documents',
+        { ...draftMeta(cabin.id, me), name: name.trim(), category, file_path: '', mime_type: ready.type, size_bytes: ready.size },
+        { file: ready, folder: 'documents', field: 'file_path' },
+      )
+      toast(`${ready.type === 'application/pdf' ? 'PDF-en' : 'Bildet'} er lagt i ${categoryLabel[category]}`)
       onClose()
     } catch (e) {
       setBusy(false)
       setError(
         e instanceof Error && e.message === 'too_large'
           ? 'Filen er for stor. Den kan være opptil 20 MB.'
-          : 'Filen ble ikke lastet opp. Sjekk at du har nett, og prøv igjen.',
+          : 'Filen ble ikke lagret. Prøv igjen.',
       )
     }
   }

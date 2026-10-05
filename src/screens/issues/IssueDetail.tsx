@@ -5,13 +5,13 @@ import { useToast } from '../../components/Toast'
 import { useCurrentCabin } from '../../lib/cabins'
 import { issueMeta, onlyDeleter, statusLabel } from '../../lib/content'
 import { deleteRows, updateRow, useTable } from '../../lib/data'
-import { useSignedUrl } from '../../lib/files'
+import { useFileUrl } from '../../lib/files'
 import { useNames } from '../../lib/members'
 import type { Issue, IssueStatus } from '../../lib/types'
 import { useMe } from '../../lib/useMe'
 
 function Photo({ path }: { path: string }) {
-  const url = useSignedUrl(path)
+  const url = useFileUrl(path)
   return <div className="photo">{url ? <img src={url} alt="Bilde av feilen" /> : <div style={{ height: 200 }} />}</div>
 }
 
@@ -43,17 +43,17 @@ export function IssueDetail() {
     if (status === i.status) return
     updateRow<Issue>('issues', cabin.id, i.id, { status }).then(
       () => toast(`Status: ${statusLabel[status]}`),
-      () => toast('Statusen ble ikke lagret. Sjekk at du har nett.'),
+      () => toast('Statusen ble ikke lagret. Prøv igjen.'),
     )
   }
 
   async function remove(i: Issue) {
     navigate('/feil', { replace: true })
     try {
-      await deleteRows<Issue>('issues', cabin.id, [i.id])
+      await deleteRows('issues', cabin.id, [i.id])
       toast('Feilmeldingen er slettet')
     } catch {
-      toast('Feilmeldingen ble ikke slettet. Sjekk at du har nett.')
+      toast('Feilmeldingen ble ikke slettet. Prøv igjen.')
     }
   }
 
