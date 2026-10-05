@@ -27,11 +27,26 @@ npm run dev
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript |
 | `npm run icons` | Lager PNG-ikoner fra `public/favicon.svg` |
+| `npm run test:db` | Kjører migrasjonene og RLS-testene mot en tom Postgres (krever `DATABASE_URL`) |
 
 ## Oppsett som må gjøres én gang
 
 1. **Supabase:** opprett et gratis prosjekt. Under *Project Settings → API* finner du `Project URL` og `anon public`-nøkkelen.
 2. **Netlify:** *Add new site → Import from GitHub* og velg dette repoet. Bygg-innstillingene leses fra `netlify.toml`. Legg inn `VITE_SUPABASE_URL` og `VITE_SUPABASE_ANON_KEY` under *Site configuration → Environment variables*.
-3. **Supabase Auth:** legg Netlify-adressen (`https://<navn>.netlify.app`) inn som *Site URL* og under *Redirect URLs* (*Authentication → URL Configuration*), så «Glemt passord»-lenker virker.
+3. **Database:** kjør migrasjonene i `supabase/migrations/` i rekkefølge, enten med Supabase CLI (`supabase link --project-ref <ref>` og `supabase db push`) eller ved å lime dem inn i *SQL Editor*.
+4. **Supabase Auth:** skru av *Confirm email* under *Authentication → Providers → Email*.
+5. **Supabase Auth:** legg Netlify-adressen (`https://<navn>.netlify.app`) inn som *Site URL* og under *Redirect URLs* (*Authentication → URL Configuration*), så «Glemt passord»-lenker virker.
 
 Anon-nøkkelen er laget for å ligge i nettleseren. Sikkerheten ligger i Row Level Security i databasen. `service_role`-nøkkelen skal aldri inn i appen, Netlify eller repoet.
+
+## Database og tilgang
+
+Alle tabeller har Row Level Security. Kort fortalt:
+
+- Bare medlemmer av en hytte ser og endrer noe i den. Ikke-innloggede ser ingenting.
+- Bare den som opprettet noe, og admin, kan slette det. Unntak: kjøpte varer kan fjernes av alle.
+- Bare admin ser invitasjonslenken, lager ny lenke, fjerner medlemmer og endrer sjekklistepunkter.
+- Hytter opprettes med `create_cabin(navn)`, man blir med med `join_cabin(kode)`, og «Bli med»-skjermen bruker `invite_preview(kode)`.
+- Filer ligger i den private bucketen `cabin-files` under `{cabin_id}/…`, og bare hyttas medlemmer slipper til.
+
+`supabase/tests/rls_test.sql` beviser reglene og kjøres i CI mot en vanlig Postgres med en liten etterligning av Supabase (`supabase/tests/supabase_shim.sql`).
