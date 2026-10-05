@@ -370,11 +370,48 @@ select tests.fails($$select * from public.invite_preview('x')$$, 'anon kan ikke 
 -- Slette hytte
 -- ---------------------------------------------------------------------------
 set role authenticated;
+
+-- Eve blir med i Fjellbu og legger inn litt av alt.
+select tests.login('00000000-0000-0000-0000-00000000000d');
+select public.join_cabin(tests.token('bbbbbbbb-0000-0000-0000-000000000002'));
+insert into tasks (cabin_id, title) values ('bbbbbbbb-0000-0000-0000-000000000002', 'Måke tak');
+insert into issues (cabin_id, title) values ('bbbbbbbb-0000-0000-0000-000000000002', 'Lekker');
+insert into shopping_items (cabin_id, name) values ('bbbbbbbb-0000-0000-0000-000000000002', 'Ved');
+insert into stays (cabin_id, user_id, start_date, end_date)
+  values ('bbbbbbbb-0000-0000-0000-000000000002', auth.uid(), '2026-10-10', '2026-10-12');
+insert into calendar_events (cabin_id, title, start_date, end_date)
+  values ('bbbbbbbb-0000-0000-0000-000000000002', 'Dugnad', '2026-10-20', '2026-10-20');
+insert into history_entries (cabin_id, happened_on, title)
+  values ('bbbbbbbb-0000-0000-0000-000000000002', '2026-10-01', 'Nytt tak');
+insert into storage.objects (bucket_id, name, owner_id)
+  values ('cabin-files', 'bbbbbbbb-0000-0000-0000-000000000002/history/eve.jpg', auth.uid()::text);
+
+select tests.ok(tests.affected($$delete from cabins where id = 'bbbbbbbb-0000-0000-0000-000000000002'$$) = 0,
+  'medlem kan ikke slette hytta');
+select tests.login('00000000-0000-0000-0000-00000000000a');  -- Ola, admin i en annen hytte
+select tests.ok(tests.affected($$delete from cabins where id = 'bbbbbbbb-0000-0000-0000-000000000002'$$) = 0,
+  'admin i en annen hytte kan ikke slette hytta');
+
+-- Per sletter som appen gjør: først filene, så hytta.
 select tests.login('00000000-0000-0000-0000-00000000000c');
+select tests.ok(tests.affected($$delete from storage.objects where name like 'bbbbbbbb-0000-0000-0000-000000000002/%'$$) = 1,
+  'admin sletter hyttas filer, også andres');
 select tests.ok(tests.affected($$delete from cabins where id = 'bbbbbbbb-0000-0000-0000-000000000002'$$) = 1,
   'admin kan slette hytta si');
 
 reset role;
-select tests.ok(tests.rows($$select 1 from public.cabin_members where cabin_id = 'bbbbbbbb-0000-0000-0000-000000000002'$$) = 0,
-  'medlemskapene forsvinner med hytta');
+select tests.ok(
+  (select count(*) from public.cabin_members where cabin_id = 'bbbbbbbb-0000-0000-0000-000000000002')
+  + (select count(*) from public.cabin_invites where cabin_id = 'bbbbbbbb-0000-0000-0000-000000000002')
+  + (select count(*) from public.cabin_info where cabin_id = 'bbbbbbbb-0000-0000-0000-000000000002')
+  + (select count(*) from public.tasks where cabin_id = 'bbbbbbbb-0000-0000-0000-000000000002')
+  + (select count(*) from public.issues where cabin_id = 'bbbbbbbb-0000-0000-0000-000000000002')
+  + (select count(*) from public.shopping_items where cabin_id = 'bbbbbbbb-0000-0000-0000-000000000002')
+  + (select count(*) from public.stays where cabin_id = 'bbbbbbbb-0000-0000-0000-000000000002')
+  + (select count(*) from public.calendar_events where cabin_id = 'bbbbbbbb-0000-0000-0000-000000000002')
+  + (select count(*) from public.history_entries where cabin_id = 'bbbbbbbb-0000-0000-0000-000000000002')
+  + (select count(*) from storage.objects where name like 'bbbbbbbb-0000-0000-0000-000000000002/%') = 0,
+  'alt som hørte til hytta er borte');
+select tests.ok(tests.rows($$select 1 from public.profiles where id = '00000000-0000-0000-0000-00000000000d'$$) = 1,
+  'medlemmene har fortsatt kontoen sin');
 \echo 'Alle RLS-tester bestått.'
