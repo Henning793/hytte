@@ -238,6 +238,25 @@ select tests.login('00000000-0000-0000-0000-00000000000a');
 select tests.ok(tests.affected($$delete from calendar_events$$) = 1, 'admin kan slette andres hendelser');
 
 -- ---------------------------------------------------------------------------
+-- Historikk
+-- ---------------------------------------------------------------------------
+select tests.login('00000000-0000-0000-0000-00000000000b');  -- Kari
+insert into history_entries (id, cabin_id, happened_on, title) values
+  ('77777777-0000-0000-0000-00000000000b', 'aaaaaaaa-0000-0000-0000-000000000001', '2019-06-15', 'Malte hytta');
+select tests.ok(tests.rows($$select 1 from history_entries where created_by = auth.uid()$$) = 1, 'medlemmer skriver i historikken, også tilbake i tid');
+select tests.login('00000000-0000-0000-0000-00000000000a');  -- Ola, admin
+insert into history_entries (id, cabin_id, happened_on, title) values
+  ('77777777-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000001', '2024-08-01', 'Ny kledning på nordveggen');
+select tests.login('00000000-0000-0000-0000-00000000000b');
+select tests.ok(tests.affected($$update history_entries set title = 'Ny kledning, nord og vest' where id = '77777777-0000-0000-0000-00000000000a'$$) = 1,
+  'medlemmer kan endre andres oppføringer');
+select tests.ok(tests.affected($$delete from history_entries where id = '77777777-0000-0000-0000-00000000000a'$$) = 0,
+  'medlemmer kan ikke slette andres oppføringer');
+select tests.login('00000000-0000-0000-0000-00000000000a');
+select tests.ok(tests.affected($$delete from history_entries where id = '77777777-0000-0000-0000-00000000000b'$$) = 1,
+  'admin kan slette andres oppføringer');
+
+-- ---------------------------------------------------------------------------
 -- Andre hytter og utenforstående
 -- ---------------------------------------------------------------------------
 select tests.login('00000000-0000-0000-0000-00000000000c');  -- Per, admin i Fjellbu
@@ -249,6 +268,7 @@ select tests.ok(tests.rows($$select 1 from cabin_info where cabin_id = 'aaaaaaaa
   'Per ser ikke Furulias koder');
 select tests.ok(tests.rows('select 1 from checklist_items') = 0, 'Per ser ikke Furulias sjekkliste');
 select tests.ok(tests.rows('select 1 from stays') = 0, 'Per ser ikke Furulias opphold');
+select tests.ok(tests.rows('select 1 from history_entries') = 0, 'Per ser ikke Furulias historikk');
 select tests.fails($$insert into calendar_events (cabin_id, title, start_date, end_date) values
   ('aaaaaaaa-0000-0000-0000-000000000001', 'Inntrenger', '2026-10-10', '2026-10-10')$$, 'Per kan ikke legge til hendelser i Furulia');
 select tests.ok(tests.affected($$delete from stays$$) = 0, 'Per kan ikke slette Furulias opphold');

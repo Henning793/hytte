@@ -19,6 +19,9 @@ import { JoinHelp } from './screens/cabins/JoinHelp'
 import { Members } from './screens/cabins/Members'
 import { MyCabins } from './screens/cabins/MyCabins'
 import { NoCabin } from './screens/cabins/NoCabin'
+import { History } from './screens/history/History'
+import { HistoryDetail } from './screens/history/HistoryDetail'
+import { HistoryForm } from './screens/history/HistoryForm'
 import { Home } from './screens/Home'
 import { IssueDetail } from './screens/issues/IssueDetail'
 import { IssueNew } from './screens/issues/IssueNew'
@@ -79,6 +82,10 @@ export const router = createBrowserRouter([
       { path: 'mer/kalender/opphold/:id', element: <StayForm /> },
       { path: 'mer/kalender/hendelse/ny', element: <EventForm /> },
       { path: 'mer/kalender/hendelse/:id', element: <EventForm /> },
+      { path: 'mer/historikk', element: <History /> },
+      { path: 'mer/historikk/ny', element: <HistoryForm /> },
+      { path: 'mer/historikk/:id', element: <HistoryDetail /> },
+      { path: 'mer/historikk/:id/endre', element: <HistoryForm /> },
       { path: 'mer/medlemmer', element: <Members /> },
       { path: 'mer/hytter', element: <MyCabins /> },
     ],

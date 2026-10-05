@@ -69,3 +69,8 @@ export function formatRange(start: string, end: string): string {
   if (a.getFullYear() === b.getFullYear() && withYear) return `${dayMonth.format(a)}–${fmt.format(b)}`
   return `${fmt.format(a)}–${fmt.format(b)}`
 }
+
+const fullDay = new Intl.DateTimeFormat('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })
+
+/** «15. juni 2019» */
+export const formatFullDay = (iso: string) => fullDay.format(fromIso(iso))

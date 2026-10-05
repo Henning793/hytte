@@ -26,6 +26,7 @@ import { setThemePreference, useTheme } from '../lib/theme'
 
 const links: { to: string; label: string; icon: LucideIcon }[] = [
   { to: '/mer/kalender', label: 'Kalender', icon: CalendarDays },
+  { to: '/mer/historikk', label: 'Historikk', icon: History },
   { to: '/mer/dokumenter', label: 'Dokumenter', icon: FileText },
   { to: '/mer/info', label: 'Info og koder', icon: Info },
   { to: '/mer/sjekkliste', label: 'Sjekklister', icon: ListTodo },
@@ -34,7 +35,6 @@ const links: { to: string; label: string; icon: LucideIcon }[] = [
 ]
 
 const comingSoon: { label: string; icon: LucideIcon }[] = [
-  { label: 'Historikk', icon: History },
   { label: 'Varsler', icon: Bell },
 ]
 

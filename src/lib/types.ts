@@ -120,6 +120,18 @@ export type CalendarEvent = {
   updated_at: string
 }
 
+export type HistoryEntry = {
+  id: string
+  cabin_id: string
+  happened_on: string
+  title: string
+  description: string | null
+  photo_path: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
 /** Felter serveren fyller inn; brukes når en ny rad vises før den er lagret. */
 export function draftMeta(cabinId: string, userId: string) {
   const now = new Date().toISOString()

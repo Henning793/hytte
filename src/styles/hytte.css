@@ -238,3 +238,8 @@ button.edit-main .ha-li-title { padding-right:20px; }
 .swatches { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:var(--space-3); }
 .swatch { aspect-ratio:1; min-height:48px; border-radius:50%; border:3px solid transparent; cursor:pointer; display:grid; place-items:center; color:#fff; }
 .swatch[aria-checked="true"] { box-shadow:0 0 0 3px var(--surface-raised), 0 0 0 6px var(--ink); }
+
+/* Historikk */
+.search { position:relative; display:flex; align-items:center; }
+.search > .ha-ico { position:absolute; left:16px; color:var(--ink-muted); pointer-events:none; }
+.search .ha-input { padding-left:52px; }
