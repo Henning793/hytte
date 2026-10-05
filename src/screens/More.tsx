@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import {
   Bell,
   CalendarDays,
@@ -13,6 +13,7 @@ import {
   Warehouse,
   type LucideIcon,
 } from 'lucide-react'
+import { useAuth } from '../lib/auth'
 import { setThemePreference, useTheme } from '../lib/theme'
 
 const links: { to: string; label: string; icon: LucideIcon }[] = [
@@ -31,6 +32,8 @@ const comingSoon: { label: string; icon: LucideIcon }[] = [
 
 export function More() {
   const theme = useTheme()
+  const { signOut } = useAuth()
+  const navigate = useNavigate()
   const dark = theme === 'dark'
 
   return (
@@ -68,13 +71,19 @@ export function More() {
               onClick={() => setThemePreference(dark ? 'light' : 'dark')}
             />
           </div>
-          {/* Logg ut kobles til Supabase Auth i steg 3. */}
-          <Link to="/velkommen" className="ha-li">
+          <button
+            type="button"
+            className="ha-li"
+            onClick={async () => {
+              await signOut()
+              navigate('/velkommen', { replace: true })
+            }}
+          >
             <LogOut className="ha-ico" aria-hidden="true" />
             <span className="ha-li-main">
               <span className="ha-li-title">Logg ut</span>
             </span>
-          </Link>
+          </button>
         </div>
       </div>
 
