@@ -52,7 +52,7 @@ Hytteappen er en mobil-først PWA der familier som deler en hytte holder orden p
 
 - Lucide-stil: 24px rutenett, 2px strek, avrundede ender, `currentColor`. Bruk Lucide (ISC-lisens) i appen. Det finnes ingen egne ikonfiler i systemet ennå.
 - Ikoner står alltid sammen med tekst, unntatt øyet («Vis passord» / «Skjul passord» som tilgjengelig navn) og lukk-krysset.
-- Faste ikoner: Hjem `house`, Gjøremål `list-checks`, Feil `wrench`, Handleliste `shopping-cart`, Mer `menu`, Meld feil `camera`, Ankomst / Avreise `door-open`, frakoblet `cloud-off`, venter på sending `clock`.
+- Faste ikoner: Hjem `house`, Gjøremål `list-checks`, Feil `wrench`, Handleliste `shopping-cart`, Mer `menu`, Meld feil `camera`, Hjem-snarveien «Noe som må fikses?» `wrench`, Ankomst / Avreise `door-open`, frakoblet `cloud-off`, venter på sending `clock`.
 
 ## Frakoblet
 

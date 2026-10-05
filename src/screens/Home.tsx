@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router'
-import { Camera, DoorOpen } from 'lucide-react'
+import { DoorOpen, Wrench } from 'lucide-react'
 import { CabinSwitcher } from '../components/CabinSwitcher'
 import { StatusBadge } from '../components/StatusBadge'
 import { useCurrentCabin } from '../lib/cabins'
@@ -37,8 +37,8 @@ export function Home() {
       <div className="scroll" style={{ paddingTop: 12 }}>
         <div className="tiles">
           <button type="button" className="ha-tile ha-tile-primary" onClick={() => navigate('/feil/ny')}>
-            <Camera className="ha-ico" aria-hidden="true" />
-            Meld feil
+            <Wrench className="ha-ico" aria-hidden="true" />
+            Noe som må fikses?
           </button>
           <button type="button" className="ha-tile ha-tile-secondary" onClick={() => navigate('/mer/sjekkliste')}>
             <DoorOpen className="ha-ico" aria-hidden="true" />
