@@ -41,7 +41,7 @@ Rollene gjelder per hytte.
 
 - **Admin:** den som opprettet hytta. Eneste som kan invitere, lage ny invitasjonslenke, fjerne medlemmer og redigere de faste punktene i sjekklistene.
 - **Medlem:** kan opprette, redigere og krysse av alt (gjøremål, feil, handleliste, dokumenter, info og koder).
-- **Sletting:** bare den som opprettet et element, og admin, kan slette det. I UI vises «Slett» bare for dem. Andre ser «Bare Ola kan slette dette».
+- **Sletting:** bare den som opprettet et element, og admin, kan slette det. I UI vises «Slett» bare for dem. Andre ser «Bare Ola kan slette dette». Før noe slettes, spør appen «Er du sikker?».
 - **Unntak:** «Fjern kjøpte varer» på handlelisten kan brukes av alle og fjerner alle avkryssede varer, uansett hvem som la dem inn.
 - **Status på feil** (Ny, Pågår, Fikset) kan endres av alle medlemmer.
 - Skjul handlinger brukeren ikke har lov til. Ingen deaktiverte knapper uten forklaring.
@@ -96,7 +96,7 @@ RLS-hjelpere: `is_member(cabin_id)` og `is_admin(cabin_id)` (security definer, s
 | tasks, issues, documents | medlem | medlem | medlem | `created_by = auth.uid()` eller admin |
 | shopping_items | medlem | medlem | medlem | eier, admin, **eller `done = true`** |
 | cabin_info | medlem | medlem | medlem | – |
-| checklist_items | medlem | admin | admin | admin |
+| checklist_items | medlem | medlem | medlem | `created_by = auth.uid()` eller admin |
 | checklist_runs | medlem | medlem | – | admin |
 | profiles | seg selv + de man deler hytte med | seg selv | seg selv | – |
 
@@ -129,7 +129,7 @@ Se `docs/design/navigasjon.md` og prototypen for oppsett og tekster. Bunnmeny: *
 7. **Handleliste:** hurtiginnlegging øverst, avkryssing setter «Kjøpt av [navn]», «Fjern kjøpte varer».
 8. **Dokumenter og manualer:** to faste mapper, **Manualer** og **Dokumenter** (prototypen har tre, bruk to). Last opp: ta bilde eller velg PDF/bilde. Visning: bilder i appen, PDF-er åpnes i nettleserens egen visning. Last ned.
 9. **Info og koder:** wifi-navn og -passord (Kopier-knapp), nøkkelboks (koden er skjult til man trykker «Vis kode», pluss hvor boksen er), søppeltømming, nærmeste butikk, faste nødnumre (110, 112, 113, 116 117) og fritekst «Greit å vite». Alle medlemmer kan redigere.
-10. **Sjekkliste (Ankomst / Avreise):** faste punkter med valgfritt hint, som admin legger til og fjerner. Avkryssing er **personlig og lokal** på telefonen og viser fremdrift. «Ferdig» lagrer en `checklist_run` og nullstiller listen. Alle ser siste gjennomgang, f.eks. «Avreise fullført av Mari, søn.».
+10. **Sjekkliste (Ankomst / Avreise):** faste punkter med valgfritt hint, som alle medlemmer kan legge til og sortere. Den som la inn et punkt, og admin, kan fjerne det. Avkryssing er **personlig og lokal** på telefonen og viser fremdrift. «Ferdig» lagrer en `checklist_run` og nullstiller listen. Alle ser siste gjennomgang, f.eks. «Avreise fullført av Mari, søn.».
 11. **Medlemmer:** liste med rolle. Admin ser Inviter (ark med lenke, Del på SMS, Kopier, Lag ny lenke) og Fjern (bekreftelse «Fjerne Ola fra Furulia?»).
 12. **Mine hytter:** liste og «Opprett ny hytte» / «Jeg har fått en invitasjonslenke».
 13. **Mer:** lenker til 8–12, Innstillinger med «Mørkt tema» (følg systemet som standard), Logg ut. Under en skillelinje: Kalender, Historikk og Varsler som grå rader merket «Kommer».

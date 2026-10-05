@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
+import { ConfirmSheet } from '../../components/ConfirmSheet'
 import { TopBar } from '../../components/TopBar'
 import { useToast } from '../../components/Toast'
 import { useCurrentCabin } from '../../lib/cabins'
@@ -18,6 +20,7 @@ export function TaskDetail() {
   const { rows } = useTable<Task>('tasks', cabin.id)
   const name = useNames(cabin.id)
   const toggle = useToggleTask()
+  const [confirming, setConfirming] = useState(false)
   const task = rows?.find((t) => t.id === id)
 
   if (!rows) return <TopBar backTo="/gjoremal" backLabel="Gjøremål" />
@@ -100,7 +103,7 @@ export function TaskDetail() {
             Endre
           </Link>
           {canDelete ? (
-            <button type="button" className="ha-btn ha-btn-danger ha-btn-block" onClick={() => remove(task)}>
+            <button type="button" className="ha-btn ha-btn-danger ha-btn-block" onClick={() => setConfirming(true)}>
               Slett gjøremålet
             </button>
           ) : (
@@ -108,6 +111,11 @@ export function TaskDetail() {
           )}
         </div>
       </div>
+      {confirming && (
+        <ConfirmSheet title="Slette gjøremålet?" confirmLabel="Slett gjøremålet" onConfirm={() => remove(task)} onClose={() => setConfirming(false)}>
+          «{task.title}» blir borte for alle.
+        </ConfirmSheet>
+      )}
     </>
   )
 }

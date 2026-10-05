@@ -1,13 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import { Check, Trash2 } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
 import { CheckBox } from '../../components/CheckBox'
+import { ConfirmSheet } from '../../components/ConfirmSheet'
 import { Segmented } from '../../components/Segmented'
 import { TopBar } from '../../components/TopBar'
 import { useToast } from '../../components/Toast'
 import { useCurrentCabin } from '../../lib/cabins'
 import { logRun, useRuns, useTicks } from '../../lib/checklist'
-import { deleteRows, insertRow, useTable } from '../../lib/data'
+import { deleteRows, insertRow, updateRow, useTable } from '../../lib/data'
 import { formatDay } from '../../lib/format'
 import { useNames } from '../../lib/members'
 import { draftMeta, type ChecklistItem, type ChecklistKind } from '../../lib/types'
@@ -31,6 +32,7 @@ export function Checklist() {
   const [text, setText] = useState('')
   const [hint, setHint] = useState('')
   const [busy, setBusy] = useState(false)
+  const [removing, setRemoving] = useState<ChecklistItem | null>(null)
 
   const items = (rows ?? []).filter((i) => i.kind === kind).sort((a, b) => a.position - b.position || a.created_at.localeCompare(b.created_at))
   // Punkter som er fjernet siden sist teller ikke.
@@ -62,6 +64,20 @@ export function Checklist() {
       toast(`«${t}» ble ikke lagt til. Prøv igjen.`),
     )
   }
+
+  // Flytter et punkt ett hakk opp eller ned og nummererer listen på nytt.
+  function move(index: number, by: -1 | 1) {
+    const order = [...items]
+    const [item] = order.splice(index, 1)
+    order.splice(index + by, 0, item)
+    order.forEach((it, i) => {
+      if (it.position !== i + 1) {
+        updateRow<ChecklistItem>('checklist_items', cabin.id, it.id, { position: i + 1 }).catch(() => toast('Rekkefølgen ble ikke lagret. Prøv igjen.'))
+      }
+    })
+  }
+
+  const canRemove = (item: ChecklistItem) => isAdmin || item.created_by === me
 
   function remove(item: ChecklistItem) {
     deleteRows('checklist_items', cabin.id, [item.id]).then(
@@ -133,31 +149,50 @@ export function Checklist() {
 
         {editing && (
           <div className="ha-list">
-            {items.map((i) => (
+            {items.map((i, idx) => (
               <div key={i.id} className="ha-li">
                 <span className="ha-li-main">
                   <span className="ha-li-title">{i.text}</span>
                   {i.hint && <span className="ha-li-meta">{i.hint}</span>}
                 </span>
-                <button type="button" className="mini-btn" aria-label={`Fjern «${i.text}»`} onClick={() => remove(i)}>
-                  <Trash2 className="ha-ico" aria-hidden="true" />
-                </button>
+                <span className="row-actions">
+                  <button type="button" className="mini-btn ico-only" aria-label={`Flytt «${i.text}» opp`} disabled={idx === 0} onClick={() => move(idx, -1)}>
+                    <ChevronUp className="ha-ico" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className="mini-btn ico-only"
+                    aria-label={`Flytt «${i.text}» ned`}
+                    disabled={idx === items.length - 1}
+                    onClick={() => move(idx, 1)}
+                  >
+                    <ChevronDown className="ha-ico" aria-hidden="true" />
+                  </button>
+                  {canRemove(i) && (
+                    <button type="button" className="mini-btn ico-only" aria-label={`Fjern «${i.text}»`} onClick={() => setRemoving(i)}>
+                      <Trash2 className="ha-ico" aria-hidden="true" />
+                    </button>
+                  )}
+                </span>
               </div>
             ))}
           </div>
         )}
-
-        {rows && items.length === 0 && (
-          <div className="empty">{isAdmin ? 'Ingen punkter ennå. Legg til de faste punktene under.' : 'Admin har ikke lagt inn punkter ennå.'}</div>
+        {editing && !isAdmin && items.some((i) => !canRemove(i)) && (
+          <p className="t-caption">Du kan fjerne punkter du har lagt inn selv. Admin kan fjerne alle.</p>
         )}
 
-        {isAdmin && rows && (
+        {rows && items.length === 0 && (
+          <div className="empty">Ingen punkter ennå. Legg til punktene under, så ser alle dem.</div>
+        )}
+
+        {rows && (
           <div className="stack">
             <div className="sec-h">
-              <h2 className="list-h">Faste punkter (bare admin)</h2>
+              <h2 className="list-h">Faste punkter</h2>
               {items.length > 0 && (
                 <button type="button" className="ha-btn ha-btn-ghost" style={{ minHeight: 44, padding: '0 4px', whiteSpace: 'nowrap' }} onClick={() => setEditing((e) => !e)}>
-                  {editing ? 'Ferdig' : 'Fjern punkter'}
+                  {editing ? 'Ferdig' : 'Endre punkter'}
                 </button>
               )}
             </div>
@@ -179,6 +214,11 @@ export function Checklist() {
           </div>
         )}
       </div>
+      {removing && (
+        <ConfirmSheet title={`Fjerne «${removing.text}»?`} confirmLabel="Fjern punktet" onConfirm={() => remove(removing)} onClose={() => setRemoving(null)}>
+          Punktet blir borte fra {kind === 'ankomst' ? 'ankomstlisten' : 'avreiselisten'} for alle.
+        </ConfirmSheet>
+      )}
     </>
   )
 }

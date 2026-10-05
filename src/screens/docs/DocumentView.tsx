@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { Download, ExternalLink } from 'lucide-react'
+import { ConfirmSheet } from '../../components/ConfirmSheet'
 import { TopBar } from '../../components/TopBar'
 import { useToast } from '../../components/Toast'
 import { useCurrentCabin } from '../../lib/cabins'
@@ -20,6 +22,7 @@ export function DocumentView() {
   const name = useNames(cabin.id)
   const doc = rows?.find((d) => d.id === id)
   const url = useFileUrl(doc?.file_path)
+  const [confirming, setConfirming] = useState(false)
 
   const top = <TopBar backTo="/mer/dokumenter" backLabel="Dokumenter" />
   if (!rows) return top
@@ -83,13 +86,18 @@ export function DocumentView() {
           Last ned
         </button>
         {canDelete ? (
-          <button type="button" className="ha-btn ha-btn-danger ha-btn-block" onClick={() => remove(doc)}>
+          <button type="button" className="ha-btn ha-btn-danger ha-btn-block" onClick={() => setConfirming(true)}>
             Slett dokumentet
           </button>
         ) : (
           <p className="t-caption center">Bare {onlyDeleter(name(doc.created_by))} kan slette dette dokumentet.</p>
         )}
       </div>
+      {confirming && (
+        <ConfirmSheet title="Slette dokumentet?" confirmLabel="Slett dokumentet" onConfirm={() => remove(doc)} onClose={() => setConfirming(false)}>
+          «{doc.name}» blir borte for alle.
+        </ConfirmSheet>
+      )}
     </>
   )
 }
