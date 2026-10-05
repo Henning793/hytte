@@ -1,0 +1,1259 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<title>Hytteappen</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="hytte.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600;700&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div class="app" data-theme="{{theme}}" style="font-family: 'Atkinson Hyperlegible Next', 'Atkinson Hyperlegible', system-ui, sans-serif; color: var(--ink);">
+
+<!-- ============ 1 VELKOMMEN ============ -->
+<sc-if value="{{scr.welcome}}" hint-placeholder-val="{{true}}">
+<div class="screen">
+  <div class="scroll" style="justify-content: space-between; padding-top: 40px;">
+    <div class="stack-lg">
+      <div class="welcome-art"><svg viewBox="0 0 120 80" aria-hidden="true"><rect width="120" height="80" fill="#cddbe0"></rect><path d="M0 52 Q30 34 60 46 T120 40 V80 H0z" fill="#8fae86"></path><path d="M0 62 Q40 50 80 58 T120 56 V80 H0z" fill="#6c8c64"></path><path d="M44 46 L62 34 L80 46 Z" fill="#4a5a3a"></path><rect x="47" y="46" width="30" height="18" fill="#5a3b2a"></rect><rect x="58" y="52" width="7" height="12" fill="#2b1d14"></rect><rect x="68" y="50" width="6" height="5" fill="#f3d27a"></rect><path d="M18 64 L24 44 L30 64Z" fill="#2f4d3a"></path><path d="M90 64 L97 40 L104 64Z" fill="#2f4d3a"></path><path d="M100 66 L105 50 L110 66Z" fill="#3b5d47"></path><circle cx="98" cy="18" r="7" fill="#e2ad5b"></circle></svg></div>
+      <h1 class="t-display">Velkommen til Hytteappen</h1>
+      <p class="t-body-lg muted">Gjøremål, feil og mangler, handleliste og koder – samlet på ett sted for alle som deler hytta.</p>
+    </div>
+    <div class="stack">
+      <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{toSignup}}">Opprett bruker</button>
+      <button class="ha-btn ha-btn-secondary ha-btn-block" onClick="{{toLogin}}">Logg inn</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ OPPRETT BRUKER ============ -->
+<sc-if value="{{scr.signup}}" hint-placeholder-val="{{false}}">
+<div class="screen">
+  <div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Tilbake</button></div>
+  <div class="scroll">
+    <div class="stack">
+      <h1 class="t-title">Opprett bruker</h1>
+      <sc-if value="{{invite}}" hint-placeholder-val="{{false}}"><p class="muted">Etterpå blir du med i {{invite.name}}.</p></sc-if>
+    </div>
+    <div class="stack-lg">
+      <div class="{{e.nameCls}}">
+        <label for="su-name">Fornavn</label>
+        <input id="su-name" class="ha-input" type="text" autocomplete="given-name" value="{{f.name}}" onChange="{{onName}}">
+        <span class="ha-hint">Vises når du krysser av eller melder noe</span>
+        <sc-if value="{{e.name}}" hint-placeholder-val="{{false}}"><div class="ha-error" role="alert"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span>{{e.name}}</span></div></sc-if>
+      </div>
+      <div class="{{e.emailCls}}">
+        <label for="su-email">E-postadresse</label>
+        <input id="su-email" class="ha-input" type="email" autocomplete="email" value="{{f.email}}" onChange="{{onEmail}}">
+        <sc-if value="{{e.email}}" hint-placeholder-val="{{false}}"><div class="ha-error" role="alert"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span>{{e.email}}</span></div></sc-if>
+      </div>
+      <div class="{{e.pw1Cls}}">
+        <label for="su-pw1">Passord</label>
+        <div class="ha-input-wrap">
+          <input id="su-pw1" class="ha-input" type="{{pw1Type}}" autocomplete="new-password" value="{{f.pw1}}" onChange="{{onPw1}}">
+          <button class="ha-eye" aria-label="{{pw1Label}}" onClick="{{togglePw1}}">
+            <sc-if value="{{f.show1}}" hint-placeholder-val="{{false}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3 3.9M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg></sc-if>
+            <sc-if value="{{hide1}}" hint-placeholder-val="{{true}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></sc-if>
+          </button>
+        </div>
+        <span class="ha-hint">Minst 8 tegn</span>
+        <sc-if value="{{e.pw1}}" hint-placeholder-val="{{false}}"><div class="ha-error" role="alert"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span>{{e.pw1}}</span></div></sc-if>
+      </div>
+      <div class="{{e.pw2Cls}}">
+        <label for="su-pw2">Gjenta passord</label>
+        <div class="ha-input-wrap">
+          <input id="su-pw2" class="ha-input" type="{{pw2Type}}" autocomplete="new-password" value="{{f.pw2}}" onChange="{{onPw2}}">
+          <button class="ha-eye" aria-label="{{pw2Label}}" onClick="{{togglePw2}}">
+            <sc-if value="{{f.show2}}" hint-placeholder-val="{{false}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3 3.9M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg></sc-if>
+            <sc-if value="{{hide2}}" hint-placeholder-val="{{true}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></sc-if>
+          </button>
+        </div>
+        <sc-if value="{{e.pw2}}" hint-placeholder-val="{{false}}"><div class="ha-error" role="alert"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span>{{e.pw2}}</span></div></sc-if>
+      </div>
+    </div>
+    <div class="stack">
+      <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{submitSignup}}">Opprett bruker</button>
+      <button class="ha-btn ha-btn-ghost" onClick="{{toLogin}}">Har du bruker? Logg inn</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ LOGG INN ============ -->
+<sc-if value="{{scr.login}}" hint-placeholder-val="{{false}}">
+<div class="screen">
+  <div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Tilbake</button></div>
+  <div class="scroll">
+    <div class="stack">
+      <h1 class="t-title">Logg inn</h1>
+      <sc-if value="{{invite}}" hint-placeholder-val="{{false}}"><p class="muted">Etterpå blir du med i {{invite.name}}.</p></sc-if>
+    </div>
+    <div class="stack-lg">
+      <div class="ha-field">
+        <label for="li-email">E-postadresse</label>
+        <input id="li-email" class="ha-input" type="email" autocomplete="email" value="{{f.email}}" onChange="{{onEmail}}">
+      </div>
+      <div class="{{e.loginCls}}">
+        <label for="li-pw">Passord</label>
+        <div class="ha-input-wrap">
+          <input id="li-pw" class="ha-input" type="{{pwType}}" autocomplete="current-password" value="{{f.pw}}" onChange="{{onPw}}">
+          <button class="ha-eye" aria-label="{{pwLabel}}" onClick="{{togglePw}}">
+            <sc-if value="{{f.showPw}}" hint-placeholder-val="{{false}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3 3.9M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg></sc-if>
+            <sc-if value="{{hidePw}}" hint-placeholder-val="{{true}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></sc-if>
+          </button>
+        </div>
+        <sc-if value="{{e.login}}" hint-placeholder-val="{{false}}"><div class="ha-error" role="alert"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span>{{e.login}}</span></div></sc-if>
+        <div><button class="ha-btn ha-btn-ghost" style="padding-left: 0;" onClick="{{toForgot}}">Glemt passord?</button></div>
+      </div>
+    </div>
+    <div class="stack">
+      <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{submitLogin}}">Logg inn</button>
+      <p class="t-caption center">Du forblir innlogget på denne telefonen.</p>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ GLEMT PASSORD ============ -->
+<sc-if value="{{scr.forgot}}" hint-placeholder-val="{{false}}">
+<div class="screen">
+  <div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Tilbake</button></div>
+  <div class="scroll">
+    <sc-if value="{{forgotForm}}" hint-placeholder-val="{{true}}">
+      <div class="stack">
+        <h1 class="t-title">Glemt passord</h1>
+        <p class="muted">Skriv e-postadressen din, så sender vi deg en lenke for å lage nytt passord.</p>
+      </div>
+      <div class="ha-field">
+        <label for="fg-email">E-postadresse</label>
+        <input id="fg-email" class="ha-input" type="email" autocomplete="email" value="{{f.email}}" onChange="{{onEmail}}">
+      </div>
+      <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{sendReset}}">Send lenke</button>
+    </sc-if>
+    <sc-if value="{{s.resetSent}}" hint-placeholder-val="{{false}}">
+      <div class="done-card"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><div class="stack" style="gap: 4px;"><strong>Sjekk e-posten din</strong><span>Vi har sendt en lenke til {{resetEmail}}. Lenken virker i én time.</span></div></div>
+      <button class="ha-btn ha-btn-secondary ha-btn-block" onClick="{{toLogin}}">Tilbake til innlogging</button>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ 2 INGEN HYTTE ============ -->
+<sc-if value="{{scr.nocabin}}" hint-placeholder-val="{{false}}">
+<div class="screen">
+  <div class="scroll" style="padding-top: 40px; justify-content: space-between;">
+    <div class="stack-lg">
+      <h1 class="t-display">Hei, {{user.name}}!</h1>
+      <p class="t-body-lg muted">Du er ikke med i noen hytte ennå. Opprett din egen, eller bli med i en du er invitert til.</p>
+    </div>
+    <div class="stack">
+      <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{toCreate}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Opprett hytte</button>
+      <button class="ha-btn ha-btn-secondary ha-btn-block" onClick="{{toInviteHelp}}">Jeg har fått en invitasjonslenke</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ OPPRETT HYTTE ============ -->
+<sc-if value="{{scr.createcabin}}" hint-placeholder-val="{{false}}">
+<div class="screen">
+  <div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Tilbake</button></div>
+  <div class="scroll">
+    <div class="stack">
+      <h1 class="t-title">Opprett hytte</h1>
+      <p class="muted">Du blir admin, og kan invitere de andre etterpå.</p>
+    </div>
+    <div class="{{e.cabinCls}}">
+      <label for="cc-name">Hva heter hytta?</label>
+      <input id="cc-name" class="ha-input" type="text" value="{{f.cabinName}}" onChange="{{onCabinName}}">
+      <sc-if value="{{e.cabin}}" hint-placeholder-val="{{false}}"><div class="ha-error" role="alert"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span>{{e.cabin}}</span></div></sc-if>
+    </div>
+    <div class="ha-field">
+      <span class="ha-label">Bilde <span class="muted" style="font-weight: 400;">(valgfritt)</span></span>
+      <sc-if value="{{noCabinPhoto}}" hint-placeholder-val="{{true}}">
+        <button class="photo-slot" onClick="{{addCabinPhoto}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M21 16l-5-5-9 9"></path></svg>Legg til bilde</button>
+      </sc-if>
+      <sc-if value="{{f.cabinPhoto}}" hint-placeholder-val="{{false}}">
+        <div class="photo"><svg viewBox="0 0 120 80" role="img" aria-label="Bilde av hytta"><rect width="120" height="80" fill="#cddbe0"></rect><path d="M0 52 Q30 34 60 46 T120 40 V80 H0z" fill="#8fae86"></path><path d="M0 62 Q40 50 80 58 T120 56 V80 H0z" fill="#6c8c64"></path><path d="M44 46 L62 34 L80 46 Z" fill="#4a5a3a"></path><rect x="47" y="46" width="30" height="18" fill="#5a3b2a"></rect><rect x="58" y="52" width="7" height="12" fill="#2b1d14"></rect><rect x="68" y="50" width="6" height="5" fill="#f3d27a"></rect><path d="M18 64 L24 44 L30 64Z" fill="#2f4d3a"></path><path d="M90 64 L97 40 L104 64Z" fill="#2f4d3a"></path><path d="M100 66 L105 50 L110 66Z" fill="#3b5d47"></path></svg></div>
+        <div><button class="ha-btn ha-btn-ghost" style="padding-left: 0;" onClick="{{removeCabinPhoto}}">Fjern bildet</button></div>
+      </sc-if>
+    </div>
+    <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{submitCabin}}">Opprett hytte</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ INVITASJON – HJELP ============ -->
+<sc-if value="{{scr.invitehelp}}" hint-placeholder-val="{{false}}">
+<div class="screen">
+  <div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Tilbake</button></div>
+  <div class="scroll">
+    <div class="stack">
+      <h1 class="t-title">Bli med via lenke</h1>
+      <p class="muted">Det enkleste er å trykke på lenken i SMS-en du fikk. Fungerer ikke det, kan du lime den inn her.</p>
+    </div>
+    <div class="{{e.inviteCls}}">
+      <label for="iv-link">Invitasjonslenke</label>
+      <input id="iv-link" class="ha-input" type="url" value="{{f.inviteText}}" onChange="{{onInviteText}}">
+      <span class="ha-hint">Ser ut som hytteappen.no/bli-med/…</span>
+      <sc-if value="{{e.invite}}" hint-placeholder-val="{{false}}"><div class="ha-error" role="alert"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span>{{e.invite}}</span></div></sc-if>
+    </div>
+    <div class="stack">
+      <button class="ha-btn ha-btn-secondary ha-btn-block" onClick="{{pasteInvite}}">Lim inn fra utklippstavlen</button>
+      <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{submitInvite}}">Fortsett</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ SMS (utenfor appen) ============ -->
+<sc-if value="{{scr.sms}}" hint-placeholder-val="{{false}}">
+<div class="sms">
+  <div class="sms-head"><div class="sms-avatar">K</div><strong>Kari</strong><div class="t-caption">SMS · i dag 18:42</div></div>
+  <div style="flex: 1; padding: 20px 16px; display: flex; flex-direction: column; gap: 10px;">
+    <div class="bubble">Hei! Nå har vi fått Solbakken inn i Hytteappen. Trykk her for å bli med:</div>
+    <div class="bubble"><a href="#" onClick="{{openInvite}}">hytteappen.no/bli-med/SOL-4F7P</a></div>
+    <p class="t-caption" style="margin-top: 12px;">Slik ser SMS-en ut i meldingsappen. Trykk på lenken.</p>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ 3 BLI MED ============ -->
+<sc-if value="{{scr.join}}" hint-placeholder-val="{{false}}">
+<div class="screen">
+  <div class="scroll" style="padding-top: 40px; justify-content: space-between;">
+    <sc-if value="{{invite}}" hint-placeholder-val="{{true}}">
+    <div class="stack-lg">
+      <div class="ha-avatar alt" style="width: 72px; height: 72px; font-size: 32px; border-radius: 22px;">{{invite.initial}}</div>
+      <h1 class="t-display">Bli med i {{invite.name}}</h1>
+      <p class="t-body-lg muted">{{invite.admin}} har invitert deg. {{inviteCount}} er med fra før.</p>
+      <div class="ha-card">
+        <div class="row"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span>Se og legg til gjøremål og feil</span></div>
+        <div class="row"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span>Felles handleliste og sjekklister</span></div>
+        <div class="row"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><span>Wifi, koder og manualer</span></div>
+      </div>
+    </div>
+    <div class="stack">
+      <sc-if value="{{loggedIn}}" hint-placeholder-val="{{true}}">
+        <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{acceptInvite}}">Bli med i {{invite.name}}</button>
+        <button class="ha-btn ha-btn-ghost" onClick="{{declineInvite}}">Ikke nå</button>
+      </sc-if>
+      <sc-if value="{{loggedOut}}" hint-placeholder-val="{{false}}">
+        <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{toSignup}}">Opprett bruker og bli med</button>
+        <button class="ha-btn ha-btn-secondary ha-btn-block" onClick="{{toLogin}}">Jeg har bruker – logg inn</button>
+      </sc-if>
+    </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ TOPPFELT HJEM + FRAKOBLET ============ -->
+<sc-if value="{{scr.home}}" hint-placeholder-val="{{false}}">
+<div class="home-head">
+  <span class="ha-avatar {{cab.altCls}}">
+    <sc-if value="{{cab.photo}}" hint-placeholder-val="{{false}}"><svg viewBox="0 0 120 80" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="120" height="80" fill="#cddbe0"></rect><path d="M0 52 Q30 34 60 46 T120 40 V80 H0z" fill="#8fae86"></path><path d="M0 62 Q40 50 80 58 T120 56 V80 H0z" fill="#6c8c64"></path><path d="M44 46 L62 34 L80 46 Z" fill="#4a5a3a"></path><rect x="47" y="46" width="30" height="18" fill="#5a3b2a"></rect><rect x="68" y="50" width="6" height="5" fill="#f3d27a"></rect></svg></sc-if>
+    <sc-if value="{{cab.noPhoto}}" hint-placeholder-val="{{true}}">{{cab.initial}}</sc-if>
+  </span>
+  <sc-if value="{{multi}}" hint-placeholder-val="{{true}}">
+    <button class="ha-switch" aria-haspopup="dialog" aria-label="{{switchLabel}}" onClick="{{openSwitcher}}">{{cab.name}}<svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+  </sc-if>
+  <sc-if value="{{single}}" hint-placeholder-val="{{false}}">
+    <span class="ha-switch is-static">{{cab.name}}</span>
+  </sc-if>
+</div>
+</sc-if>
+<sc-if value="{{showOffline}}" hint-placeholder-val="{{false}}">
+  <div class="offline-wrap"><div class="ha-offline" role="status"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M8 7.3A6 6 0 0 1 17.7 10H18a4 4 0 0 1 2.5 7.1M16 19H7a5 5 0 0 1-2.3-9.4"></path></svg>Frakoblet · {{pendingText}}</div></div>
+</sc-if>
+<sc-if value="{{showSynced}}" hint-placeholder-val="{{false}}">
+  <div class="offline-wrap"><div class="ha-offline is-synced" role="status"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Tilkoblet igjen · alt er sendt</div></div>
+</sc-if>
+
+<!-- ============ 4 HJEM ============ -->
+<sc-if value="{{scr.home}}" hint-placeholder-val="{{false}}">
+<div class="scroll" style="padding-top: 12px;">
+  <div class="tiles">
+    <button class="ha-tile ha-tile-primary" onClick="{{newIssueFromHome}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg>Meld feil</button>
+    <button class="ha-tile ha-tile-secondary" onClick="{{checklistFromHome}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21h16"></path><path d="M6 21V4h10v17"></path><path d="M16 6l3 1v14"></path><path d="M12.5 12.5v.01"></path></svg>Ankomst / Avreise</button>
+  </div>
+
+  <button class="ha-card card-link" onClick="{{goIssues}}">
+    <div class="sec-h"><h2 class="t-heading">Feil og mangler</h2><span class="t-caption">{{home.openText}}</span></div>
+    <sc-for list="{{home.issues}}" as="it" hint-placeholder-count="2">
+      <div class="row" style="justify-content: space-between;"><span class="t-body-lg grow">{{it.title}}</span>
+        <sc-if value="{{it.isNy}}" hint-placeholder-val="{{true}}"><span class="ha-badge ha-badge-ny"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="currentColor"></circle></svg>Ny</span></sc-if>
+        <sc-if value="{{it.isPagar}}" hint-placeholder-val="{{false}}"><span class="ha-badge ha-badge-pagar"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"></path></svg>Pågår</span></sc-if>
+      </div>
+    </sc-for>
+    <sc-if value="{{home.noIssues}}" hint-placeholder-val="{{false}}"><p class="muted">Ingen åpne feil. Fint!</p></sc-if>
+  </button>
+
+  <button class="ha-card card-link" onClick="{{goTasks}}">
+    <div class="sec-h"><h2 class="t-heading">Neste gjøremål</h2><span class="t-caption">{{home.taskCountText}}</span></div>
+    <sc-if value="{{home.task}}" hint-placeholder-val="{{true}}">
+      <div class="stack" style="gap: 2px;"><span class="t-body-lg">{{home.task.title}}</span><span class="t-caption">{{home.task.meta}}</span></div>
+    </sc-if>
+    <sc-if value="{{home.noTask}}" hint-placeholder-val="{{false}}"><p class="muted">Ingen gjøremål. Legg til det første under Gjøremål.</p></sc-if>
+  </button>
+
+  <button class="ha-card card-link" onClick="{{goShop}}">
+    <div class="sec-h"><h2 class="t-heading">Handleliste</h2><span class="t-caption">{{home.shopCountText}}</span></div>
+    <p class="muted">{{home.shopPreview}}</p>
+  </button>
+</div>
+</sc-if>
+
+<!-- ============ 5 GJØREMÅL ============ -->
+<sc-if value="{{scr.tasks}}" hint-placeholder-val="{{false}}">
+<div class="scroll" style="padding-top: 20px;">
+  <h1 class="t-title">Gjøremål</h1>
+  <div class="ha-seg" role="group" aria-label="Filter">
+    <button aria-pressed="{{tf.alle}}" onClick="{{filterAlle}}">Alle</button>
+    <button aria-pressed="{{tf.gjoremal}}" onClick="{{filterGjoremal}}">Gjøremål</button>
+    <button aria-pressed="{{tf.vedlikehold}}" onClick="{{filterVedlikehold}}">Vedlikehold</button>
+  </div>
+  <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{toTaskNew}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Nytt gjøremål</button>
+  <sc-if value="{{tasks.hasOpen}}" hint-placeholder-val="{{true}}">
+  <div class="ha-list">
+    <sc-for list="{{tasks.open}}" as="t" hint-placeholder-count="4">
+      <div class="ha-li" style="padding-left: 4px;">
+        <button class="ha-check" role="checkbox" aria-checked="{{t.done}}" aria-label="{{t.checkLabel}}" style="width: auto; border: 0; padding: 0 0 0 12px; min-height: 56px;" onClick="{{t.toggle}}"><span class="ha-box"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span></button>
+        <button class="ha-li-main" style="border: 0; background: transparent; text-align: left; cursor: pointer; padding: 4px 0; min-height: 56px; justify-content: center;" onClick="{{t.open}}">
+          <span class="ha-li-title">{{t.title}}</span>
+          <span class="ha-li-meta"><sc-if value="{{t.pending}}" hint-placeholder-val="{{false}}"><span class="pending">Venter på nett ·</span></sc-if>{{t.meta}}</span>
+        </button>
+        <svg class="ha-ico ha-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+      </div>
+    </sc-for>
+  </div>
+  </sc-if>
+  <sc-if value="{{tasks.noOpen}}" hint-placeholder-val="{{false}}"><div class="empty">Ingen gjøremål her ennå.</div></sc-if>
+  <sc-if value="{{tasks.hasDone}}" hint-placeholder-val="{{false}}">
+    <p class="list-h">Fullført</p>
+    <div class="ha-list">
+      <sc-for list="{{tasks.done}}" as="t" hint-placeholder-count="1">
+        <button class="ha-check" role="checkbox" aria-checked="{{t.done}}" onClick="{{t.toggle}}"><span class="ha-box"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><span class="ha-li-main"><span class="ha-li-title">{{t.title}}</span><span class="ha-li-meta">{{t.meta}}</span></span></button>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ============ GJØREMÅL DETALJ ============ -->
+<sc-if value="{{scr.taskdetail}}" hint-placeholder-val="{{false}}">
+<div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Gjøremål</button></div>
+<sc-if value="{{task}}" hint-placeholder-val="{{true}}">
+<div class="scroll">
+  <div class="stack">
+    <span><span class="ha-badge ha-badge-neutral">{{task.kindLabel}}</span></span>
+    <h1 class="t-title">{{task.title}}</h1>
+    <sc-if value="{{task.desc}}" hint-placeholder-val="{{true}}"><p class="t-body-lg">{{task.desc}}</p></sc-if>
+  </div>
+  <div class="ha-list">
+    <div class="ha-li"><span class="ha-li-main"><span class="ha-li-meta">Ansvarlig</span><span class="ha-li-title">{{task.respText}}</span></span></div>
+    <div class="ha-li"><span class="ha-li-main"><span class="ha-li-meta">Frist</span><span class="ha-li-title">{{task.dueText}}</span></span></div>
+    <div class="ha-li"><span class="ha-li-main"><span class="ha-li-meta">Opprettet av</span><span class="ha-li-title">{{task.by}}</span></span></div>
+  </div>
+  <div class="stack">
+    <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{task.toggle}}">{{task.toggleLabel}}</button>
+    <sc-if value="{{task.canDelete}}" hint-placeholder-val="{{false}}"><button class="ha-btn ha-btn-danger ha-btn-block" onClick="{{task.del}}">Slett gjøremålet</button></sc-if>
+    <sc-if value="{{task.cannotDelete}}" hint-placeholder-val="{{true}}"><p class="t-caption center">Bare {{task.by}} kan slette dette gjøremålet.</p></sc-if>
+  </div>
+</div>
+</sc-if>
+</sc-if>
+
+<!-- ============ NYTT GJØREMÅL ============ -->
+<sc-if value="{{scr.tasknew}}" hint-placeholder-val="{{false}}">
+<div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Avbryt</button></div>
+<div class="scroll">
+  <h1 class="t-title">Nytt gjøremål</h1>
+  <div class="ha-seg" role="group" aria-label="Type">
+    <button aria-pressed="{{tk.gjoremal}}" onClick="{{kindGjoremal}}">Gjøremål</button>
+    <button aria-pressed="{{tk.vedlikehold}}" onClick="{{kindVedlikehold}}">Vedlikehold</button>
+  </div>
+  <div class="{{e.taskCls}}">
+    <label for="tn-title">Hva skal gjøres?</label>
+    <input id="tn-title" class="ha-input" type="text" value="{{f.taskTitle}}" onChange="{{onTaskTitle}}">
+    <sc-if value="{{e.task}}" hint-placeholder-val="{{false}}"><div class="ha-error" role="alert"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span>{{e.task}}</span></div></sc-if>
+  </div>
+  <div class="ha-field">
+    <label for="tn-desc">Beskrivelse <span class="muted" style="font-weight: 400;">(valgfritt)</span></label>
+    <textarea id="tn-desc" class="ha-input" value="{{f.taskDesc}}" onChange="{{onTaskDesc}}"></textarea>
+  </div>
+  <div class="ha-field">
+    <label for="tn-resp">Ansvarlig <span class="muted" style="font-weight: 400;">(valgfritt)</span></label>
+    <select id="tn-resp" class="ha-input" value="{{f.taskResp}}" onChange="{{onTaskResp}}">
+      <option value="">Ingen ennå</option>
+      <sc-for list="{{memberNames}}" as="m" hint-placeholder-count="3"><option value="{{m}}">{{m}}</option></sc-for>
+    </select>
+  </div>
+  <div class="ha-field">
+    <label for="tn-due">Frist <span class="muted" style="font-weight: 400;">(valgfritt)</span></label>
+    <input id="tn-due" class="ha-input" type="date" value="{{f.taskDue}}" onChange="{{onTaskDue}}">
+  </div>
+  <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{submitTask}}">Lagre gjøremål</button>
+</div>
+</sc-if>
+
+<!-- ============ 6 FEIL OG MANGLER ============ -->
+<sc-if value="{{scr.issues}}" hint-placeholder-val="{{false}}">
+<div class="scroll" style="padding-top: 20px;">
+  <h1 class="t-title">Feil og mangler</h1>
+  <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{newIssueFromList}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg>Meld feil</button>
+  <sc-if value="{{issues.hasOpen}}" hint-placeholder-val="{{true}}">
+    <p class="list-h">Åpne</p>
+    <div class="ha-list">
+      <sc-for list="{{issues.open}}" as="it" hint-placeholder-count="2">
+        <button class="ha-li" onClick="{{it.open}}">
+          <span class="ha-li-main"><span class="ha-li-title">{{it.title}}</span><span class="ha-li-meta"><sc-if value="{{it.pending}}" hint-placeholder-val="{{false}}"><span class="pending">Venter på nett ·</span></sc-if>{{it.meta}}</span></span>
+          <sc-if value="{{it.isNy}}" hint-placeholder-val="{{true}}"><span class="ha-badge ha-badge-ny"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="currentColor"></circle></svg>Ny</span></sc-if>
+          <sc-if value="{{it.isPagar}}" hint-placeholder-val="{{false}}"><span class="ha-badge ha-badge-pagar"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"></path></svg>Pågår</span></sc-if>
+        </button>
+      </sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{issues.noOpen}}" hint-placeholder-val="{{false}}"><div class="empty">Ingen åpne feil. Ser du noe som er ødelagt, trykk «Meld feil».</div></sc-if>
+  <sc-if value="{{issues.hasFixed}}" hint-placeholder-val="{{true}}">
+    <p class="list-h">Fikset</p>
+    <div class="ha-list">
+      <sc-for list="{{issues.fixed}}" as="it" hint-placeholder-count="1">
+        <button class="ha-li" onClick="{{it.open}}">
+          <span class="ha-li-main"><span class="ha-li-title">{{it.title}}</span><span class="ha-li-meta">{{it.meta}}</span></span>
+          <span class="ha-badge ha-badge-fikset"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>Fikset</span>
+        </button>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ============ FEIL DETALJ ============ -->
+<sc-if value="{{scr.issuedetail}}" hint-placeholder-val="{{false}}">
+<div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Feil og mangler</button></div>
+<sc-if value="{{issue}}" hint-placeholder-val="{{true}}">
+<div class="scroll">
+  <sc-if value="{{issue.photo}}" hint-placeholder-val="{{true}}">
+    <div class="photo"><svg viewBox="0 0 160 120" role="img" aria-label="Bilde av feilen"><rect width="160" height="120" fill="#d8cdbb"></rect><rect x="18" y="20" width="124" height="100" fill="#8a6b4e"></rect><rect x="26" y="28" width="108" height="92" fill="#3a2c22"></rect><path d="M70 28 V58 Q70 70 82 70 Q94 70 94 58 V52" stroke="#a9b1b5" stroke-width="7" fill="none"></path><rect x="88" y="44" width="12" height="10" fill="#c3c9cc"></rect><circle cx="74" cy="80" r="2.6" fill="#7fb6d6"></circle><circle cx="76" cy="90" r="2.2" fill="#7fb6d6"></circle><ellipse cx="78" cy="108" rx="30" ry="7" fill="#e9e4dc"></ellipse><ellipse cx="78" cy="106" rx="22" ry="4" fill="#7fb6d6"></ellipse></svg></div>
+  </sc-if>
+  <div class="stack">
+    <h1 class="t-title">{{issue.title}}</h1>
+    <p class="t-caption">{{issue.meta}}</p>
+    <sc-if value="{{issue.desc}}" hint-placeholder-val="{{true}}"><p class="t-body-lg">{{issue.desc}}</p></sc-if>
+  </div>
+  <div class="stack">
+    <span class="ha-label">Status</span>
+    <div class="ha-seg" role="group" aria-label="Status">
+      <button aria-pressed="{{issue.pNy}}" onClick="{{issue.setNy}}">Ny</button>
+      <button aria-pressed="{{issue.pPagar}}" onClick="{{issue.setPagar}}">Pågår</button>
+      <button aria-pressed="{{issue.pFikset}}" onClick="{{issue.setFikset}}">Fikset</button>
+    </div>
+  </div>
+  <sc-if value="{{issue.canDelete}}" hint-placeholder-val="{{false}}"><button class="ha-btn ha-btn-danger ha-btn-block" onClick="{{issue.del}}">Slett feilmeldingen</button></sc-if>
+  <sc-if value="{{issue.cannotDelete}}" hint-placeholder-val="{{true}}"><p class="t-caption center">Bare {{issue.by}} kan slette denne. Alle kan endre status.</p></sc-if>
+</div>
+</sc-if>
+</sc-if>
+
+<!-- ============ MELD FEIL ============ -->
+<sc-if value="{{scr.issuenew}}" hint-placeholder-val="{{false}}">
+<div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Avbryt</button></div>
+<div class="scroll">
+  <h1 class="t-title">Meld feil</h1>
+  <sc-if value="{{noIssuePhoto}}" hint-placeholder-val="{{true}}">
+    <button class="photo-slot" onClick="{{openCamera}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg>Ta bilde<span class="t-caption" style="font-weight: 400;">Valgfritt, men hjelper de andre</span></button>
+  </sc-if>
+  <sc-if value="{{f.issuePhoto}}" hint-placeholder-val="{{false}}">
+    <div class="stack">
+      <div class="photo"><svg viewBox="0 0 160 120" role="img" aria-label="Bildet du tok"><rect width="160" height="120" fill="#d8cdbb"></rect><rect x="18" y="20" width="124" height="100" fill="#8a6b4e"></rect><rect x="26" y="28" width="108" height="92" fill="#3a2c22"></rect><path d="M70 28 V58 Q70 70 82 70 Q94 70 94 58 V52" stroke="#a9b1b5" stroke-width="7" fill="none"></path><rect x="88" y="44" width="12" height="10" fill="#c3c9cc"></rect><circle cx="74" cy="80" r="2.6" fill="#7fb6d6"></circle><circle cx="76" cy="90" r="2.2" fill="#7fb6d6"></circle><ellipse cx="78" cy="108" rx="30" ry="7" fill="#e9e4dc"></ellipse><ellipse cx="78" cy="106" rx="22" ry="4" fill="#7fb6d6"></ellipse></svg></div>
+      <div><button class="ha-btn ha-btn-ghost" style="padding-left: 0;" onClick="{{openCamera}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"></path><path d="M4 3v5h5"></path><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"></path><path d="M20 21v-5h-5"></path></svg>Ta nytt bilde</button></div>
+    </div>
+  </sc-if>
+  <div class="{{e.issueCls}}">
+    <label for="in-title">Hva er feil?</label>
+    <input id="in-title" class="ha-input" type="text" value="{{f.issueTitle}}" onChange="{{onIssueTitle}}">
+    <sc-if value="{{e.issue}}" hint-placeholder-val="{{false}}"><div class="ha-error" role="alert"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7.5v5.5M12 16.5v.01"></path></svg><span>{{e.issue}}</span></div></sc-if>
+  </div>
+  <div class="ha-field">
+    <label for="in-desc">Beskrivelse <span class="muted" style="font-weight: 400;">(valgfritt)</span></label>
+    <textarea id="in-desc" class="ha-input" value="{{f.issueDesc}}" onChange="{{onIssueDesc}}"></textarea>
+    <span class="ha-hint">Hvor er det, og hva har du gjort så langt?</span>
+  </div>
+  <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{submitIssue}}">Send feilmelding</button>
+</div>
+</sc-if>
+
+<!-- ============ KAMERA ============ -->
+<sc-if value="{{scr.camera}}" hint-placeholder-val="{{false}}">
+<div class="camera">
+  <div class="camera-view">
+    <svg viewBox="0 0 160 120" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="160" height="120" fill="#d8cdbb"></rect><rect x="18" y="20" width="124" height="100" fill="#8a6b4e"></rect><rect x="26" y="28" width="108" height="92" fill="#3a2c22"></rect><path d="M70 28 V58 Q70 70 82 70 Q94 70 94 58 V52" stroke="#a9b1b5" stroke-width="7" fill="none"></path><rect x="88" y="44" width="12" height="10" fill="#c3c9cc"></rect><circle cx="74" cy="80" r="2.6" fill="#7fb6d6"></circle><circle cx="76" cy="90" r="2.2" fill="#7fb6d6"></circle><ellipse cx="78" cy="108" rx="30" ry="7" fill="#e9e4dc"></ellipse><ellipse cx="78" cy="106" rx="22" ry="4" fill="#7fb6d6"></ellipse><path d="M40 30 h-10 v10 M120 30 h10 v10 M40 100 h-10 v-10 M120 100 h10 v-10" stroke="#ffffff" stroke-width="1.5" fill="none"></path></svg>
+    <div class="cam-hint"><span>Ta bilde av feilen</span></div>
+  </div>
+  <div class="camera-bar">
+    <button class="cam-cancel" onClick="{{closeCamera}}">Avbryt</button>
+    <button class="shutter" aria-label="Ta bilde" onClick="{{takePhoto}}"></button>
+    <span style="width: 80px;"></span>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ 7 HANDLELISTE ============ -->
+<sc-if value="{{scr.shop}}" hint-placeholder-val="{{false}}">
+<div class="scroll" style="padding-top: 20px;">
+  <div class="sec-h"><h1 class="t-title">Handleliste</h1><span class="t-caption">{{shop.countText}}</span></div>
+  <div class="quickadd">
+    <label for="sh-add" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Ny vare</label>
+    <input id="sh-add" class="ha-input" type="text" placeholder="Legg til vare …" value="{{f.shopText}}" onChange="{{onShopText}}" onKeyDown="{{onShopKey}}">
+    <button class="ha-btn ha-btn-primary" onClick="{{addShop}}">Legg til</button>
+  </div>
+  <sc-if value="{{shop.hasOpen}}" hint-placeholder-val="{{true}}">
+    <div class="ha-list">
+      <sc-for list="{{shop.open}}" as="it" hint-placeholder-count="3">
+        <button class="ha-check" role="checkbox" aria-checked="{{it.done}}" onClick="{{it.toggle}}"><span class="ha-box"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><span class="ha-li-main"><span class="ha-li-title">{{it.name}}</span><span class="ha-li-meta"><sc-if value="{{it.pending}}" hint-placeholder-val="{{false}}"><span class="pending">Venter på nett ·</span></sc-if>{{it.meta}}</span></span></button>
+      </sc-for>
+    </div>
+  </sc-if>
+  <sc-if value="{{shop.noOpen}}" hint-placeholder-val="{{false}}"><div class="empty">Alt er kjøpt. Skriv en vare over for å legge den til.</div></sc-if>
+  <sc-if value="{{shop.hasDone}}" hint-placeholder-val="{{true}}">
+    <p class="list-h">Kjøpt</p>
+    <div class="ha-list">
+      <sc-for list="{{shop.done}}" as="it" hint-placeholder-count="1">
+        <button class="ha-check" role="checkbox" aria-checked="{{it.done}}" onClick="{{it.toggle}}"><span class="ha-box"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><span class="ha-li-main"><span class="ha-li-title">{{it.name}}</span><span class="ha-li-meta"><sc-if value="{{it.pending}}" hint-placeholder-val="{{false}}"><span class="pending">Venter på nett ·</span></sc-if>{{it.meta}}</span></span></button>
+      </sc-for>
+    </div>
+    <div><button class="ha-btn ha-btn-ghost" style="padding-left: 0;" onClick="{{clearBought}}">Fjern kjøpte varer</button></div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ============ MER ============ -->
+<sc-if value="{{scr.more}}" hint-placeholder-val="{{false}}">
+<div class="scroll" style="padding-top: 20px;">
+  <h1 class="t-title">Mer</h1>
+  <div class="ha-list">
+    <button class="ha-li" onClick="{{goDocs}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path></svg><span class="ha-li-main"><span class="ha-li-title">Dokumenter og manualer</span></span><svg class="ha-ico ha-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+    <button class="ha-li" onClick="{{goInfo}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l9-9M16 7l3 3"></path></svg><span class="ha-li-main"><span class="ha-li-title">Info og koder</span><span class="ha-li-meta">Wifi, nøkkelboks, søppel, nødnumre</span></span><svg class="ha-ico ha-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+    <button class="ha-li" onClick="{{goChecklist}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 21h16"></path><path d="M6 21V4h10v17"></path><path d="M16 6l3 1v14"></path><path d="M12.5 12.5v.01"></path></svg><span class="ha-li-main"><span class="ha-li-title">Sjekklister</span><span class="ha-li-meta">Ankomst og avreise</span></span><svg class="ha-ico ha-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+    <button class="ha-li" onClick="{{goMembers}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2.5 20a6.5 6.5 0 0 1 13 0"></path><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 20a6.5 6.5 0 0 0-3-5.5"></path></svg><span class="ha-li-main"><span class="ha-li-title">Medlemmer</span><span class="ha-li-meta">{{memberCountText}}</span></span><svg class="ha-ico ha-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+    <button class="ha-li" onClick="{{goMyCabins}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-5h4v5"></path></svg><span class="ha-li-main"><span class="ha-li-title">Mine hytter</span></span><svg class="ha-ico ha-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+  </div>
+  <p class="list-h">Kommer senere</p>
+  <div class="ha-list soon">
+    <div class="ha-li"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="16" rx="2"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg><span class="ha-li-main"><span class="ha-li-title">Kalender</span><span class="ha-li-meta">Dugnad og når hytta er opptatt</span></span><span class="ha-badge ha-badge-neutral">Kommer</span></div>
+    <div class="ha-li"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path><path d="M12 7v5l3 2"></path></svg><span class="ha-li-main"><span class="ha-li-title">Historikk</span><span class="ha-li-meta">Når ting sist ble gjort</span></span><span class="ha-badge ha-badge-neutral">Kommer</span></div>
+    <div class="ha-li"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9z"></path><path d="M10 20.5a2 2 0 0 0 4 0"></path></svg><span class="ha-li-main"><span class="ha-li-title">Varsler</span></span><span class="ha-badge ha-badge-neutral">Kommer</span></div>
+  </div>
+  <p class="list-h">Innstillinger</p>
+  <div class="ha-list">
+    <button class="ha-li" role="switch" aria-checked="{{isDark}}" onClick="{{toggleTheme}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg><span class="ha-li-main"><span class="ha-li-title">Mørkt tema</span></span><span class="{{themeSwitchCls}}"></span></button>
+    <button class="ha-li" role="switch" aria-checked="{{offline}}" onClick="{{toggleOffline}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M8 7.3A6 6 0 0 1 17.7 10H18a4 4 0 0 1 2.5 7.1M16 19H7a5 5 0 0 1-2.3-9.4"></path></svg><span class="ha-li-main"><span class="ha-li-title">Simuler frakoblet</span><span class="ha-li-meta">Bare i prototypen</span></span><span class="{{offlineSwitchCls}}"></span></button>
+    <button class="ha-li" onClick="{{logout}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4h4v16h-4"></path><path d="M10 8l-4 4 4 4M6 12h10"></path></svg><span class="ha-li-main"><span class="ha-li-title">Logg ut</span><span class="ha-li-meta">{{user.email}}</span></span></button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ 8 DOKUMENTER ============ -->
+<sc-if value="{{scr.docs}}" hint-placeholder-val="{{false}}">
+<div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Mer</button></div>
+<div class="scroll">
+  <h1 class="t-title">Dokumenter og manualer</h1>
+  <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{openUpload}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"></path><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"></path></svg>Last opp</button>
+  <sc-for list="{{docs}}" as="cat" hint-placeholder-count="3">
+    <div class="stack">
+      <p class="list-h">{{cat.cat}} · {{cat.count}}</p>
+      <sc-if value="{{cat.has}}" hint-placeholder-val="{{true}}">
+      <div class="ha-list">
+        <sc-for list="{{cat.items}}" as="d" hint-placeholder-count="2">
+          <button class="ha-li" onClick="{{d.open}}"><span class="{{d.typeCls}}">{{d.type}}</span><span class="ha-li-main"><span class="ha-li-title">{{d.name}}</span><span class="ha-li-meta"><sc-if value="{{d.pending}}" hint-placeholder-val="{{false}}"><span class="pending">Venter på nett ·</span></sc-if>{{d.meta}}</span></span><svg class="ha-ico ha-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg></button>
+        </sc-for>
+      </div>
+      </sc-if>
+      <sc-if value="{{cat.empty}}" hint-placeholder-val="{{false}}"><div class="empty">Ingen dokumenter her ennå.</div></sc-if>
+    </div>
+  </sc-for>
+</div>
+</sc-if>
+
+<!-- ============ DOKUMENT-VISNING ============ -->
+<sc-if value="{{scr.docview}}" hint-placeholder-val="{{false}}">
+<div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Dokumenter</button></div>
+<sc-if value="{{doc}}" hint-placeholder-val="{{true}}">
+<div class="scroll">
+  <div class="stack" style="gap: 4px;"><h1 class="t-title">{{doc.name}}</h1><p class="t-caption">{{doc.type}} · {{doc.meta}}</p></div>
+  <sc-if value="{{doc.isPdf}}" hint-placeholder-val="{{true}}">
+    <div class="doc-page" role="img" aria-label="Forhåndsvisning av første side">
+      <strong style="font-size: 18px;">{{doc.name}}</strong>
+      <div class="ln" style="width: 92%;"></div><div class="ln" style="width: 84%;"></div><div class="ln" style="width: 88%;"></div><div class="ln" style="width: 60%;"></div>
+      <div style="height: 90px; border-radius: 8px; background: #e6e1d6; margin: 8px 0;"></div>
+      <div class="ln" style="width: 90%;"></div><div class="ln" style="width: 80%;"></div><div class="ln" style="width: 86%;"></div><div class="ln" style="width: 40%;"></div>
+    </div>
+    <p class="t-caption center">Side 1 av {{doc.pages}} · sveip for neste side</p>
+  </sc-if>
+  <sc-if value="{{doc.isImg}}" hint-placeholder-val="{{false}}">
+    <div class="photo" role="img" aria-label="Bilde av sikringsskapet"><svg viewBox="0 0 160 120"><rect width="160" height="120" fill="#cfc8bb"></rect><rect x="40" y="14" width="80" height="94" rx="4" fill="#eceae4" stroke="#8d877c" stroke-width="2"></rect><rect x="50" y="26" width="60" height="14" fill="#3e4a44"></rect><rect x="50" y="48" width="60" height="14" fill="#3e4a44"></rect><rect x="50" y="70" width="60" height="14" fill="#3e4a44"></rect><path d="M56 30v6M64 30v6M72 30v6M80 30v6M88 30v6M96 30v6M56 52v6M64 52v6M72 52v6M80 52v6M56 74v6M64 74v6M72 74v6" stroke="#f3f0e8" stroke-width="3"></path></svg></div>
+  </sc-if>
+  <button class="ha-btn ha-btn-secondary ha-btn-block" onClick="{{downloadDoc}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v12M7 11l5 5 5-5"></path><path d="M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"></path></svg>Last ned</button>
+</div>
+</sc-if>
+</sc-if>
+
+<!-- ============ 9 INFO OG KODER ============ -->
+<sc-if value="{{scr.info}}" hint-placeholder-val="{{false}}">
+<div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Mer</button></div>
+<div class="scroll">
+  <h1 class="t-title">Info og koder</h1>
+  <div class="ha-card">
+    <div class="row"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"></path><path d="M12 19.5v.01"></path></svg><h2 class="t-heading">Wifi</h2></div>
+    <div class="stack" style="gap: 2px;"><span class="t-caption">Nettverk</span><span class="t-body-lg">{{info.wifiName}}</span></div>
+    <div class="code-row"><div class="stack" style="gap: 2px;"><span class="t-caption">Passord</span><span class="t-code">{{info.wifiPw}}</span></div><button class="mini-btn" onClick="{{copyWifi}}">Kopier</button></div>
+  </div>
+  <div class="ha-card">
+    <div class="row"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l9-9M16 7l3 3"></path></svg><h2 class="t-heading">Nøkkelboks</h2></div>
+    <div class="code-row"><span class="t-code">{{keyShown}}</span><button class="mini-btn" onClick="{{toggleKey}}">{{keyBtn}}</button></div>
+    <p class="muted">{{info.keyWhere}}</p>
+  </div>
+  <div class="ha-card">
+    <div class="row"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg><h2 class="t-heading">Søppeltømming</h2></div>
+    <p>{{info.trash}}</p>
+  </div>
+  <div class="ha-card">
+    <div class="row"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.4"></circle><circle cx="18" cy="20" r="1.4"></circle><path d="M2 3h3l2.6 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.5L22 8H6"></path></svg><h2 class="t-heading">Nærmeste butikk</h2></div>
+    <p>{{info.store}}</p>
+  </div>
+  <div class="ha-card">
+    <div class="row"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z"></path></svg><h2 class="t-heading">Nødnumre</h2></div>
+    <div class="ha-list" style="border: 0;">
+      <div class="ha-li" style="padding-left: 0;"><span class="ha-li-main"><span class="ha-li-title">Brann</span></span><a class="tel" href="tel:110">110</a></div>
+      <div class="ha-li" style="padding-left: 0;"><span class="ha-li-main"><span class="ha-li-title">Politi</span></span><a class="tel" href="tel:112">112</a></div>
+      <div class="ha-li" style="padding-left: 0;"><span class="ha-li-main"><span class="ha-li-title">Ambulanse</span></span><a class="tel" href="tel:113">113</a></div>
+      <div class="ha-li" style="padding-left: 0;"><span class="ha-li-main"><span class="ha-li-title">Legevakt</span></span><a class="tel" href="tel:116117">116 117</a></div>
+    </div>
+  </div>
+  <div class="ha-card">
+    <div class="row"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8v.01"></path></svg><h2 class="t-heading">Greit å vite</h2></div>
+    <p style="white-space: pre-line;">{{info.free}}</p>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ 10 SJEKKLISTER ============ -->
+<sc-if value="{{scr.checklist}}" hint-placeholder-val="{{false}}">
+<div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Tilbake</button></div>
+<div class="scroll">
+  <h1 class="t-title">Sjekkliste</h1>
+  <div class="ha-seg" role="group" aria-label="Velg liste">
+    <button aria-pressed="{{cm.ankomst}}" onClick="{{modeAnkomst}}">Ankomst</button>
+    <button aria-pressed="{{cm.avreise}}" onClick="{{modeAvreise}}">Avreise</button>
+  </div>
+  <sc-if value="{{chk.has}}" hint-placeholder-val="{{true}}">
+    <div class="stack" style="gap: 8px;">
+      <div class="sec-h"><span class="ha-label">{{chk.progressText}}</span></div>
+      <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="{{chk.total}}" aria-valuenow="{{chk.done}}"><div style="{{chk.barStyle}}"></div></div>
+    </div>
+    <div class="ha-list">
+      <sc-for list="{{chk.items}}" as="it" hint-placeholder-count="5">
+        <button class="ha-check" role="checkbox" aria-checked="{{it.done}}" onClick="{{it.toggle}}"><span class="ha-box"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span><span class="ha-li-main"><span class="ha-li-title">{{it.text}}</span><sc-if value="{{it.hint}}" hint-placeholder-val="{{false}}"><span class="ha-li-meta">{{it.hint}}</span></sc-if></span></button>
+      </sc-for>
+    </div>
+    <sc-if value="{{chk.allDone}}" hint-placeholder-val="{{false}}">
+      <div class="done-card"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg><div class="stack" style="gap: 4px;"><strong style="font-size: 19px;">{{chk.doneTitle}}</strong><span>{{chk.doneText}}</span></div></div>
+      <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{finishChecklist}}">Ferdig</button>
+    </sc-if>
+  </sc-if>
+  <sc-if value="{{chk.empty}}" hint-placeholder-val="{{false}}"><div class="empty">{{chk.emptyText}}</div></sc-if>
+  <sc-if value="{{isAdmin}}" hint-placeholder-val="{{false}}">
+    <div class="stack">
+      <p class="list-h">Fast punkt (bare admin)</p>
+      <div class="quickadd">
+        <label for="ck-add" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0);">Nytt punkt</label>
+        <input id="ck-add" class="ha-input" type="text" placeholder="F.eks. Lås uthuset" value="{{f.checkText}}" onChange="{{onCheckText}}">
+        <button class="ha-btn ha-btn-secondary" onClick="{{addCheck}}">Legg til</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+<!-- ============ 11 MEDLEMMER ============ -->
+<sc-if value="{{scr.members}}" hint-placeholder-val="{{false}}">
+<div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Mer</button></div>
+<div class="scroll">
+  <div class="stack" style="gap: 4px;"><h1 class="t-title">Medlemmer</h1><p class="t-caption">{{memberCountText}} i {{cab.name}}</p></div>
+  <sc-if value="{{isAdmin}}" hint-placeholder-val="{{true}}">
+    <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{openInviteSheet}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Inviter</button>
+  </sc-if>
+  <sc-if value="{{notAdmin}}" hint-placeholder-val="{{false}}">
+    <p class="muted">Bare {{cab.admin}} (admin) kan invitere og fjerne medlemmer.</p>
+  </sc-if>
+  <div class="ha-list">
+    <sc-for list="{{members}}" as="m" hint-placeholder-count="5">
+      <div class="ha-li">
+        <span class="ha-avatar alt" style="width: 40px; height: 40px; font-size: 17px; border-radius: 20px;">{{m.initial}}</span>
+        <span class="ha-li-main"><span class="ha-li-title">{{m.label}}</span><span class="ha-li-meta">{{m.role}}</span></span>
+        <sc-if value="{{m.canRemove}}" hint-placeholder-val="{{false}}"><button class="mini-btn" style="color: var(--danger); border-color: var(--danger);" aria-label="{{m.removeLabel}}" onClick="{{m.ask}}">Fjern</button></sc-if>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ 12 MINE HYTTER ============ -->
+<sc-if value="{{scr.mycabins}}" hint-placeholder-val="{{false}}">
+<div class="topbar"><button class="back" onClick="{{back}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"></path></svg>Mer</button></div>
+<div class="scroll">
+  <h1 class="t-title">Mine hytter</h1>
+  <div class="ha-list">
+    <sc-for list="{{cabinList}}" as="c" hint-placeholder-count="2">
+      <button class="ha-li" onClick="{{c.pick}}">
+        <span class="{{c.avCls}}">{{c.initial}}</span>
+        <span class="ha-li-main"><span class="ha-li-title">{{c.name}}</span><span class="ha-li-meta">{{c.meta}}</span></span>
+        <sc-if value="{{c.current}}" hint-placeholder-val="{{false}}"><span style="color: var(--primary);" aria-label="Valgt"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span></sc-if>
+      </button>
+    </sc-for>
+  </div>
+  <button class="ha-btn ha-btn-secondary ha-btn-block" onClick="{{toCreate}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Opprett ny hytte</button>
+  <button class="ha-btn ha-btn-ghost" onClick="{{toInviteHelp}}">Jeg har fått en invitasjonslenke</button>
+</div>
+</sc-if>
+
+<!-- ============ BUNNMENY ============ -->
+<sc-if value="{{showNav}}" hint-placeholder-val="{{false}}">
+<nav class="ha-nav" aria-label="Hovedmeny">
+  <button aria-current="{{nav.home}}" onClick="{{goHome}}"><span class="pill"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7"></path><path d="M5 10v10h14V10"></path><path d="M10 20v-5h4v5"></path></svg></span>Hjem</button>
+  <button aria-current="{{nav.tasks}}" onClick="{{goTasks}}"><span class="pill"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l2 2 3-3M3 13l2 2 3-3"></path><path d="M12 7h9M12 14h9M12 20h9"></path></svg></span>Gjøremål</button>
+  <button aria-current="{{nav.issues}}" onClick="{{goIssues}}"><span class="pill"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3.5a5 5 0 0 0-4.6 6.9L3.5 17.3V20.5h3.2l6.9-6.9A5 5 0 0 0 20.5 9l-3.2 1.2-2.6-2.6L15.9 4.4z"></path></svg></span>Feil<sc-if value="{{home.hasOpenIssues}}" hint-placeholder-val="{{false}}"><span class="dot">{{home.openCount}}</span></sc-if></button>
+  <button aria-current="{{nav.shop}}" onClick="{{goShop}}"><span class="pill"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.4"></circle><circle cx="18" cy="20" r="1.4"></circle><path d="M2 3h3l2.6 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.5L22 8H6"></path></svg></span>Handleliste<sc-if value="{{home.hasShop}}" hint-placeholder-val="{{false}}"><span class="dot" style="background: var(--primary); color: var(--on-primary);">{{home.shopCount}}</span></sc-if></button>
+  <button aria-current="{{nav.more}}" onClick="{{goMore}}"><span class="pill"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg></span>Mer</button>
+</nav>
+</sc-if>
+
+<!-- ============ ARK: BYTT HYTTE ============ -->
+<sc-if value="{{sheet.switcher}}" hint-placeholder-val="{{false}}">
+<div class="overlay">
+  <button class="scrim" aria-label="Lukk" onClick="{{closeSheet}}"></button>
+  <div class="ha-sheet" role="dialog" aria-label="Velg hytte">
+    <div class="ha-grab"></div>
+    <h2 class="t-heading">Bytt hytte</h2>
+    <div class="ha-list">
+      <sc-for list="{{cabinList}}" as="c" hint-placeholder-count="2">
+        <button class="ha-li" onClick="{{c.pick}}">
+          <span class="{{c.avCls}}">{{c.initial}}</span>
+          <span class="ha-li-main"><span class="ha-li-title">{{c.name}}</span><span class="ha-li-meta">{{c.meta}}</span></span>
+          <sc-if value="{{c.current}}" hint-placeholder-val="{{false}}"><span style="color: var(--primary);" aria-label="Valgt"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span></sc-if>
+        </button>
+      </sc-for>
+    </div>
+    <button class="ha-btn ha-btn-ghost" onClick="{{goMyCabins}}">Mine hytter</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ ARK: INVITER ============ -->
+<sc-if value="{{sheet.invite}}" hint-placeholder-val="{{false}}">
+<div class="overlay">
+  <button class="scrim" aria-label="Lukk" onClick="{{closeSheet}}"></button>
+  <div class="ha-sheet" role="dialog" aria-label="Inviter til hytta">
+    <div class="ha-grab"></div>
+    <div class="stack" style="gap: 4px;"><h2 class="t-heading">Inviter til {{cab.name}}</h2><p class="muted">Alle som har lenken kan bli med. Send den på SMS til dem du vil invitere.</p></div>
+    <div class="link-box">{{inviteLink}}</div>
+    <button class="ha-btn ha-btn-primary ha-btn-block" onClick="{{shareSms}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"></path></svg>Del på SMS</button>
+    <div class="row">
+      <button class="ha-btn ha-btn-secondary grow" onClick="{{copyLink}}">Kopier</button>
+      <button class="ha-btn ha-btn-secondary grow" onClick="{{newLink}}">Lag ny lenke</button>
+    </div>
+    <p class="t-caption">«Lag ny lenke» gjør den gamle ugyldig.</p>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ ARK: FJERN MEDLEM ============ -->
+<sc-if value="{{sheet.remove}}" hint-placeholder-val="{{false}}">
+<div class="overlay">
+  <button class="scrim" aria-label="Lukk" onClick="{{closeSheet}}"></button>
+  <div class="ha-sheet" role="dialog" aria-label="Fjern medlem">
+    <div class="ha-grab"></div>
+    <div class="stack" style="gap: 4px;"><h2 class="t-heading">Fjerne {{removeName}} fra {{cab.name}}?</h2><p class="muted">{{removeName}} mister tilgangen til hytta med en gang. Det {{removeName}} har lagt inn, blir liggende.</p></div>
+    <button class="ha-btn ha-btn-danger ha-btn-block" onClick="{{confirmRemove}}">Fjern {{removeName}}</button>
+    <button class="ha-btn ha-btn-ghost" onClick="{{closeSheet}}">Avbryt</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ ARK: LAST OPP ============ -->
+<sc-if value="{{sheet.upload}}" hint-placeholder-val="{{false}}">
+<div class="overlay">
+  <button class="scrim" aria-label="Lukk" onClick="{{closeSheet}}"></button>
+  <div class="ha-sheet" role="dialog" aria-label="Last opp">
+    <div class="ha-grab"></div>
+    <h2 class="t-heading">Last opp til</h2>
+    <div class="ha-seg" role="group" aria-label="Kategori">
+      <button aria-pressed="{{uc.Manualer}}" onClick="{{ucManualer}}">Manualer</button>
+      <button aria-pressed="{{uc.Hytta}}" onClick="{{ucHytta}}">Hytta</button>
+      <button aria-pressed="{{uc.Avtaler}}" onClick="{{ucAvtaler}}">Avtaler</button>
+    </div>
+    <button class="ha-btn ha-btn-secondary ha-btn-block" onClick="{{uploadPhoto}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"></path><circle cx="12" cy="13.5" r="3.5"></circle></svg>Ta bilde</button>
+    <button class="ha-btn ha-btn-secondary ha-btn-block" onClick="{{uploadFile}}"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path><path d="M14 3v5h5"></path></svg>Velg PDF eller bilde</button>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ TOAST ============ -->
+<sc-if value="{{toast}}" hint-placeholder-val="{{false}}">
+  <div class="toast-wrap"><div class="ha-toast" role="status"><svg class="ha-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg>{{toast}}</div></div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"scenario":{"editor":"enum","options":["new","returning","invite","member"],"default":"new","section":"Prototype"},"start":{"editor":"enum","options":["welcome","login","signup","sms","home","tasks","issues","issuenew","shop","more","docs","info","checklist","members","mycabins"],"default":"welcome","section":"Prototype"},"theme":{"editor":"enum","options":["light","dark"],"default":"light","section":"Prototype"},"offline":{"editor":"boolean","default":false,"section":"Prototype"},"checkMode":{"editor":"enum","options":["ankomst","avreise"],"default":"ankomst","section":"Prototype"},"$preview":{"width":390,"height":844}}'>
+function hyttaSeed() {
+  var furulia = {
+    id: 'furulia', name: 'Furulia', initial: 'F', alt: false, photo: true, isAdmin: true, admin: 'Mari', inviteCode: 'FUR-8K2Q',
+    members: [
+      { id: 'm1', name: 'Mari', role: 'Admin', me: true }, { id: 'm2', name: 'Kari', role: 'Medlem' }, { id: 'm3', name: 'Ola', role: 'Medlem' },
+      { id: 'm4', name: 'Per', role: 'Medlem' }, { id: 'm5', name: 'Ingrid', role: 'Medlem' }, { id: 'm6', name: 'Lars', role: 'Medlem' },
+      { id: 'm7', name: 'Sofie', role: 'Medlem' }, { id: 'm8', name: 'Erik', role: 'Medlem' }, { id: 'm9', name: 'Anne', role: 'Medlem' }
+    ],
+    issues: [
+      { id: 'i1', title: 'Lekker under kjøkkenvasken', desc: 'Det drypper fra røret inn mot veggen. Har satt en bolle under.', status: 'ny', by: 'Ola', when: 'i går', photo: true },
+      { id: 'i2', title: 'Ytterdøra går tungt', desc: 'Må dras hardt igjen for å låse. Trolig hengslene.', status: 'pagar', by: 'Kari', when: '3 dager siden', photo: false },
+      { id: 'i3', title: 'Røykvarsler piper i gangen', desc: 'Byttet batteri, virker nå.', status: 'fikset', by: 'Mari', when: 'forrige uke', photo: false }
+    ],
+    tasks: [
+      { id: 't1', title: 'Bytte pakning i kjøkkenkranen', desc: 'Pakninger ligger i skuffen under benken.', kind: 'gjoremal', resp: 'Ola', due: 'fre. 10. okt.', by: 'Kari', done: false },
+      { id: 't2', title: 'Bestille ved til vinteren', desc: 'Tre sekker bjørk. Leveres ved låven.', kind: 'gjoremal', resp: 'Mari', due: 'i morgen', by: 'Mari', done: false },
+      { id: 't3', title: 'Rense takrenner', desc: 'Etter at løvet har falt.', kind: 'vedlikehold', resp: '', due: 'før 1. nov.', by: 'Mari', done: false },
+      { id: 't4', title: 'Male vindskier', desc: 'Samme farge som sist. Malingen står i uthuset.', kind: 'vedlikehold', resp: 'Per', due: '', by: 'Kari', done: false },
+      { id: 't5', title: 'Vaske vinduer', desc: '', kind: 'gjoremal', resp: 'Ingrid', due: '', by: 'Ingrid', done: true }
+    ],
+    shop: [
+      { id: 's1', name: 'Doruller', addedBy: 'Ola', done: false }, { id: 's2', name: 'Oppvaskmiddel', addedBy: 'Kari', done: false },
+      { id: 's3', name: 'Fyrstikker', addedBy: 'Mari', done: false }, { id: 's4', name: 'Kaffefilter', addedBy: 'Per', done: true, boughtBy: 'Kari' }
+    ],
+    docs: [
+      { cat: 'Manualer', items: [ { id: 'd1', name: 'Varmepumpe', type: 'PDF', pages: 24, meta: 'lagt til av Kari' }, { id: 'd2', name: 'Vaskemaskin', type: 'PDF', pages: 12, meta: 'lagt til av Per' } ] },
+      { cat: 'Hytta', items: [ { id: 'd3', name: 'Sikringsskapet', type: 'Bilde', pages: 1, meta: 'lagt til av Ola' }, { id: 'd4', name: 'Plantegning', type: 'PDF', pages: 2, meta: 'lagt til av Mari' } ] },
+      { cat: 'Avtaler', items: [ { id: 'd5', name: 'Brøyteavtale 2026', type: 'PDF', pages: 1, meta: 'lagt til av Mari' } ] }
+    ],
+    info: { wifiName: 'Furulia', wifiPw: 'Blåbær-2026', keyCode: '4719', keyWhere: 'Til høyre for ytterdøra, bak vedkassa.', trash: 'Containere ved bommen. Tømmes tirsdager. Glass og metall i den grønne.', store: 'Joker Fjellstua, 6 km. Hverdager 9–21, lørdag 9–20, søndag 12–18.', free: 'Brøytebilen kommer før kl. 07. Parker inntil låven.\nSnøskuffa står i gangen.' },
+    check: {
+      ankomst: [ { id: 'a1', text: 'Skru på hovedkranen', hint: 'Kjelleren, til venstre for døra', done: false }, { id: 'a2', text: 'Slå på varmtvannsberederen', hint: 'Bryter 4 i sikringsskapet', done: false }, { id: 'a3', text: 'Skru opp varmepumpa til 20 grader', hint: '', done: false }, { id: 'a4', text: 'Sjekk musefellene', hint: 'Kjøkkenbenken og boden', done: false } ],
+      avreise: [ { id: 'r1', text: 'Tøm og tørk av kjøleskapet', hint: 'La døra stå på gløtt', done: false }, { id: 'r2', text: 'Skru av hovedkranen', hint: 'Kjelleren, til venstre for døra', done: false }, { id: 'r3', text: 'Slå av varmtvannsberederen', hint: 'Bryter 4 i sikringsskapet', done: false }, { id: 'r4', text: 'Skru varmepumpa ned til 10 grader', hint: '', done: false }, { id: 'r5', text: 'Lukk spjeldet i peisen', hint: '', done: false }, { id: 'r6', text: 'Lås uthuset', hint: '', done: false }, { id: 'r7', text: 'Ta med søppelet', hint: 'Containere ved bommen', done: false }, { id: 'r8', text: 'Lås ytterdøra og legg nøkkelen i boksen', hint: '', done: false } ]
+    }
+  };
+  var solbakken = {
+    id: 'solbakken', name: 'Solbakken', initial: 'S', alt: true, photo: false, isAdmin: false, admin: 'Kari', inviteCode: 'SOL-4F7P',
+    members: [ { id: 'n1', name: 'Kari', role: 'Admin' }, { id: 'n2', name: 'Jon', role: 'Medlem' }, { id: 'n3', name: 'Liv', role: 'Medlem' }, { id: 'n4', name: 'Tor', role: 'Medlem' }, { id: 'n5', name: 'Hanne', role: 'Medlem' } ],
+    issues: [ { id: 'j1', title: 'Takstein har løsnet over terrassen', desc: 'Ligger løst i kanten, ikke gå under.', status: 'ny', by: 'Jon', when: 'i dag', photo: false } ],
+    tasks: [ { id: 'u1', title: 'Bære inn hagemøblene', desc: 'Før første snø.', kind: 'gjoremal', resp: 'Tor', due: 'søn. 12. okt.', by: 'Kari', done: false }, { id: 'u2', title: 'Olje terrassen', desc: '', kind: 'vedlikehold', resp: '', due: '', by: 'Liv', done: false } ],
+    shop: [ { id: 'v1', name: 'Lyspærer E27', addedBy: 'Liv', done: false }, { id: 'v2', name: 'Grillkull', addedBy: 'Jon', done: false } ],
+    docs: [ { cat: 'Manualer', items: [ { id: 'e1', name: 'Peisovn', type: 'PDF', pages: 8, meta: 'lagt til av Kari' } ] }, { cat: 'Hytta', items: [] }, { cat: 'Avtaler', items: [] } ],
+    info: { wifiName: 'Solbakken-hytte', wifiPw: 'Fjellrev-77', keyCode: '2306', keyWhere: 'Under trappa, bak den løse planken.', trash: 'Hentes annenhver onsdag ved veikrysset.', store: 'Coop Marked, 11 km. Hverdager 8–22.', free: 'Vannet kommer fra egen brønn. Kok før drikking etter lange fravær.' },
+    check: { ankomst: [ { id: 'b1', text: 'Skru på vannet', hint: 'Under kjøkkenbenken', done: false }, { id: 'b2', text: 'Slå på strømmen', hint: 'Hovedsikringen i gangen', done: false } ], avreise: [ { id: 'q1', text: 'Skru av vannet', hint: '', done: false }, { id: 'q2', text: 'Lås boden', hint: '', done: false }, { id: 'q3', text: 'Ta med søppelet', hint: '', done: false } ] }
+  };
+  return { furulia: furulia, solbakken: solbakken };
+}
+
+class Component extends DCLogic {
+  init() {
+    if (this._init) return this._init;
+    var p = this.props || {};
+    var sc = p.scenario || 'new';
+    var d = hyttaSeed();
+    var me = { id: 'me', name: 'Mari', role: 'Medlem', me: true };
+    var cabins = [], loggedIn = false, invite = null;
+    if (sc === 'returning') { d.solbakken.members.push(me); cabins = [d.furulia, d.solbakken]; }
+    else if (sc === 'invite') { cabins = [d.furulia]; loggedIn = true; invite = d.solbakken; }
+    else if (sc === 'member') { d.solbakken.members.push(me); cabins = [d.furulia, d.solbakken]; loggedIn = true; }
+    this._init = {
+      screen: p.start || 'welcome', cabins: cabins, cabinId: cabins.length ? cabins[0].id : null, loggedIn: loggedIn, invite: invite,
+      user: { name: sc === 'new' ? '' : 'Mari', email: sc === 'new' ? '' : 'mari@eksempel.no' },
+      theme: p.theme || 'light', offline: !!p.offline, synced: false, sheet: null, toast: '', resetSent: false,
+      f: { name: '', email: sc === 'returning' ? 'mari@eksempel.no' : '', pw1: '', pw2: '', show1: false, show2: false, pw: '', showPw: false, cabinName: '', cabinPhoto: false, issueTitle: '', issueDesc: '', issuePhoto: false, shopText: '', inviteText: '', taskTitle: '', taskDesc: '', taskKind: 'gjoremal', taskResp: '', taskDue: '', checkText: '' },
+      errs: {}, taskFilter: 'alle', checkMode: p.checkMode || 'ankomst', selTask: null, selIssue: null, selDoc: null,
+      returnTo: 'home', removeId: null, showKey: false, uploadCat: 'Manualer'
+    };
+    return this._init;
+  }
+  S() { return Object.assign({}, this.init(), this.state || {}); }
+  setF(o) { this.setState({ f: Object.assign({}, this.S().f, o) }); }
+  setErr(o) { this.setState({ errs: Object.assign({}, this.S().errs, o) }); }
+  go(screen, extra) { this.setState(Object.assign({ screen: screen, sheet: null, errs: {} }, extra || {})); }
+  cab() { var s = this.S(); for (var i = 0; i < s.cabins.length; i++) if (s.cabins[i].id === s.cabinId) return s.cabins[i]; return null; }
+  upd(fn) {
+    var s = this.S(); var cabins = JSON.parse(JSON.stringify(s.cabins));
+    var c = null; for (var i = 0; i < cabins.length; i++) if (cabins[i].id === s.cabinId) c = cabins[i];
+    if (c) fn(c, s.offline);
+    this.setState({ cabins: cabins });
+  }
+  toast(t) { var self = this; clearTimeout(this._tt); this.setState({ toast: t }); this._tt = setTimeout(function () { self.setState({ toast: '' }); }, 2800); }
+  componentWillUnmount() { clearTimeout(this._tt); clearTimeout(this._st); }
+  pendingCount(cabins) {
+    var n = 0;
+    cabins.forEach(function (c) {
+      ['issues', 'tasks', 'shop'].forEach(function (k) { c[k].forEach(function (x) { if (x.pending) n++; }); });
+      c.docs.forEach(function (cat) { cat.items.forEach(function (x) { if (x.pending) n++; }); });
+    });
+    return n;
+  }
+  setOffline(v) {
+    var self = this;
+    if (v) { this.setState({ offline: true, synced: false }); return; }
+    var cabins = JSON.parse(JSON.stringify(this.S().cabins));
+    cabins.forEach(function (c) {
+      ['issues', 'tasks', 'shop'].forEach(function (k) { c[k].forEach(function (x) { delete x.pending; }); });
+      c.docs.forEach(function (cat) { cat.items.forEach(function (x) { delete x.pending; }); });
+    });
+    this.setState({ offline: false, synced: true, cabins: cabins });
+    clearTimeout(this._st); this._st = setTimeout(function () { self.setState({ synced: false }); }, 3000);
+  }
+  newId() { this._n = (this._n || 0) + 1; return 'x' + Date.now() + this._n; }
+
+  renderVals() {
+    var self = this, s = this.S(), f = s.f, c = this.cab(), me = s.user.name || 'Mari', E = s.errs || {};
+    var screens = ['welcome','signup','login','forgot','nocabin','createcabin','invitehelp','sms','join','home','tasks','taskdetail','tasknew','issues','issuedetail','issuenew','camera','shop','more','docs','docview','info','checklist','members','mycabins'];
+    var scr = {}; screens.forEach(function (k) { scr[k] = s.screen === k; });
+    var inCabin = { home: 'home', tasks: 'tasks', taskdetail: 'tasks', issues: 'issues', issuedetail: 'issues', shop: 'shop', more: 'more', docs: 'more', docview: 'more', info: 'more', members: 'more', mycabins: 'more', checklist: 'home', tasknew: 'tasks', issuenew: 'issues' };
+    var tab = inCabin[s.screen];
+    var navScreens = { home: 1, tasks: 1, taskdetail: 1, issues: 1, issuedetail: 1, shop: 1, more: 1, docs: 1, docview: 1, info: 1, members: 1, mycabins: 1, checklist: 1 };
+    var showNav = !!navScreens[s.screen] && !!c;
+    var nav = {}; ['home', 'tasks', 'issues', 'shop', 'more'].forEach(function (k) { nav[k] = tab === k ? 'page' : undefined; });
+    var backTo = {
+      signup: s.invite ? 'join' : 'welcome', login: s.invite ? 'join' : 'welcome', forgot: 'login',
+      createcabin: s.cabins.length ? 'mycabins' : 'nocabin', invitehelp: s.cabins.length ? 'mycabins' : 'nocabin',
+      taskdetail: 'tasks', tasknew: 'tasks', issuedetail: 'issues', issuenew: s.returnTo || 'issues', camera: 'issuenew',
+      docs: 'more', docview: 'docs', info: 'more', members: 'more', mycabins: 'more', checklist: s.returnTo || 'home'
+    };
+    var go = function (k, x) { return function () { self.go(k, x); }; };
+    var cls = function (msg) { return msg ? 'ha-field is-error' : 'ha-field'; };
+    var e = {
+      name: E.name || '', email: E.email || '', pw1: E.pw1 || '', pw2: E.pw2 || '', login: E.login || '', cabin: E.cabin || '', invite: E.invite || '', issue: E.issue || '', task: E.task || '',
+      nameCls: cls(E.name), emailCls: cls(E.email), pw1Cls: cls(E.pw1), pw2Cls: cls(E.pw2), loginCls: cls(E.login), cabinCls: cls(E.cabin), inviteCls: cls(E.invite), issueCls: cls(E.issue), taskCls: cls(E.task)
+    };
+    var afterAuth = function () {
+      if (s.invite) return 'join';
+      return s.cabins.length ? 'home' : 'nocabin';
+    };
+
+    // ---------- cabin-derived ----------
+    var badge = function (i) {
+      return Object.assign({}, i, { isNy: i.status === 'ny', isPagar: i.status === 'pagar', isFikset: i.status === 'fikset', meta: 'Meldt av ' + i.by + ' · ' + i.when, open: go('issuedetail', { selIssue: i.id }) });
+    };
+    var home = { issues: [], noIssues: true, openText: '', task: null, noTask: true, taskCountText: '', shopCountText: '', shopPreview: '', openCount: 0, hasOpenIssues: false, shopCount: 0, hasShop: false };
+    var issues = { open: [], fixed: [], hasOpen: false, noOpen: true, hasFixed: false };
+    var tasks = { open: [], done: [], hasOpen: false, noOpen: true, hasDone: false };
+    var shop = { open: [], done: [], hasOpen: false, noOpen: true, hasDone: false, countText: '' };
+    var docs = [], info = {}, chk = {}, members = [], memberNames = [];
+    var cab = { name: '', initial: '', altCls: '', photo: false, noPhoto: true, admin: '' };
+    if (c) {
+      cab = { name: c.name, initial: c.initial, altCls: c.alt ? 'alt' : '', photo: !!c.photo, noPhoto: !c.photo, admin: c.admin };
+      var openI = c.issues.filter(function (i) { return i.status !== 'fikset'; });
+      issues.open = openI.map(badge);
+      issues.fixed = c.issues.filter(function (i) { return i.status === 'fikset'; }).map(badge);
+      issues.hasOpen = openI.length > 0; issues.noOpen = !issues.hasOpen; issues.hasFixed = issues.fixed.length > 0;
+      home.issues = issues.open.slice(0, 2); home.noIssues = !issues.hasOpen;
+      home.openCount = openI.length; home.hasOpenIssues = openI.length > 0;
+      home.openText = openI.length ? openI.length + ' åpne' : '';
+
+      var taskMeta = function (t) {
+        var parts = [];
+        if (t.resp) parts.push(t.resp);
+        if (t.due) parts.push('frist ' + t.due);
+        parts.push('av ' + t.by);
+        return parts.join(' · ');
+      };
+      var decT = function (t) {
+        return Object.assign({}, t, {
+          meta: taskMeta(t), checkLabel: 'Merk «' + t.title + '» som gjort',
+          toggle: function () { self.upd(function (cc, off) { cc.tasks.forEach(function (x) { if (x.id === t.id) { x.done = !x.done; if (off) x.pending = true; } }); }); },
+          open: go('taskdetail', { selTask: t.id })
+        });
+      };
+      var filt = c.tasks.filter(function (t) { return s.taskFilter === 'alle' || t.kind === s.taskFilter; });
+      tasks.open = filt.filter(function (t) { return !t.done; }).map(decT);
+      tasks.done = filt.filter(function (t) { return t.done; }).map(decT);
+      tasks.hasOpen = tasks.open.length > 0; tasks.noOpen = !tasks.hasOpen; tasks.hasDone = tasks.done.length > 0;
+      var openTasks = c.tasks.filter(function (t) { return !t.done; });
+      if (openTasks.length) { home.task = { title: openTasks[0].title, meta: taskMeta(openTasks[0]) }; home.noTask = false; }
+      home.taskCountText = openTasks.length ? openTasks.length + ' igjen' : '';
+
+      var decS = function (it) {
+        return Object.assign({}, it, {
+          meta: it.done ? 'Kjøpt av ' + it.boughtBy : 'Lagt til av ' + it.addedBy,
+          toggle: function () { self.upd(function (cc, off) { cc.shop.forEach(function (x) { if (x.id === it.id) { x.done = !x.done; x.boughtBy = x.done ? me : undefined; if (off) x.pending = true; } }); }); }
+        });
+      };
+      shop.open = c.shop.filter(function (x) { return !x.done; }).map(decS);
+      shop.done = c.shop.filter(function (x) { return x.done; }).map(decS);
+      shop.hasOpen = shop.open.length > 0; shop.noOpen = !shop.hasOpen; shop.hasDone = shop.done.length > 0;
+      shop.countText = shop.open.length === 1 ? '1 vare' : shop.open.length + ' varer';
+      home.shopCount = shop.open.length; home.hasShop = shop.open.length > 0;
+      home.shopCountText = shop.countText;
+      home.shopPreview = shop.open.length ? shop.open.map(function (x) { return x.name; }).join(', ') : 'Ingenting på lista.';
+
+      docs = c.docs.map(function (cat) {
+        return { cat: cat.cat, count: cat.items.length, has: cat.items.length > 0, empty: cat.items.length === 0,
+          items: cat.items.map(function (d) { return Object.assign({}, d, { typeCls: d.type === 'PDF' ? 'doc-type' : 'doc-type img', open: go('docview', { selDoc: d.id }) }); }) };
+      });
+      info = c.info;
+      var list = c.check[s.checkMode] || [];
+      var done = list.filter(function (x) { return x.done; }).length;
+      chk = {
+        has: list.length > 0, empty: list.length === 0, total: list.length, done: done,
+        allDone: list.length > 0 && done === list.length,
+        progressText: done + ' av ' + list.length + ' krysset av',
+        barStyle: 'width: ' + (list.length ? Math.round(done / list.length * 100) : 0) + '%;',
+        doneTitle: s.checkMode === 'avreise' ? 'Alt er klart. God tur hjem!' : 'Hytta er klar. God tur!',
+        doneText: s.checkMode === 'avreise' ? 'De andre ser at hytta er låst og stengt.' : 'Listen nullstilles når du trykker Ferdig.',
+        emptyText: c.isAdmin ? 'Ingen punkter ennå. Legg til de faste punktene under.' : 'Admin har ikke lagt inn punkter ennå.',
+        items: list.map(function (x) {
+          return Object.assign({}, x, { toggle: function () { self.upd(function (cc) { cc.check[s.checkMode].forEach(function (y) { if (y.id === x.id) y.done = !y.done; }); }); } });
+        })
+      };
+      members = c.members.map(function (m) {
+        return { initial: m.name.charAt(0), label: m.me ? m.name + ' (deg)' : m.name, role: m.role, canRemove: c.isAdmin && !m.me,
+          removeLabel: 'Fjern ' + m.name + ' fra hytta', ask: function () { self.setState({ sheet: 'remove', removeId: m.id }); } };
+      });
+      memberNames = c.members.map(function (m) { return m.name; });
+    }
+
+    var task = null;
+    if (c && s.selTask) c.tasks.forEach(function (t) {
+      if (t.id !== s.selTask) return;
+      task = Object.assign({}, t, {
+        kindLabel: t.kind === 'vedlikehold' ? 'Vedlikehold' : 'Gjøremål',
+        respText: t.resp || 'Ingen ennå', dueText: t.due || 'Ingen frist',
+        toggleLabel: t.done ? 'Merk som ikke gjort' : 'Merk som gjort',
+        canDelete: t.by === me, cannotDelete: t.by !== me,
+        toggle: function () { self.upd(function (cc, off) { cc.tasks.forEach(function (x) { if (x.id === t.id) { x.done = !x.done; if (off) x.pending = true; } }); }); self.toast(t.done ? 'Satt tilbake til ikke gjort' : 'Merket som gjort'); },
+        del: function () { self.upd(function (cc) { cc.tasks = cc.tasks.filter(function (x) { return x.id !== t.id; }); }); self.go('tasks'); self.toast('Gjøremålet er slettet'); }
+      });
+    });
+    var issue = null;
+    if (c && s.selIssue) c.issues.forEach(function (i) {
+      if (i.id !== s.selIssue) return;
+      var setSt = function (st, label) { return function () { self.upd(function (cc, off) { cc.issues.forEach(function (x) { if (x.id === i.id) { x.status = st; if (off) x.pending = true; } }); }); self.toast('Status: ' + label); }; };
+      issue = Object.assign({}, i, {
+        meta: 'Meldt av ' + i.by + ' · ' + i.when,
+        pNy: i.status === 'ny', pPagar: i.status === 'pagar', pFikset: i.status === 'fikset',
+        setNy: setSt('ny', 'Ny'), setPagar: setSt('pagar', 'Pågår'), setFikset: setSt('fikset', 'Fikset'),
+        canDelete: i.by === me, cannotDelete: i.by !== me,
+        del: function () { self.upd(function (cc) { cc.issues = cc.issues.filter(function (x) { return x.id !== i.id; }); }); self.go('issues'); self.toast('Feilmeldingen er slettet'); }
+      });
+    });
+    var doc = null;
+    if (c && s.selDoc) c.docs.forEach(function (cat) { cat.items.forEach(function (d) { if (d.id === s.selDoc) doc = Object.assign({}, d, { isPdf: d.type === 'PDF', isImg: d.type !== 'PDF' }); }); });
+
+    var cabinList = s.cabins.map(function (cc) {
+      return { name: cc.name, initial: cc.initial, avCls: cc.alt ? 'ha-avatar alt' : 'ha-avatar', current: cc.id === s.cabinId,
+        meta: (cc.isAdmin ? 'Du er admin' : 'Medlem') + ' · ' + cc.members.length + ' medlemmer',
+        pick: function () { var changed = cc.id !== s.cabinId; self.setState({ cabinId: cc.id, screen: 'home', sheet: null }); if (changed) self.toast('Du ser nå ' + cc.name); } };
+    });
+    var pending = this.pendingCount(s.cabins);
+    var removeName = '';
+    if (c && s.removeId) c.members.forEach(function (m) { if (m.id === s.removeId) removeName = m.name; });
+
+    var addShop = function () {
+      var t = (self.S().f.shopText || '').trim(); if (!t) return;
+      self.upd(function (cc, off) { cc.shop.unshift({ id: self.newId(), name: t.charAt(0).toUpperCase() + t.slice(1), addedBy: me, done: false, pending: off || undefined }); });
+      self.setF({ shopText: '' });
+    };
+
+    return {
+      s: s, f: f, e: e, scr: scr, theme: s.theme, user: { name: s.user.name || 'Mari', email: s.user.email || 'mari@eksempel.no' },
+      invite: s.invite, loggedIn: s.loggedIn, loggedOut: !s.loggedIn,
+      inviteCount: s.invite ? s.invite.members.length + ' andre' : '',
+      cab: cab, multi: s.cabins.length > 1, single: s.cabins.length <= 1,
+      switchLabel: 'Bytt hytte. Nå: ' + cab.name,
+      home: home, issues: issues, tasks: tasks, shop: shop, docs: docs, info: info, chk: chk, members: members, memberNames: memberNames,
+      task: task, issue: issue, doc: doc, cabinList: cabinList,
+      isAdmin: !!(c && c.isAdmin), notAdmin: !!(c && !c.isAdmin),
+      memberCountText: c ? c.members.length + ' medlemmer' : '',
+      showNav: showNav, nav: nav,
+      showOffline: s.offline && !!c && s.screen !== 'camera', showSynced: s.synced && !s.offline && !!c,
+      pendingText: pending ? (pending === 1 ? '1 endring venter' : pending + ' endringer venter') : 'endringer sendes når du får nett',
+      toast: s.toast,
+      sheet: { switcher: s.sheet === 'switcher', invite: s.sheet === 'invite', remove: s.sheet === 'remove', upload: s.sheet === 'upload' },
+      tf: { alle: s.taskFilter === 'alle', gjoremal: s.taskFilter === 'gjoremal', vedlikehold: s.taskFilter === 'vedlikehold' },
+      tk: { gjoremal: f.taskKind === 'gjoremal', vedlikehold: f.taskKind === 'vedlikehold' },
+      cm: { ankomst: s.checkMode === 'ankomst', avreise: s.checkMode === 'avreise' },
+      uc: { Manualer: s.uploadCat === 'Manualer', Hytta: s.uploadCat === 'Hytta', Avtaler: s.uploadCat === 'Avtaler' },
+      pw1Type: f.show1 ? 'text' : 'password', pw2Type: f.show2 ? 'text' : 'password', pwType: f.showPw ? 'text' : 'password',
+      hide1: !f.show1, hide2: !f.show2, hidePw: !f.showPw,
+      pw1Label: f.show1 ? 'Skjul passord' : 'Vis passord', pw2Label: f.show2 ? 'Skjul passord' : 'Vis passord', pwLabel: f.showPw ? 'Skjul passord' : 'Vis passord',
+      forgotForm: !s.resetSent, resetEmail: f.email || 'e-postadressen din',
+      noCabinPhoto: !f.cabinPhoto, noIssuePhoto: !f.issuePhoto,
+      keyShown: s.showKey ? (info.keyCode || '').split('').join(' ') : '• • • •', keyBtn: s.showKey ? 'Skjul' : 'Vis kode',
+      inviteLink: c ? 'hytteappen.no/bli-med/' + c.inviteCode : '',
+      removeName: removeName,
+      isDark: s.theme === 'dark', offline: s.offline,
+      themeSwitchCls: s.theme === 'dark' ? 'switch on' : 'switch', offlineSwitchCls: s.offline ? 'switch on' : 'switch',
+
+      // navigation
+      back: function () { self.go(backTo[self.S().screen] || 'home'); },
+      toSignup: go('signup'), toLogin: go('login', { resetSent: false }), toForgot: go('forgot', { resetSent: false }),
+      toCreate: function () { self.setF({ cabinName: '', cabinPhoto: false }); self.go('createcabin'); },
+      toInviteHelp: go('invitehelp'),
+      goHome: go('home'), goTasks: go('tasks'), goIssues: go('issues'), goShop: go('shop'), goMore: go('more'),
+      goDocs: go('docs'), goInfo: go('info', { showKey: false }), goMembers: go('members'), goMyCabins: go('mycabins'),
+      goChecklist: go('checklist', { returnTo: 'more' }),
+      checklistFromHome: go('checklist', { returnTo: 'home' }),
+      toTaskNew: function () { self.setF({ taskTitle: '', taskDesc: '', taskResp: '', taskDue: '', taskKind: s.taskFilter === 'vedlikehold' ? 'vedlikehold' : 'gjoremal' }); self.go('tasknew'); },
+      newIssueFromHome: function () { self.setF({ issueTitle: '', issueDesc: '', issuePhoto: false }); self.go('issuenew', { returnTo: 'home' }); },
+      newIssueFromList: function () { self.setF({ issueTitle: '', issueDesc: '', issuePhoto: false }); self.go('issuenew', { returnTo: 'issues' }); },
+      openSwitcher: function () { self.setState({ sheet: 'switcher' }); },
+      closeSheet: function () { self.setState({ sheet: null }); },
+
+      // auth
+      onName: function (ev) { self.setF({ name: ev.target.value }); if (E.name) self.setErr({ name: '' }); },
+      onEmail: function (ev) { self.setF({ email: ev.target.value }); if (E.email) self.setErr({ email: '' }); },
+      onPw1: function (ev) { var v = ev.target.value; self.setF({ pw1: v }); var o = {}; if (E.pw1 && v.length >= 8) o.pw1 = ''; if (E.pw2 && v === self.S().f.pw2) o.pw2 = ''; self.setErr(o); },
+      onPw2: function (ev) { var v = ev.target.value; self.setF({ pw2: v }); if (E.pw2 && v === self.S().f.pw1) self.setErr({ pw2: '' }); },
+      onPw: function (ev) { self.setF({ pw: ev.target.value }); if (E.login) self.setErr({ login: '' }); },
+      togglePw1: function () { self.setF({ show1: !self.S().f.show1 }); },
+      togglePw2: function () { self.setF({ show2: !self.S().f.show2 }); },
+      togglePw: function () { self.setF({ showPw: !self.S().f.showPw }); },
+      submitSignup: function () {
+        var ff = self.S().f, err = {};
+        if (!ff.name.trim()) err.name = 'Skriv fornavnet ditt, så de andre ser hvem som har gjort hva.';
+        if (!/^\S+@\S+\.\S+$/.test(ff.email)) err.email = 'Det ser ikke ut som en e-postadresse. Sjekk at den har med @ og punktum.';
+        if (ff.pw1.length < 8) err.pw1 = 'Passordet må ha minst 8 tegn.';
+        else if (ff.pw1 !== ff.pw2) err.pw2 = 'Passordene er ikke like. Skriv det samme passordet i begge feltene.';
+        if (Object.keys(err).length) { self.setState({ errs: err }); return; }
+        var nm = ff.name.trim(); nm = nm.charAt(0).toUpperCase() + nm.slice(1);
+        self.setState({ loggedIn: true, user: { name: nm, email: ff.email } });
+        self.go(afterAuth());
+        self.toast('Velkommen, ' + nm + '!');
+      },
+      submitLogin: function () {
+        var ff = self.S().f;
+        if (!ff.pw) { self.setErr({ login: 'Skriv inn passordet ditt.' }); return; }
+        if (ff.pw.length < 8) { self.setErr({ login: 'Feil e-post eller passord. Prøv igjen, eller trykk «Glemt passord?».' }); return; }
+        self.setState({ loggedIn: true, user: { name: 'Mari', email: ff.email || 'mari@eksempel.no' } });
+        self.go(afterAuth());
+      },
+      sendReset: function () { self.setState({ resetSent: true }); },
+      logout: function () { self.setState({ loggedIn: false, sheet: null, f: Object.assign({}, self.S().f, { pw: '', showPw: false }) }); self.go('welcome'); },
+
+      // cabin + invite
+      onCabinName: function (ev) { self.setF({ cabinName: ev.target.value }); if (E.cabin) self.setErr({ cabin: '' }); },
+      addCabinPhoto: function () { self.setF({ cabinPhoto: true }); },
+      removeCabinPhoto: function () { self.setF({ cabinPhoto: false }); },
+      submitCabin: function () {
+        var ff = self.S().f, nm = ff.cabinName.trim();
+        if (!nm) { self.setErr({ cabin: 'Gi hytta et navn, for eksempel «Furulia» eller «Hytta på Geilo».' }); return; }
+        var id = self.newId();
+        var nc = { id: id, name: nm, initial: nm.charAt(0).toUpperCase(), alt: self.S().cabins.length % 2 === 1, photo: ff.cabinPhoto, isAdmin: true, admin: me, inviteCode: 'NY-' + Math.random().toString(36).slice(2, 6).toUpperCase(),
+          members: [{ id: 'me', name: me, role: 'Admin', me: true }], issues: [], tasks: [], shop: [],
+          docs: [{ cat: 'Manualer', items: [] }, { cat: 'Hytta', items: [] }, { cat: 'Avtaler', items: [] }],
+          info: { wifiName: 'Ikke fylt ut ennå', wifiPw: '–', keyCode: '', keyWhere: 'Legg inn hvor nøkkelboksen er.', trash: 'Ikke fylt ut ennå.', store: 'Ikke fylt ut ennå.', free: 'Skriv det de andre bør vite om hytta.' },
+          check: { ankomst: [], avreise: [] } };
+        self.setState({ cabins: self.S().cabins.concat([nc]), cabinId: id });
+        self.go('home');
+        self.toast(nm + ' er opprettet. Inviter de andre under Mer › Medlemmer.');
+      },
+      onInviteText: function (ev) { self.setF({ inviteText: ev.target.value }); if (E.invite) self.setErr({ invite: '' }); },
+      pasteInvite: function () { self.setF({ inviteText: 'https://hytteappen.no/bli-med/SOL-4F7P' }); self.setErr({ invite: '' }); },
+      submitInvite: function () {
+        var t = self.S().f.inviteText || '';
+        if (t.indexOf('bli-med/') < 0) { self.setErr({ invite: 'Det ser ikke ut som en invitasjonslenke. Lim inn hele lenken fra SMS-en.' }); return; }
+        if (t.indexOf('SOL-4F7P') < 0) { self.setErr({ invite: 'Invitasjonslenken er utløpt. Be den som inviterte deg om en ny lenke.' }); return; }
+        var sol = hyttaSeed().solbakken;
+        self.go('join', { invite: sol });
+      },
+      openInvite: function (ev) { if (ev && ev.preventDefault) ev.preventDefault(); self.go('join'); },
+      acceptInvite: function () {
+        var st = self.S(), inv = JSON.parse(JSON.stringify(st.invite));
+        if (!inv) return;
+        inv.members.push({ id: 'me', name: me, role: 'Medlem', me: true });
+        var exists = st.cabins.some(function (x) { return x.id === inv.id; });
+        self.setState({ cabins: exists ? st.cabins : st.cabins.concat([inv]), cabinId: inv.id, invite: null });
+        self.go('home');
+        self.toast('Du er nå med i ' + inv.name);
+      },
+      declineInvite: function () { self.setState({ invite: null }); self.go(self.S().cabins.length ? 'home' : 'nocabin'); },
+
+      // tasks
+      filterAlle: function () { self.setState({ taskFilter: 'alle' }); },
+      filterGjoremal: function () { self.setState({ taskFilter: 'gjoremal' }); },
+      filterVedlikehold: function () { self.setState({ taskFilter: 'vedlikehold' }); },
+      kindGjoremal: function () { self.setF({ taskKind: 'gjoremal' }); },
+      kindVedlikehold: function () { self.setF({ taskKind: 'vedlikehold' }); },
+      onTaskTitle: function (ev) { self.setF({ taskTitle: ev.target.value }); if (E.task) self.setErr({ task: '' }); },
+      onTaskDesc: function (ev) { self.setF({ taskDesc: ev.target.value }); },
+      onTaskResp: function (ev) { self.setF({ taskResp: ev.target.value }); },
+      onTaskDue: function (ev) { self.setF({ taskDue: ev.target.value }); },
+      submitTask: function () {
+        var ff = self.S().f, t = ff.taskTitle.trim();
+        if (!t) { self.setErr({ task: 'Skriv kort hva som skal gjøres.' }); return; }
+        var due = '';
+        if (ff.taskDue) { var p = ff.taskDue.split('-'); var mn = ['jan.','feb.','mars','apr.','mai','juni','juli','aug.','sep.','okt.','nov.','des.']; due = parseInt(p[2], 10) + '. ' + mn[parseInt(p[1], 10) - 1]; }
+        self.upd(function (cc, off) { cc.tasks.unshift({ id: self.newId(), title: t, desc: ff.taskDesc.trim(), kind: ff.taskKind, resp: ff.taskResp, due: due, by: me, done: false, pending: off || undefined }); });
+        self.go('tasks');
+        self.toast('Gjøremålet er lagt til');
+      },
+
+      // issues
+      openCamera: function () { self.go('camera'); },
+      closeCamera: function () { self.go('issuenew'); },
+      takePhoto: function () { self.setF({ issuePhoto: true }); self.go('issuenew'); },
+      onIssueTitle: function (ev) { self.setF({ issueTitle: ev.target.value }); if (E.issue) self.setErr({ issue: '' }); },
+      onIssueDesc: function (ev) { self.setF({ issueDesc: ev.target.value }); },
+      submitIssue: function () {
+        var ff = self.S().f, t = ff.issueTitle.trim();
+        if (!t) { self.setErr({ issue: 'Skriv kort hva som er feil, for eksempel «Lekker under vasken».' }); return; }
+        var off = self.S().offline;
+        self.upd(function (cc, o) { cc.issues.unshift({ id: self.newId(), title: t, desc: ff.issueDesc.trim(), status: 'ny', by: me, when: 'nå', photo: ff.issuePhoto, pending: o || undefined }); });
+        self.setF({ issueTitle: '', issueDesc: '', issuePhoto: false });
+        self.go('issues');
+        self.toast(off ? 'Lagret. Sendes når du får nett.' : 'Feilen er meldt. Alle i ' + cab.name + ' kan se den.');
+      },
+
+      // shop
+      onShopText: function (ev) { self.setF({ shopText: ev.target.value }); },
+      onShopKey: function (ev) { if (ev.key === 'Enter') addShop(); },
+      addShop: addShop,
+      clearBought: function () { self.upd(function (cc) { cc.shop = cc.shop.filter(function (x) { return !x.done; }); }); self.toast('Kjøpte varer er fjernet'); },
+
+      // docs
+      openUpload: function () { self.setState({ sheet: 'upload' }); },
+      ucManualer: function () { self.setState({ uploadCat: 'Manualer' }); },
+      ucHytta: function () { self.setState({ uploadCat: 'Hytta' }); },
+      ucAvtaler: function () { self.setState({ uploadCat: 'Avtaler' }); },
+      uploadPhoto: function () { var cat = self.S().uploadCat; self.upd(function (cc, off) { cc.docs.forEach(function (k) { if (k.cat === cat) k.items.unshift({ id: self.newId(), name: 'Bilde 5. okt.', type: 'Bilde', pages: 1, meta: 'lagt til av ' + me, pending: off || undefined }); }); }); self.setState({ sheet: null }); self.toast('Bildet er lastet opp til ' + cat); },
+      uploadFile: function () { var cat = self.S().uploadCat; self.upd(function (cc, off) { cc.docs.forEach(function (k) { if (k.cat === cat) k.items.unshift({ id: self.newId(), name: 'Garantibevis komfyr', type: 'PDF', pages: 3, meta: 'lagt til av ' + me, pending: off || undefined }); }); }); self.setState({ sheet: null }); self.toast('PDF-en er lastet opp til ' + cat); },
+      downloadDoc: function () { self.toast('Lagret i Filer på telefonen'); },
+
+      // info
+      copyWifi: function () { self.toast('Wifi-passordet er kopiert'); },
+      toggleKey: function () { self.setState({ showKey: !self.S().showKey }); },
+
+      // checklist
+      modeAnkomst: function () { self.setState({ checkMode: 'ankomst' }); },
+      modeAvreise: function () { self.setState({ checkMode: 'avreise' }); },
+      onCheckText: function (ev) { self.setF({ checkText: ev.target.value }); },
+      addCheck: function () { var t = (self.S().f.checkText || '').trim(); if (!t) return; var m = self.S().checkMode; self.upd(function (cc) { cc.check[m].push({ id: self.newId(), text: t, hint: '', done: false }); }); self.setF({ checkText: '' }); },
+      finishChecklist: function () { var m = self.S().checkMode; self.upd(function (cc) { cc.check[m].forEach(function (x) { x.done = false; }); }); self.go(self.S().returnTo || 'home'); self.toast(m === 'avreise' ? 'Avreise registrert. God tur hjem!' : 'Ankomst registrert. God tur!'); },
+
+      // members
+      openInviteSheet: function () { self.setState({ sheet: 'invite' }); },
+      shareSms: function () { self.setState({ sheet: null }); self.toast('Meldinger åpnes med lenken ferdig utfylt'); },
+      copyLink: function () { self.toast('Lenken er kopiert'); },
+      newLink: function () { self.upd(function (cc) { cc.inviteCode = cc.initial + 'U' + '-' + Math.random().toString(36).slice(2, 6).toUpperCase(); }); self.toast('Ny lenke laget. Den gamle virker ikke lenger.'); },
+      confirmRemove: function () { var id = self.S().removeId, nm = removeName; self.upd(function (cc) { cc.members = cc.members.filter(function (m) { return m.id !== id; }); }); self.setState({ sheet: null, removeId: null }); self.toast(nm + ' er fjernet fra ' + cab.name); },
+
+      // settings
+      toggleTheme: function () { self.setState({ theme: self.S().theme === 'dark' ? 'light' : 'dark' }); },
+      toggleOffline: function () { self.setOffline(!self.S().offline); }
+    };
+  }
+}
+</script>
+</body>
+</html>
