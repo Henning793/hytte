@@ -1,5 +1,5 @@
 import { useEffect, useSyncExternalStore } from 'react'
-import { idbClear, idbGet, idbSet } from './idb'
+import { idbClear, idbDelWhere, idbGet, idbSet } from './idb'
 import { supabase } from './supabase'
 
 // Et lite lager for innholdet i valgt hytte.
@@ -421,6 +421,27 @@ export async function clearLocalData() {
   outboxChanged()
   entries.clear()
   await idbClear()
+}
+
+/**
+ * Når en hytte er slettet: glem lagrede lister, filer og endringer som ikke er sendt.
+ * Ny farge (profiles) gjelder alle hyttene og beholdes.
+ */
+export async function forgetCabin(cabinId: string) {
+  await loadOutbox()
+  const dropped = outbox.filter((op) => op.key.includes(cabinId) && op.table !== 'profiles')
+  if (dropped.length) {
+    outbox = outbox.filter((op) => !dropped.includes(op))
+    outboxChanged()
+    dropped.forEach((op) => settle(op.id))
+  }
+  for (const key of [...entries.keys()]) if (key.includes(cabinId)) entries.delete(key)
+  await idbDelWhere((key) => key.includes(cabinId))
+  try {
+    for (const key of Object.keys(localStorage)) if (key.includes(cabinId)) localStorage.removeItem(key)
+  } catch {
+    // Ikke viktig: avkryssingene i sjekklisten blir bare liggende.
+  }
 }
 
 if (typeof window !== 'undefined') {

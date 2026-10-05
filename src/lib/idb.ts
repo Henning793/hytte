@@ -46,3 +46,15 @@ export const idbGet = <T>(key: string) => run<T>('readonly', (s) => s.get(key))
 export const idbSet = (key: string, value: unknown) => run<void>('readwrite', (s) => void s.put(value, key))
 export const idbDel = (key: string) => run<void>('readwrite', (s) => void s.delete(key))
 export const idbClear = () => run<void>('readwrite', (s) => void s.clear())
+
+/** Sletter alle nøkler som passer, f.eks. alt som hører til en slettet hytte. */
+export const idbDelWhere = (match: (key: string) => boolean) =>
+  run<void>('readwrite', (s) => {
+    const req = s.openCursor()
+    req.onsuccess = () => {
+      const cursor = req.result
+      if (!cursor) return
+      if (typeof cursor.key === 'string' && match(cursor.key)) cursor.delete()
+      cursor.continue()
+    }
+  })
