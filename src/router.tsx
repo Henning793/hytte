@@ -5,6 +5,9 @@ import { ForgotPassword } from './screens/auth/ForgotPassword'
 import { Login } from './screens/auth/Login'
 import { NewPassword } from './screens/auth/NewPassword'
 import { Signup } from './screens/auth/Signup'
+import { Calendar } from './screens/calendar/Calendar'
+import { EventForm } from './screens/calendar/EventForm'
+import { StayForm } from './screens/calendar/StayForm'
 import { Checklist } from './screens/checklist/Checklist'
 import { DocumentView } from './screens/docs/DocumentView'
 import { Documents } from './screens/docs/Documents'
@@ -71,6 +74,11 @@ export const router = createBrowserRouter([
       { path: 'mer/info', element: <Info /> },
       { path: 'mer/info/endre', element: <InfoEdit /> },
       { path: 'mer/sjekkliste', element: <Checklist /> },
+      { path: 'mer/kalender', element: <Calendar /> },
+      { path: 'mer/kalender/opphold/ny', element: <StayForm /> },
+      { path: 'mer/kalender/opphold/:id', element: <StayForm /> },
+      { path: 'mer/kalender/hendelse/ny', element: <EventForm /> },
+      { path: 'mer/kalender/hendelse/:id', element: <EventForm /> },
       { path: 'mer/medlemmer', element: <Members /> },
       { path: 'mer/hytter', element: <MyCabins /> },
     ],

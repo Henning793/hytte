@@ -94,6 +94,32 @@ export type ChecklistRun = {
   completed_at: string
 }
 
+export type Stay = {
+  id: string
+  cabin_id: string
+  user_id: string
+  start_date: string
+  end_date: string
+  note: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type CalendarEvent = {
+  id: string
+  cabin_id: string
+  title: string
+  description: string | null
+  start_date: string
+  end_date: string
+  /** «10:00:00», eller null for hele dagen. */
+  start_time: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
 /** Felter serveren fyller inn; brukes når en ny rad vises før den er lagret. */
 export function draftMeta(cabinId: string, userId: string) {
   const now = new Date().toISOString()

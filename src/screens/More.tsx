@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import {
   Bell,
   CalendarDays,
+  Check,
   ChevronRight,
   FileText,
   History,
@@ -9,15 +11,21 @@ import {
   ListTodo,
   LogOut,
   Moon,
+  Palette,
   Users,
   Warehouse,
   type LucideIcon,
 } from 'lucide-react'
+import { Sheet } from '../components/Sheet'
+import { useToast } from '../components/Toast'
 import { useAuth } from '../lib/auth'
 import { useCurrentCabin } from '../lib/cabins'
+import { PALETTE, saveMyColor, useColors } from '../lib/members'
+import { useMe } from '../lib/useMe'
 import { setThemePreference, useTheme } from '../lib/theme'
 
 const links: { to: string; label: string; icon: LucideIcon }[] = [
+  { to: '/mer/kalender', label: 'Kalender', icon: CalendarDays },
   { to: '/mer/dokumenter', label: 'Dokumenter', icon: FileText },
   { to: '/mer/info', label: 'Info og koder', icon: Info },
   { to: '/mer/sjekkliste', label: 'Sjekklister', icon: ListTodo },
@@ -26,7 +34,6 @@ const links: { to: string; label: string; icon: LucideIcon }[] = [
 ]
 
 const comingSoon: { label: string; icon: LucideIcon }[] = [
-  { label: 'Kalender', icon: CalendarDays },
   { label: 'Historikk', icon: History },
   { label: 'Varsler', icon: Bell },
 ]
@@ -40,6 +47,9 @@ export function More() {
   }
   const navigate = useNavigate()
   const dark = theme === 'dark'
+  const me = useMe()
+  const myColor = useColors(cabin.id)(me)
+  const [choosingColor, setChoosingColor] = useState(false)
 
   return (
     <div className="scroll">
@@ -77,6 +87,14 @@ export function More() {
               onClick={() => setThemePreference(dark ? 'light' : 'dark')}
             />
           </div>
+          <button type="button" className="ha-li" onClick={() => setChoosingColor(true)}>
+            <Palette className="ha-ico" aria-hidden="true" />
+            <span className="ha-li-main">
+              <span className="ha-li-title">Min farge</span>
+              <span className="ha-li-meta">Viser deg i kalenderen</span>
+            </span>
+            <span className="cal-dot" style={{ background: myColor, width: 24, height: 24 }} aria-hidden="true" />
+          </button>
           <button
             type="button"
             className="ha-li"
@@ -104,6 +122,51 @@ export function More() {
           </div>
         ))}
       </div>
+      {choosingColor && <ColorSheet current={myColor} onClose={() => setChoosingColor(false)} />}
     </div>
+  )
+}
+
+/** Velg egen farge i kalenderen. */
+function ColorSheet({ current, onClose }: { current: string; onClose: () => void }) {
+  const cabin = useCurrentCabin()
+  const me = useMe()
+  const toast = useToast()
+
+  function choose(color: string) {
+    onClose()
+    if (color === current) return
+    saveMyColor(cabin.id, me, color).then(
+      () => toast('Fargen er lagret'),
+      () => toast('Fargen ble ikke lagret. Prøv igjen.'),
+    )
+  }
+
+  return (
+    <Sheet label="Min farge" onClose={onClose}>
+      <div className="stack" style={{ gap: 4 }}>
+        <h2 className="t-heading">Min farge</h2>
+        <p className="muted">Fargen viser når du er på hytta. Den gjelder i alle hyttene dine.</p>
+      </div>
+      <div className="swatches" role="radiogroup" aria-label="Farge">
+        {PALETTE.map((p) => (
+          <button
+            key={p.value}
+            type="button"
+            role="radio"
+            className="swatch"
+            aria-checked={p.value === current}
+            aria-label={p.label}
+            style={{ background: p.value }}
+            onClick={() => choose(p.value)}
+          >
+            {p.value === current && <Check className="ha-ico" aria-hidden="true" />}
+          </button>
+        ))}
+      </div>
+      <button type="button" className="ha-btn ha-btn-ghost" onClick={onClose}>
+        Avbryt
+      </button>
+    </Sheet>
   )
 }

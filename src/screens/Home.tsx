@@ -3,11 +3,13 @@ import { Camera, DoorOpen } from 'lucide-react'
 import { CabinSwitcher } from '../components/CabinSwitcher'
 import { StatusBadge } from '../components/StatusBadge'
 import { useCurrentCabin } from '../lib/cabins'
+import { byStart, formatTime } from '../lib/calendar'
 import { newestFirst, sortOpen, taskMeta } from '../lib/content'
+import { formatRange, todayIso } from '../lib/dates'
 import { useTable } from '../lib/data'
 import { count } from '../lib/format'
-import { useNames } from '../lib/members'
-import type { Issue, ShoppingItem, Task } from '../lib/types'
+import { useColors, useNames } from '../lib/members'
+import type { CalendarEvent, Issue, ShoppingItem, Stay, Task } from '../lib/types'
 
 export function Home() {
   const cabin = useCurrentCabin()
@@ -16,10 +18,17 @@ export function Home() {
   const issues = useTable<Issue>('issues', cabin.id).rows
   const tasks = useTable<Task>('tasks', cabin.id).rows
   const items = useTable<ShoppingItem>('shopping_items', cabin.id).rows
+  const stays = useTable<Stay>('stays', cabin.id).rows
+  const events = useTable<CalendarEvent>('calendar_events', cabin.id).rows
+  const color = useColors(cabin.id)
 
   const openIssues = (issues ?? []).filter((i) => i.status !== 'fikset').sort(newestFirst)
   const openTasks = (tasks ?? []).filter((t) => !t.done).sort(sortOpen)
   const next = openTasks[0]
+  const today = todayIso()
+  const hereNow = (stays ?? []).filter((s) => s.start_date <= today && s.end_date >= today).sort(byStart)
+  const nextStay = (stays ?? []).filter((s) => s.start_date > today).sort(byStart)[0]
+  const nextEvent = (events ?? []).filter((e) => e.end_date >= today).sort(byStart)[0]
   const toBuy = (items ?? []).filter((i) => !i.done).sort((a, b) => a.created_at.localeCompare(b.created_at))
 
   return (
@@ -36,6 +45,33 @@ export function Home() {
             Ankomst / Avreise
           </button>
         </div>
+
+        <button type="button" className="ha-card card-link" onClick={() => navigate('/mer/kalender')}>
+          <span className="sec-h">
+            <h2 className="t-heading">På hytta</h2>
+          </span>
+          {hereNow.length > 0 ? (
+            <span className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+              {hereNow.map((s) => (
+                <span key={s.id} className="cal-dot" style={{ background: color(s.user_id) }} aria-hidden="true" />
+              ))}
+              <span className="t-body-lg">{names(hereNow.map((s) => name(s.user_id)))} er der nå</span>
+            </span>
+          ) : (
+            stays && <span className="muted">Ingen er der nå.</span>
+          )}
+          {nextStay && (
+            <span className="t-caption">
+              Neste: {name(nextStay.user_id)} · {formatRange(nextStay.start_date, nextStay.end_date)}
+            </span>
+          )}
+          {nextEvent && (
+            <span className="t-caption">
+              {nextEvent.title} · {formatRange(nextEvent.start_date, nextEvent.end_date)}
+              {formatTime(nextEvent) ? ` ${formatTime(nextEvent)}` : ''}
+            </span>
+          )}
+        </button>
 
         <button type="button" className="ha-card card-link" onClick={() => navigate('/feil')}>
           <span className="sec-h">
@@ -77,4 +113,10 @@ export function Home() {
       </div>
     </>
   )
+}
+
+/** «Kari», «Kari og Ola», «Kari, Ola og Per». */
+function names(list: string[]) {
+  const unique = [...new Set(list)]
+  return unique.length < 2 ? unique.join('') : `${unique.slice(0, -1).join(', ')} og ${unique[unique.length - 1]}`
 }

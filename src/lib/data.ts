@@ -148,7 +148,7 @@ export function useSyncState(): SyncState {
 // Utboksen
 // ---------------------------------------------------------------------------
 
-export type ContentTable = 'tasks' | 'issues' | 'shopping_items' | 'documents' | 'checklist_items'
+export type ContentTable = 'tasks' | 'issues' | 'shopping_items' | 'documents' | 'checklist_items' | 'stays' | 'calendar_events'
 type Row = { id: string; cabin_id: string; created_at: string }
 type Upload = { file: Blob; cabinId: string; folder: string; field: string; ext: string; type: string }
 
@@ -367,7 +367,12 @@ export function insertRow<T extends Row>(table: ContentTable, row: T, upload?: {
 
 /** Endrer en rad. `local` er det som vises før serveren svarer (f.eks. «Kjøpt av» meg). */
 export function updateRow<T extends Row>(table: ContentTable, cabinId: string, id: string, patch: Partial<T>, local: Partial<T> = {}): Promise<void> {
-  return enqueue({ id: crypto.randomUUID(), key: tableKey(table, cabinId), kind: 'update', table, rowId: id, patch, local })
+  return updateRecord(tableKey(table, cabinId), table, id, patch, local)
+}
+
+/** Endrer en rad i en hvilken som helst tabell; `key` er listen som viser den (raden må ha `id`). */
+export function updateRecord(key: string, table: string, id: string, patch: object, local: object = {}): Promise<void> {
+  return enqueue({ id: crypto.randomUUID(), key, kind: 'update', table, rowId: id, patch, local })
 }
 
 /** Sletter rader. Rader serveren ikke lot oss slette, kommer tilbake. */
