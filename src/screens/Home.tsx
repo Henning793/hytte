@@ -46,45 +46,14 @@ export function Home() {
           </button>
         </div>
 
-        <button type="button" className="ha-card card-link" onClick={() => navigate('/mer/kalender')}>
+        <button type="button" className="ha-card card-link" onClick={() => navigate('/handleliste')}>
           <span className="sec-h">
-            <h2 className="t-heading">På hytta</h2>
+            <h2 className="t-heading">Handleliste</h2>
+            {items && toBuy.length > 0 && <span className="t-caption">{count(toBuy.length, 'vare', 'varer')}</span>}
           </span>
-          {hereNow.length > 0 ? (
-            <span className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
-              {hereNow.map((s) => (
-                <span key={s.id} className="cal-dot" style={{ background: tint(s) }} aria-hidden="true" />
-              ))}
-              <span className="t-body-lg">{names(hereNow.map(who))} er der nå</span>
-            </span>
-          ) : (
-            stays && <span className="muted">Ingen er der nå.</span>
+          {items && (
+            <span className="muted">{toBuy.length ? toBuy.map((i) => i.name).join(', ') : 'Ingenting på lista.'}</span>
           )}
-          {nextStay && (
-            <span className="t-caption">
-              Neste: {who(nextStay)} · {formatRange(nextStay.start_date, nextStay.end_date)}
-            </span>
-          )}
-          {nextEvent && (
-            <span className="t-caption">
-              {nextEvent.title} · {formatRange(nextEvent.start_date, nextEvent.end_date)}
-              {formatTime(nextEvent) ? ` ${formatTime(nextEvent)}` : ''}
-            </span>
-          )}
-        </button>
-
-        <button type="button" className="ha-card card-link" onClick={() => navigate('/feil')}>
-          <span className="sec-h">
-            <h2 className="t-heading">Feil og mangler</h2>
-            {issues && openIssues.length > 0 && <span className="t-caption">{count(openIssues.length, 'åpen', 'åpne')}</span>}
-          </span>
-          {openIssues.slice(0, 2).map((i) => (
-            <span key={i.id} className="row" style={{ justifyContent: 'space-between' }}>
-              <span className="t-body-lg grow">{i.title}</span>
-              <StatusBadge status={i.status} />
-            </span>
-          ))}
-          {issues && openIssues.length === 0 && <span className="muted">Ingen åpne feil. Fint!</span>}
         </button>
 
         <button type="button" className="ha-card card-link" onClick={() => navigate('/gjoremal')}>
@@ -101,15 +70,44 @@ export function Home() {
           {tasks && !next && <span className="muted">Ingen gjøremål. Legg til det første under Gjøremål.</span>}
         </button>
 
-        <button type="button" className="ha-card card-link" onClick={() => navigate('/handleliste')}>
+        <button type="button" className="ha-card card-link" onClick={() => navigate('/feil')}>
           <span className="sec-h">
-            <h2 className="t-heading">Handleliste</h2>
-            {items && toBuy.length > 0 && <span className="t-caption">{count(toBuy.length, 'vare', 'varer')}</span>}
+            <h2 className="t-heading">Feil og mangler</h2>
+            {issues && openIssues.length > 0 && <span className="t-caption">{count(openIssues.length, 'åpen', 'åpne')}</span>}
           </span>
-          {items && (
-            <span className="muted">{toBuy.length ? toBuy.map((i) => i.name).join(', ') : 'Ingenting på lista.'}</span>
-          )}
+          {openIssues.slice(0, 2).map((i) => (
+            <span key={i.id} className="row" style={{ justifyContent: 'space-between' }}>
+              <span className="t-body-lg grow">{i.title}</span>
+              <StatusBadge status={i.status} />
+            </span>
+          ))}
+          {issues && openIssues.length === 0 && <span className="muted">Ingen åpne feil. Fint!</span>}
         </button>
+
+        {hereNow.length > 0 && (
+          <button type="button" className="ha-card card-link" onClick={() => navigate('/mer/kalender')}>
+            <span className="sec-h">
+              <h2 className="t-heading">På hytta</h2>
+            </span>
+            <span className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+              {hereNow.map((s) => (
+                <span key={s.id} className="cal-dot" style={{ background: tint(s) }} aria-hidden="true" />
+              ))}
+              <span className="t-body-lg">{names(hereNow.map(who))} er der nå</span>
+            </span>
+            {nextStay && (
+              <span className="t-caption">
+                Neste: {who(nextStay)} · {formatRange(nextStay.start_date, nextStay.end_date)}
+              </span>
+            )}
+            {nextEvent && (
+              <span className="t-caption">
+                {nextEvent.title} · {formatRange(nextEvent.start_date, nextEvent.end_date)}
+                {formatTime(nextEvent) ? ` ${formatTime(nextEvent)}` : ''}
+              </span>
+            )}
+          </button>
+        )}
       </div>
     </>
   )
