@@ -154,7 +154,7 @@ type Upload = { file: Blob; cabinId: string; folder: string; field: string; ext:
 
 type Op = { id: string; key: string } & (
   | { kind: 'insert'; table: string; row: Row; upload?: Upload }
-  | { kind: 'update'; table: string; rowId: string; patch: object; local: object }
+  | { kind: 'update'; table: string; rowId: string; patch: object; local: object; upload?: Upload }
   | { kind: 'delete'; table: string; ids: string[] }
   | { kind: 'upsert'; table: string; conflict: string; match: Record<string, string>; fields: object }
   | { kind: 'insertMinimal'; table: string; row: Record<string, unknown> & { id: string } }
@@ -205,7 +205,9 @@ function applyOp(op: Op, rows: unknown[]): unknown[] {
       return list.some((r) => r.id === row.id) ? list : op.kind === 'insertMinimal' ? [row, ...list] : [...list, row]
     }
     case 'update':
-      return list.map((r) => (r.id === op.rowId ? { ...r, ...op.patch, ...op.local } : r))
+      return list.map((r) =>
+        r.id === op.rowId ? { ...r, ...op.patch, ...op.local, ...(op.upload ? { [op.upload.field]: `local:${op.id}` } : {}) } : r,
+      )
     case 'delete':
       return list.filter((r) => !op.ids.includes(r.id as string))
     case 'upsert':
@@ -292,18 +294,19 @@ function describe(op: Op): string {
 
 class Rejected extends Error {}
 
+/** Laster opp filen til en endring og gir stien tilbake. */
+async function sendUpload(opId: string, u: Upload): Promise<string> {
+  // Samme sti hver gang, så et nytt forsøk etter brudd ikke lager en ekstra fil.
+  const path = `${u.cabinId}/${u.folder}/${opId}.${u.ext}`
+  const { error } = await supabase.storage.from('cabin-files').upload(path, u.file, { contentType: u.type, upsert: true })
+  if (error) throw error
+  return path
+}
+
 async function send(op: Op): Promise<void> {
   switch (op.kind) {
     case 'insert': {
-      let row: Record<string, unknown> = op.row
-      if (op.upload) {
-        const u = op.upload
-        // Samme sti hver gang, så et nytt forsøk etter brudd ikke lager en ekstra fil.
-        const path = `${u.cabinId}/${u.folder}/${op.id}.${u.ext}`
-        const { error } = await supabase.storage.from('cabin-files').upload(path, u.file, { contentType: u.type, upsert: true })
-        if (error) throw error
-        row = { ...row, [u.field]: path }
-      }
+      const row = op.upload ? { ...op.row, [op.upload.field]: await sendUpload(op.id, op.upload) } : op.row
       const { error } = await supabase.from(op.table).insert(row as never)
       // 23505: raden finnes allerede (forrige forsøk kom fram, men svaret gjorde det ikke).
       if (error && error.code !== '23505') throw error
@@ -315,7 +318,8 @@ async function send(op: Op): Promise<void> {
       return
     }
     case 'update': {
-      const { data, error } = await supabase.from(op.table).update(op.patch as never).eq('id', op.rowId).select('id')
+      const patch = op.upload ? { ...op.patch, [op.upload.field]: await sendUpload(op.id, op.upload) } : op.patch
+      const { data, error } = await supabase.from(op.table).update(patch as never).eq('id', op.rowId).select('id')
       if (error) throw error
       if (!data?.length) throw new Rejected('Ingen tilgang')
       return
@@ -352,22 +356,40 @@ export function useTable<T extends Row>(table: ContentTable, cabinId: string): S
  * Legger til en rad. Løftet holder når raden er lagret eller lagt i utboksen
  * (uten nett), og feiler bare hvis serveren sier nei.
  */
-export function insertRow<T extends Row>(table: ContentTable, row: T, upload?: { file: File; folder: string; field: keyof T & string }): Promise<void> {
-  const id = crypto.randomUUID()
-  const up = upload && {
-    file: upload.file,
-    cabinId: row.cabin_id,
+type FileUpload<T> = { file: File; folder: string; field: keyof T & string }
+
+function toUpload<T>(cabinId: string, upload: FileUpload<T>): Upload {
+  const { file } = upload
+  return {
+    file,
+    cabinId,
     folder: upload.folder,
     field: upload.field,
-    type: upload.file.type,
-    ext: upload.file.type === 'image/jpeg' ? 'jpg' : upload.file.type === 'application/pdf' ? 'pdf' : (upload.file.name.split('.').pop() ?? 'bin'),
+    type: file.type,
+    ext: file.type === 'image/jpeg' ? 'jpg' : file.type === 'application/pdf' ? 'pdf' : (file.name.split('.').pop() ?? 'bin'),
   }
+}
+
+export function insertRow<T extends Row>(table: ContentTable, row: T, upload?: FileUpload<T>): Promise<void> {
+  const id = crypto.randomUUID()
+  const up = upload && toUpload(row.cabin_id, upload)
   return enqueue({ id, key: tableKey(table, row.cabin_id), kind: 'insert', table, row, upload: up })
 }
 
-/** Endrer en rad. `local` er det som vises før serveren svarer (f.eks. «Kjøpt av» meg). */
-export function updateRow<T extends Row>(table: ContentTable, cabinId: string, id: string, patch: Partial<T>, local: Partial<T> = {}): Promise<void> {
-  return updateRecord(tableKey(table, cabinId), table, id, patch, local)
+/**
+ * Endrer en rad. `local` er det som vises før serveren svarer (f.eks. «Kjøpt av» meg).
+ * Med `upload` lastes en ny fil opp, og stien lagres i feltet.
+ */
+export function updateRow<T extends Row>(
+  table: ContentTable,
+  cabinId: string,
+  id: string,
+  patch: Partial<T>,
+  local: Partial<T> = {},
+  upload?: FileUpload<T>,
+): Promise<void> {
+  const up = upload && toUpload(cabinId, upload)
+  return enqueue({ id: crypto.randomUUID(), key: tableKey(table, cabinId), kind: 'update', table, rowId: id, patch, local, upload: up })
 }
 
 /** Endrer en rad i en hvilken som helst tabell; `key` er listen som viser den (raden må ha `id`). */
@@ -406,7 +428,7 @@ export function usePendingIds(): ReadonlySet<string> {
 export function pendingFile(localPath: string): Blob | null {
   const opId = localPath.replace(/^local:/, '')
   const op = outbox.find((o) => o.id === opId)
-  return op?.kind === 'insert' && op.upload ? op.upload.file : null
+  return (op?.kind === 'insert' || op?.kind === 'update') && op.upload ? op.upload.file : null
 }
 
 /** Blir varslet når en endring fra utboksen ble avvist etter at skjermen var gått videre. */
