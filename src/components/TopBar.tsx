@@ -7,6 +7,9 @@ type Props = {
   backLabel?: string
 }
 
+/** react-router teller sidene i appen i history.state.idx. */
+const canGoBack = () => ((window.history.state as { idx?: number } | null)?.idx ?? 0) > 0
+
 export function TopBar({ backTo, backLabel = 'Tilbake' }: Props) {
   const navigate = useNavigate()
   return (
@@ -14,7 +17,8 @@ export function TopBar({ backTo, backLabel = 'Tilbake' }: Props) {
       <button
         type="button"
         className="back"
-        onClick={() => (backTo ? navigate(backTo) : navigate(-1))}
+        // Åpnet fra en lenke (ingen historikk i appen): gå til Hjem i stedet for ut av appen.
+        onClick={() => (backTo ? navigate(backTo) : canGoBack() ? navigate(-1) : navigate('/'))}
       >
         <ChevronLeft className="ha-ico" aria-hidden="true" />
         {backLabel}

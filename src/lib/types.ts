@@ -44,6 +44,56 @@ export type ShoppingItem = {
   updated_at: string
 }
 
+export type DocCategory = 'manualer' | 'dokumenter'
+
+export type Doc = {
+  id: string
+  cabin_id: string
+  name: string
+  category: DocCategory
+  file_path: string
+  mime_type: string
+  size_bytes: number
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type CabinInfo = {
+  cabin_id: string
+  wifi_name: string | null
+  wifi_password: string | null
+  keybox_code: string | null
+  keybox_location: string | null
+  trash_info: string | null
+  store_info: string | null
+  notes: string | null
+  updated_by: string | null
+  updated_at: string
+}
+
+export type ChecklistKind = 'ankomst' | 'avreise'
+
+export type ChecklistItem = {
+  id: string
+  cabin_id: string
+  kind: ChecklistKind
+  text: string
+  hint: string | null
+  position: number
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type ChecklistRun = {
+  id: string
+  cabin_id: string
+  kind: ChecklistKind
+  completed_by: string | null
+  completed_at: string
+}
+
 /** Felter serveren fyller inn; brukes når en ny rad vises før den er lagret. */
 export function draftMeta(cabinId: string, userId: string) {
   const now = new Date().toISOString()
