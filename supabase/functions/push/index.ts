@@ -3,6 +3,7 @@
 // Kalles bare fra databasen (se migrasjonen 20261007090000_push.sql):
 //   { "table": "issues" | "calendar_events" | "stays" | "tasks", "id": "<uuid>" }  når noe nytt legges inn
 //   { "kind": "reminders" }                                                          hver dag, for hendelser og egne opphold i morgen
+//   { "kind": "test", "user_id": "<uuid>" }                                          testvarsel til én person (kjøres for hånd)
 // Kallet må ha headeren x-push-secret med hemmeligheten fra Vault.
 //
 // Utrulling: supabase functions deploy push --no-verify-jwt
@@ -179,6 +180,23 @@ async function reminders(): Promise<Message[]> {
   return out
 }
 
+/** Testvarsel til én person, i den første hytta personen er med i. */
+async function testMessage(userId: string): Promise<Message[]> {
+  const { data } = await db.from('cabin_members').select('cabin_id').eq('user_id', userId).limit(1)
+  const cabinId = data?.[0]?.cabin_id
+  if (!cabinId) return []
+  return [{
+    cabinId,
+    pref: 'issues',
+    actor: null,
+    only: userId,
+    title: 'Testvarsel fra hytteappen',
+    body: 'Varsler virker. Trykk her for å åpne appen.',
+    url: '/',
+    tag: 'test',
+  }]
+}
+
 // ---------------------------------------------------------------------------
 // Sending
 // ---------------------------------------------------------------------------
@@ -241,7 +259,8 @@ Deno.serve(async (req) => {
   )
 
   const body = await req.json().catch(() => ({}))
-  const messages = body.kind === 'reminders' ? await reminders() : await messageForRow(body.table, body.id)
+  const messages =
+    body.kind === 'reminders' ? await reminders() : body.kind === 'test' ? await testMessage(body.user_id) : await messageForRow(body.table, body.id)
   let sent = 0
   for (const m of messages) sent += await send(m)
   return Response.json({ messages: messages.length, sent })
