@@ -183,6 +183,9 @@ div.ha-li { cursor:default; }
 .mini-btn { min-height:48px; padding:0 16px; border-radius:var(--radius-md); border:2px solid var(--line-strong); background:var(--surface-raised); font-size:17px; font-weight:700; cursor:pointer; color:var(--ink); }
 .mini-btn.ico-only { padding:0; width:48px; display:inline-flex; align-items:center; justify-content:center; }
 .mini-btn:disabled { opacity:.35; cursor:default; }
+button.edit-main { font:inherit; color:inherit; text-align:left; background:none; border:0; padding:4px 0; margin:-4px 0; cursor:pointer; border-radius:var(--radius-md); min-height:48px; justify-content:center; }
+.edit-pen { width:16px; height:16px; color:var(--ink-muted); vertical-align:-2px; margin-left:4px; margin-right:-20px; }
+button.edit-main .ha-li-title { padding-right:20px; }
 .row-actions { display:flex; gap:6px; flex-shrink:0; }
 .tel { color:var(--primary); font-weight:700; text-decoration:none; font-size:19px; display:inline-flex; align-items:center; justify-content:flex-end; min-height:48px; min-width:56px; padding:0 4px; border-radius:var(--radius-md); }
 

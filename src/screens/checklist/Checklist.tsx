@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
-import { Check, ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
+import { Check, ChevronDown, ChevronUp, Pencil, Trash2 } from 'lucide-react'
 import { CheckBox } from '../../components/CheckBox'
 import { ConfirmSheet } from '../../components/ConfirmSheet'
+import { Field } from '../../components/Field'
+import { Sheet } from '../../components/Sheet'
 import { Segmented } from '../../components/Segmented'
 import { TopBar } from '../../components/TopBar'
 import { useToast } from '../../components/Toast'
@@ -33,6 +35,7 @@ export function Checklist() {
   const [hint, setHint] = useState('')
   const [busy, setBusy] = useState(false)
   const [removing, setRemoving] = useState<ChecklistItem | null>(null)
+  const [changing, setChanging] = useState<ChecklistItem | null>(null)
 
   const items = (rows ?? []).filter((i) => i.kind === kind).sort((a, b) => a.position - b.position || a.created_at.localeCompare(b.created_at))
   // Punkter som er fjernet siden sist teller ikke.
@@ -151,10 +154,13 @@ export function Checklist() {
           <div className="ha-list">
             {items.map((i, idx) => (
               <div key={i.id} className="ha-li">
-                <span className="ha-li-main">
-                  <span className="ha-li-title">{i.text}</span>
+                <button type="button" className="ha-li-main edit-main" aria-label={`Endre teksten «${i.text}»`} onClick={() => setChanging(i)}>
+                  <span className="ha-li-title">
+                    {i.text}
+                    <Pencil className="edit-pen" aria-hidden="true" />
+                  </span>
                   {i.hint && <span className="ha-li-meta">{i.hint}</span>}
-                </span>
+                </button>
                 <span className="row-actions">
                   <button type="button" className="mini-btn ico-only" aria-label={`Flytt «${i.text}» opp`} disabled={idx === 0} onClick={() => move(idx, -1)}>
                     <ChevronUp className="ha-ico" aria-hidden="true" />
@@ -178,8 +184,11 @@ export function Checklist() {
             ))}
           </div>
         )}
-        {editing && !isAdmin && items.some((i) => !canRemove(i)) && (
-          <p className="t-caption">Du kan fjerne punkter du har lagt inn selv. Admin kan fjerne alle.</p>
+        {editing && (
+          <p className="t-caption">
+            Trykk på et punkt for å endre teksten.
+            {!isAdmin && items.some((i) => !canRemove(i)) && ' Du kan fjerne punkter du har lagt inn selv. Admin kan fjerne alle.'}
+          </p>
         )}
 
         {rows && items.length === 0 && (
@@ -214,11 +223,60 @@ export function Checklist() {
           </div>
         )}
       </div>
+      {changing && <EditItemSheet item={changing} onClose={() => setChanging(null)} />}
       {removing && (
         <ConfirmSheet title={`Fjerne «${removing.text}»?`} confirmLabel="Fjern punktet" onConfirm={() => remove(removing)} onClose={() => setRemoving(null)}>
           Punktet blir borte fra {kind === 'ankomst' ? 'ankomstlisten' : 'avreiselisten'} for alle.
         </ConfirmSheet>
       )}
     </>
+  )
+}
+
+/** Endre teksten og hintet på et punkt. */
+function EditItemSheet({ item, onClose }: { item: ChecklistItem; onClose: () => void }) {
+  const toast = useToast()
+  const [text, setText] = useState(item.text)
+  const [hint, setHint] = useState(item.hint ?? '')
+  const [error, setError] = useState<string>()
+
+  function save(ev: FormEvent) {
+    ev.preventDefault()
+    const t = text.trim()
+    if (!t) {
+      setError('Skriv hva som skal gjøres.')
+      return
+    }
+    onClose()
+    if (t === item.text && (hint.trim() || null) === item.hint) return
+    updateRow<ChecklistItem>('checklist_items', item.cabin_id, item.id, { text: t, hint: hint.trim() || null }).then(
+      () => toast('Punktet er endret'),
+      () => toast('Endringen ble ikke lagret. Prøv igjen.'),
+    )
+  }
+
+  return (
+    <Sheet label="Endre punkt" onClose={onClose}>
+      <form className="stack" onSubmit={save} noValidate>
+        <h2 className="t-heading">Endre punkt</h2>
+        <Field
+          label="Punkt"
+          value={text}
+          maxLength={200}
+          error={error}
+          onChange={(e) => {
+            setText(e.target.value)
+            setError(undefined)
+          }}
+        />
+        <Field label="Hint (valgfritt)" value={hint} maxLength={200} onChange={(e) => setHint(e.target.value)} />
+        <button type="submit" className="ha-btn ha-btn-primary ha-btn-block">
+          Lagre
+        </button>
+        <button type="button" className="ha-btn ha-btn-ghost" onClick={onClose}>
+          Avbryt
+        </button>
+      </form>
+    </Sheet>
   )
 }

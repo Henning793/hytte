@@ -46,7 +46,7 @@ Alle tabeller har Row Level Security. Kort fortalt:
 - Bare medlemmer av en hytte ser og endrer noe i den. Ikke-innloggede ser ingenting.
 - Bare den som opprettet noe, og admin, kan slette det. Unntak: kjøpte varer kan fjernes av alle.
 - Bare admin ser invitasjonslenken, lager ny lenke og fjerner medlemmer.
-- Alle medlemmer kan legge til sjekklistepunkter og endre rekkefølgen. Punkter fjernes av den som la dem inn, eller admin.
+- Alle medlemmer kan legge til sjekklistepunkter, endre teksten og endre rekkefølgen. Punkter fjernes av den som la dem inn, eller admin.
 - Hytter opprettes med `create_cabin(navn)`, man blir med med `join_cabin(kode)`, og «Bli med»-skjermen bruker `invite_preview(kode)`.
 - Filer ligger i den private bucketen `cabin-files` under `{cabin_id}/…`, og bare hyttas medlemmer slipper til.
 
