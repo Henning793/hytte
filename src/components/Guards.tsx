@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { Navigate, useLocation } from 'react-router'
 import { useAuth } from '../lib/auth'
+import { useCabins } from '../lib/cabins'
 
 type FromState = { from?: string } | null
 
@@ -24,5 +25,13 @@ export function GuestOnly({ children }: { children: ReactNode }) {
   if (session && !recovering) {
     return <Navigate to={(location.state as FromState)?.from ?? '/'} replace />
   }
+  return children
+}
+
+/** Skjermer inne i en hytte: den som ikke er med i noen, sendes til «Ingen hytte ennå». */
+export function RequireCabin({ children }: { children: ReactNode }) {
+  const { current, loading } = useCabins()
+  if (loading) return null
+  if (!current) return <Navigate to="/ingen-hytte" replace />
   return children
 }

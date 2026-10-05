@@ -184,3 +184,8 @@ div.ha-li { cursor:default; }
 .sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 .ha-li.soon { cursor:default; }
 @media (prefers-reduced-motion: reduce) { .app *, .app *::after { transition:none !important; animation:none !important; } }
+.ha-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+.photo img { width:100%; height:auto; display:block; max-height:320px; object-fit:cover; }
+.ha-sheet:focus { outline:none; }
+.ha-sheet { max-height:85%; overflow-y:auto; animation:sheet-up .18s ease-out; }
+@keyframes sheet-up { from { transform:translateY(24px); opacity:.6; } to { transform:none; opacity:1; } }

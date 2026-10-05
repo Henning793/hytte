@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useAuth } from '../lib/auth'
+import { useCurrentCabin } from '../lib/cabins'
 import { setThemePreference, useTheme } from '../lib/theme'
 
 const links: { to: string; label: string; icon: LucideIcon }[] = [
@@ -33,6 +34,10 @@ const comingSoon: { label: string; icon: LucideIcon }[] = [
 export function More() {
   const theme = useTheme()
   const { signOut } = useAuth()
+  const cabin = useCurrentCabin()
+  const meta: Record<string, string> = {
+    '/mer/medlemmer': cabin.member_count === 1 ? '1 medlem' : `${cabin.member_count} medlemmer`,
+  }
   const navigate = useNavigate()
   const dark = theme === 'dark'
 
@@ -46,6 +51,7 @@ export function More() {
             <Icon className="ha-ico" aria-hidden="true" />
             <span className="ha-li-main">
               <span className="ha-li-title">{label}</span>
+              {meta[to] && <span className="ha-li-meta">{meta[to]}</span>}
             </span>
             <ChevronRight className="ha-ico ha-chev" aria-hidden="true" />
           </Link>

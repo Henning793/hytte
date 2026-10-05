@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router/dom'
 import { ToastProvider } from './components/Toast'
 import { AuthProvider } from './lib/auth'
+import { CabinProvider } from './lib/cabins'
 import './lib/theme'
 import './styles/hytte.css'
 import { router } from './router'
@@ -11,9 +12,11 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <div className="app">
       <AuthProvider>
-        <ToastProvider>
-          <RouterProvider router={router} />
-        </ToastProvider>
+        <CabinProvider>
+          <ToastProvider>
+            <RouterProvider router={router} />
+          </ToastProvider>
+        </CabinProvider>
       </AuthProvider>
     </div>
   </StrictMode>,
