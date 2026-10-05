@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { ChevronRight, Upload } from 'lucide-react'
+import { PendingMark } from '../../components/OfflineBanner'
 import { TopBar } from '../../components/TopBar'
 import { useCurrentCabin } from '../../lib/cabins'
 import { categoryLabel, docMeta, isPdf } from '../../lib/content'
-import { useTable } from '../../lib/data'
+import { usePendingIds, useTable } from '../../lib/data'
 import { useNames } from '../../lib/members'
 import type { Doc, DocCategory } from '../../lib/types'
 import { UploadSheet } from './UploadSheet'
@@ -16,6 +17,7 @@ export function Documents() {
   const navigate = useNavigate()
   const { rows } = useTable<Doc>('documents', cabin.id)
   const name = useNames(cabin.id)
+  const pending = usePendingIds()
   const [uploading, setUploading] = useState(false)
 
   return (
@@ -44,7 +46,10 @@ export function Documents() {
                         </span>
                         <span className="ha-li-main">
                           <span className="ha-li-title">{d.name}</span>
-                          <span className="ha-li-meta">{docMeta(d, name)}</span>
+                          <span className="ha-li-meta">
+                            <PendingMark show={pending.has(d.id)} />
+                            {docMeta(d, name)}
+                          </span>
                         </span>
                         <ChevronRight className="ha-ico ha-chev" aria-hidden="true" />
                       </button>

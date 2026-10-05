@@ -56,7 +56,7 @@ function InfoForm({ info }: { info: CabinInfo | null }) {
       navigate('/mer/info', { replace: true })
     } catch {
       setBusy(false)
-      setError('Endringene ble ikke lagret. Sjekk at du har nett, og prøv igjen.')
+      setError('Endringene ble ikke lagret. Prøv igjen.')
     }
   }
 

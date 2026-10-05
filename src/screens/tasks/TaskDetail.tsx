@@ -37,10 +37,10 @@ export function TaskDetail() {
   async function remove(t: Task) {
     navigate('/gjoremal', { replace: true })
     try {
-      await deleteRows<Task>('tasks', cabin.id, [t.id])
+      await deleteRows('tasks', cabin.id, [t.id])
       toast('Gjøremålet er slettet')
     } catch {
-      toast('Gjøremålet ble ikke slettet. Sjekk at du har nett.')
+      toast('Gjøremålet ble ikke slettet. Prøv igjen.')
     }
   }
 

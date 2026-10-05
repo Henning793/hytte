@@ -1,10 +1,11 @@
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { ChevronRight, Plus } from 'lucide-react'
 import { CheckBox } from '../../components/CheckBox'
+import { PendingMark } from '../../components/OfflineBanner'
 import { Segmented } from '../../components/Segmented'
 import { useCurrentCabin } from '../../lib/cabins'
 import { sortOpen, taskMeta, useToggleTask } from '../../lib/content'
-import { useTable } from '../../lib/data'
+import { usePendingIds, useTable } from '../../lib/data'
 import { formatDay } from '../../lib/format'
 import { useNames } from '../../lib/members'
 import type { Task, TaskKind } from '../../lib/types'
@@ -19,6 +20,7 @@ export function Tasks() {
   const { rows } = useTable<Task>('tasks', cabin.id)
   const name = useNames(cabin.id)
   const toggle = useToggleTask()
+  const pending = usePendingIds()
 
   const visible = (rows ?? []).filter((t) => filter === 'alle' || t.kind === filter)
   const open = visible.filter((t) => !t.done).sort(sortOpen)
@@ -65,7 +67,10 @@ export function Tasks() {
                 onClick={() => navigate(`/gjoremal/${t.id}`)}
               >
                 <span className="ha-li-title">{t.title}</span>
-                <span className="ha-li-meta">{taskMeta(t, name)}</span>
+                <span className="ha-li-meta">
+                  <PendingMark show={pending.has(t.id)} />
+                  {taskMeta(t, name)}
+                </span>
               </button>
               <ChevronRight className="ha-ico ha-chev" aria-hidden="true" />
             </div>
@@ -83,6 +88,7 @@ export function Tasks() {
                 <span className="ha-li-main">
                   <span className="ha-li-title">{t.title}</span>
                   <span className="ha-li-meta">
+                    <PendingMark show={pending.has(t.id)} />
                     {t.done_by ? `Gjort av ${name(t.done_by)}` : 'Gjort'}
                     {t.done_at ? ` · ${formatDay(t.done_at)}` : ''}
                   </span>

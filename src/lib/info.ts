@@ -1,4 +1,4 @@
-import { patchLocal, useQuery } from './data'
+import { upsertSingle, useQuery } from './data'
 import { supabase } from './supabase'
 import type { CabinInfo } from './types'
 
@@ -16,17 +16,6 @@ export function useCabinInfo(cabinId: string): { info: CabinInfo | null; loaded:
 
 export type InfoFields = Omit<CabinInfo, 'cabin_id' | 'updated_by' | 'updated_at'>
 
-export async function saveInfo(cabinId: string, fields: InfoFields): Promise<void> {
-  const key = infoKey(cabinId)
-  const undo = patchLocal<CabinInfo>(key, (rows) => rows.map((r) => ({ ...r, ...fields })))
-  const { data, error } = await supabase
-    .from('cabin_info')
-    .upsert({ cabin_id: cabinId, ...fields } as never, { onConflict: 'cabin_id' })
-    .select()
-    .single()
-  if (error) {
-    undo()
-    throw error
-  }
-  patchLocal<CabinInfo>(key, () => [data as CabinInfo])
+export function saveInfo(cabinId: string, fields: InfoFields): Promise<void> {
+  return upsertSingle(infoKey(cabinId), 'cabin_info', { cabin_id: cabinId }, fields)
 }

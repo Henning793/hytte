@@ -5,7 +5,7 @@ import { useToast } from '../../components/Toast'
 import { useCurrentCabin } from '../../lib/cabins'
 import { docMeta, isPdf, onlyDeleter } from '../../lib/content'
 import { deleteRows, useTable } from '../../lib/data'
-import { downloadUrl, removeFile, useSignedUrl } from '../../lib/files'
+import { downloadFile, removeFile, useFileUrl } from '../../lib/files'
 import { useNames } from '../../lib/members'
 import type { Doc } from '../../lib/types'
 import { useMe } from '../../lib/useMe'
@@ -19,7 +19,7 @@ export function DocumentView() {
   const { rows } = useTable<Doc>('documents', cabin.id)
   const name = useNames(cabin.id)
   const doc = rows?.find((d) => d.id === id)
-  const url = useSignedUrl(doc?.file_path)
+  const url = useFileUrl(doc?.file_path)
 
   const top = <TopBar backTo="/mer/dokumenter" backLabel="Dokumenter" />
   if (!rows) return top
@@ -38,26 +38,18 @@ export function DocumentView() {
   const canDelete = doc.created_by === me || cabin.role === 'admin'
 
   async function download(d: Doc) {
-    const ext = d.file_path.split('.').pop()
-    const link = await downloadUrl(d.file_path, `${d.name}.${ext}`)
-    if (!link) return toast('Filen ble ikke lastet ned. Sjekk at du har nett.')
-    // En vanlig lenke med download-navn; iPhone og Android lagrer den i Filer/Nedlastinger.
-    const a = document.createElement('a')
-    a.href = link
-    a.rel = 'noopener'
-    document.body.append(a)
-    a.click()
-    a.remove()
+    const ext = d.mime_type === 'application/pdf' ? 'pdf' : d.mime_type === 'image/jpeg' ? 'jpg' : d.file_path.split('.').pop()
+    if (!(await downloadFile(d.file_path, `${d.name}.${ext}`))) toast('Filen ble ikke lastet ned. Sjekk at du har nett.')
   }
 
   async function remove(d: Doc) {
     navigate('/mer/dokumenter', { replace: true })
     try {
-      await deleteRows<Doc>('documents', cabin.id, [d.id])
-      void removeFile(d.file_path)
+      await deleteRows('documents', cabin.id, [d.id])
+      if (!d.file_path.startsWith('local:')) void removeFile(d.file_path)
       toast('Dokumentet er slettet')
     } catch {
-      toast('Dokumentet ble ikke slettet. Sjekk at du har nett.')
+      toast('Dokumentet ble ikke slettet. Prøv igjen.')
     }
   }
 

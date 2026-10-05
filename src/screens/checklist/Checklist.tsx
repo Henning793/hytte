@@ -47,7 +47,7 @@ export function Checklist() {
       navigate('/')
     } catch {
       setBusy(false)
-      toast('Gjennomgangen ble ikke lagret. Sjekk at du har nett.')
+      toast('Gjennomgangen ble ikke lagret. Prøv igjen.')
     }
   }
 
@@ -59,14 +59,14 @@ export function Checklist() {
     setHint('')
     const position = Math.max(0, ...items.map((i) => i.position)) + 1
     insertRow<ChecklistItem>('checklist_items', { ...draftMeta(cabin.id, me), kind, text: t, hint: hint.trim() || null, position }).catch(() =>
-      toast(`«${t}» ble ikke lagt til. Sjekk at du har nett.`),
+      toast(`«${t}» ble ikke lagt til. Prøv igjen.`),
     )
   }
 
   function remove(item: ChecklistItem) {
-    deleteRows<ChecklistItem>('checklist_items', cabin.id, [item.id]).then(
+    deleteRows('checklist_items', cabin.id, [item.id]).then(
       () => toast(`«${item.text}» er fjernet`),
-      () => toast('Punktet ble ikke fjernet. Sjekk at du har nett.'),
+      () => toast('Punktet ble ikke fjernet. Prøv igjen.'),
     )
   }
 

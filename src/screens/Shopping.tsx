@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react'
 import { CheckBox } from '../components/CheckBox'
+import { PendingMark } from '../components/OfflineBanner'
 import { useToast } from '../components/Toast'
 import { useCurrentCabin } from '../lib/cabins'
-import { deleteRows, insertRow, updateRow, useTable } from '../lib/data'
+import { deleteRows, insertRow, updateRow, usePendingIds, useTable } from '../lib/data'
 import { count } from '../lib/format'
 import { useNames } from '../lib/members'
 import { draftMeta, type ShoppingItem } from '../lib/types'
@@ -14,6 +15,7 @@ export function Shopping() {
   const toast = useToast()
   const { rows } = useTable<ShoppingItem>('shopping_items', cabin.id)
   const name = useNames(cabin.id)
+  const pending = usePendingIds()
   const [text, setText] = useState('')
 
   const open = (rows ?? []).filter((i) => !i.done).sort((a, b) => a.created_at.localeCompare(b.created_at))
@@ -30,19 +32,19 @@ export function Shopping() {
       done: false,
       bought_by: null,
       bought_at: null,
-    }).catch(() => toast(`«${itemName}» ble ikke lagt til. Sjekk at du har nett.`))
+    }).catch(() => toast(`«${itemName}» ble ikke lagt til. Prøv igjen.`))
   }
 
   function toggle(i: ShoppingItem) {
     updateRow<ShoppingItem>('shopping_items', cabin.id, i.id, { done: !i.done }, { bought_by: i.done ? null : me }).catch(() =>
-      toast('Endringen ble ikke lagret. Sjekk at du har nett.'),
+      toast('Endringen ble ikke lagret. Prøv igjen.'),
     )
   }
 
   function clearBought() {
-    deleteRows<ShoppingItem>('shopping_items', cabin.id, bought.map((i) => i.id)).then(
+    deleteRows('shopping_items', cabin.id, bought.map((i) => i.id)).then(
       () => toast('Kjøpte varer er fjernet'),
-      () => toast('Noen varer ble ikke fjernet. Sjekk at du har nett.'),
+      () => toast('Noen varer ble ikke fjernet. Prøv igjen.'),
     )
   }
 
@@ -52,6 +54,7 @@ export function Shopping() {
       <span className="ha-li-main">
         <span className="ha-li-title">{i.name}</span>
         <span className="ha-li-meta">
+          <PendingMark show={pending.has(i.id)} />
           {i.done ? `Kjøpt av ${name(i.bought_by)}` : `Lagt til av ${name(i.created_by)}`}
         </span>
       </span>

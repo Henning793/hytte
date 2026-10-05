@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { openedFromRecoveryLink, supabase, supabaseConfigured } from './supabase'
+import { clearLocalData } from './data'
 
 type AuthState = {
   session: Session | null
@@ -42,6 +43,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Lokal utlogging virker også uten nett.
     signOut: async () => {
       await supabase.auth.signOut({ scope: 'local' })
+      // Neste som logger inn på telefonen skal ikke se denne brukerens data.
+      await clearLocalData()
     },
   }
 
