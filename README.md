@@ -34,7 +34,7 @@ npm run dev
 1. **Supabase:** opprett et gratis prosjekt. Under *Project Settings → API* finner du `Project URL` og `anon public`-nøkkelen.
 2. **Netlify:** *Add new site → Import from GitHub* og velg dette repoet. Bygg-innstillingene leses fra `netlify.toml`. Legg inn `VITE_SUPABASE_URL` og `VITE_SUPABASE_ANON_KEY` under *Site configuration → Environment variables*.
 3. **Database:** kjør migrasjonene i `supabase/migrations/` i rekkefølge, enten med Supabase CLI (`supabase link --project-ref <ref>` og `supabase db push`) eller ved å lime dem inn i *SQL Editor*.
-4. **Supabase Auth:** skru av *Confirm email* under *Authentication → Providers → Email*.
+4. **Supabase Auth:** under *Authentication → Providers → Email*: skru av *Confirm email*, og sett *Minimum password length* til 8.
 5. **Supabase Auth:** legg Netlify-adressen (`https://<navn>.netlify.app`) inn som *Site URL* og under *Redirect URLs* (*Authentication → URL Configuration*), så «Glemt passord»-lenker virker.
 
 Anon-nøkkelen er laget for å ligge i nettleseren. Sikkerheten ligger i Row Level Security i databasen. `service_role`-nøkkelen skal aldri inn i appen, Netlify eller repoet.

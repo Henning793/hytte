@@ -1,6 +1,8 @@
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 
 export function Welcome() {
+  // Husk hvor brukeren skulle (f.eks. en invitasjonslenke) gjennom innloggingen.
+  const { state } = useLocation()
   return (
     <main className="screen">
       <div className="scroll" style={{ justifyContent: 'space-between', paddingTop: 40 }}>
@@ -26,10 +28,10 @@ export function Welcome() {
           </p>
         </div>
         <div className="stack">
-          <Link className="ha-btn ha-btn-primary ha-btn-block" to="/opprett-bruker">
+          <Link className="ha-btn ha-btn-primary ha-btn-block" to="/opprett-bruker" state={state}>
             Opprett bruker
           </Link>
-          <Link className="ha-btn ha-btn-secondary ha-btn-block" to="/logg-inn">
+          <Link className="ha-btn ha-btn-secondary ha-btn-block" to="/logg-inn" state={state}>
             Logg inn
           </Link>
         </div>
