@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate, useParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import { ConfirmSheet } from '../../components/ConfirmSheet'
 import { Segmented } from '../../components/Segmented'
 import { TopBar } from '../../components/TopBar'
@@ -87,13 +87,16 @@ export function IssueDetail() {
             onChange={(s) => setStatus(issue, s)}
           />
         </div>
+        <Link className="ha-btn ha-btn-secondary ha-btn-block" to={`/feil/${issue.id}/endre`}>
+          Endre
+        </Link>
         {canDelete ? (
           <button type="button" className="ha-btn ha-btn-danger ha-btn-block" onClick={() => setConfirming(true)}>
             Slett feilmeldingen
           </button>
         ) : (
           <p className="t-caption center">
-            Bare {onlyDeleter(name(issue.created_by))} kan slette denne. Alle kan endre status.
+            Bare {onlyDeleter(name(issue.created_by))} kan slette denne. Alle kan endre den.
           </p>
         )}
       </div>

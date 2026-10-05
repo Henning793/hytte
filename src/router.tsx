@@ -24,7 +24,7 @@ import { HistoryDetail } from './screens/history/HistoryDetail'
 import { HistoryForm } from './screens/history/HistoryForm'
 import { Home } from './screens/Home'
 import { IssueDetail } from './screens/issues/IssueDetail'
-import { IssueNew } from './screens/issues/IssueNew'
+import { IssueForm } from './screens/issues/IssueForm'
 import { Issues } from './screens/issues/Issues'
 import { More } from './screens/More'
 import { Shopping } from './screens/Shopping'
@@ -68,8 +68,9 @@ export const router = createBrowserRouter([
       { path: 'gjoremal/:id', element: <TaskDetail /> },
       { path: 'gjoremal/:id/endre', element: <TaskForm /> },
       { path: 'feil', element: <Issues /> },
-      { path: 'feil/ny', element: <IssueNew /> },
+      { path: 'feil/ny', element: <IssueForm /> },
       { path: 'feil/:id', element: <IssueDetail /> },
+      { path: 'feil/:id/endre', element: <IssueForm /> },
       { path: 'handleliste', element: <Shopping /> },
       { path: 'mer', element: <More /> },
       { path: 'mer/dokumenter', element: <Documents /> },
