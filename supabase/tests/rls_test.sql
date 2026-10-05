@@ -281,6 +281,11 @@ select tests.ok(tests.affected($$delete from storage.objects$$) = 1, 'admin kan 
 -- ---------------------------------------------------------------------------
 -- Ikke innlogget
 -- ---------------------------------------------------------------------------
+reset role;
+select tests.ok(not has_function_privilege('authenticated', 'public.handle_new_user()', 'execute')
+  and not has_function_privilege('authenticated', 'public.keep_one_admin()', 'execute'),
+  'triggerfunksjoner kan ikke kalles som RPC');
+
 select set_config('request.jwt.claims', '', false);
 set role anon;
 select tests.fails('select * from public.cabins', 'anon kan ikke lese hytter');

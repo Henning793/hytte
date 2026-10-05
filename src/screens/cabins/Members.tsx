@@ -6,55 +6,11 @@ import { Sheet } from '../../components/Sheet'
 import { TopBar } from '../../components/TopBar'
 import { useToast } from '../../components/Toast'
 import { useAuth } from '../../lib/auth'
-import { useCabins, useCurrentCabin, type Role } from '../../lib/cabins'
+import { useCabins, useCurrentCabin } from '../../lib/cabins'
+import { reload } from '../../lib/data'
+import { membersKey, useMembers, type Member } from '../../lib/members'
 import { inviteLink } from '../../lib/invite'
 import { supabase } from '../../lib/supabase'
-
-type Member = { user_id: string; role: Role; first_name: string }
-
-async function fetchMembers(cabinId: string): Promise<Member[]> {
-  const { data, error } = await supabase
-    .from('cabin_members')
-    .select('user_id, role, profiles (first_name)')
-    .eq('cabin_id', cabinId)
-  if (error) throw error
-  type Row = { user_id: string; role: Role; profiles: { first_name: string } | null }
-  const list = ((data ?? []) as unknown as Row[]).map((r) => ({
-    user_id: r.user_id,
-    role: r.role,
-    first_name: r.profiles?.first_name ?? 'Ukjent',
-  }))
-  // Admin først, deretter alfabetisk.
-  return list.sort((a, b) =>
-    a.role === b.role ? a.first_name.localeCompare(b.first_name, 'nb') : a.role === 'admin' ? -1 : 1,
-  )
-}
-
-function useMembers(cabinId: string) {
-  const [result, setResult] = useState<{ cabinId: string; members: Member[] | null; failed: boolean } | null>(null)
-
-  useEffect(() => {
-    let active = true
-    fetchMembers(cabinId).then(
-      (members) => active && setResult({ cabinId, members, failed: false }),
-      () => active && setResult({ cabinId, members: null, failed: true }),
-    )
-    return () => {
-      active = false
-    }
-  }, [cabinId])
-
-  const reload = useCallback(async () => {
-    try {
-      setResult({ cabinId, members: await fetchMembers(cabinId), failed: false })
-    } catch {
-      // Beholder listen vi har.
-    }
-  }, [cabinId])
-
-  const current = result?.cabinId === cabinId ? result : null
-  return { members: current?.members ?? null, failed: current?.failed ?? false, reload }
-}
 
 export function Members() {
   const cabin = useCurrentCabin()
@@ -63,7 +19,7 @@ export function Members() {
   const toast = useToast()
   const me = session?.user.id
   const isAdmin = cabin.role === 'admin'
-  const { members, failed, reload } = useMembers(cabin.id)
+  const { rows: members, failed } = useMembers(cabin.id)
   const [inviteOpen, setInviteOpen] = useState(false)
   const [removing, setRemoving] = useState<Member | null>(null)
   const closeInvite = useCallback(() => setInviteOpen(false), [])
@@ -84,7 +40,8 @@ export function Members() {
       return
     }
     toast(`${member.first_name} er fjernet fra ${cabin.name}`)
-    await Promise.all([reload(), refresh()])
+    reload(membersKey(cabin.id))
+    await refresh()
   }
 
   return (
