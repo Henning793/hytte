@@ -21,16 +21,15 @@ jobs:
 
   database:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_PASSWORD: postgres
-        ports: ['5432:5432']
-        options: >-
-          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    # Postgres som følger med runneren, ikke en service-container: jobber med
+    # service-containere ble stående i kø uten runner til de ble avbrutt.
     steps:
       - uses: actions/checkout@v4
+      - name: Start Postgres
+        run: |
+          sudo systemctl start postgresql.service
+          sudo -u postgres psql -qc "alter user postgres password 'postgres'"
+          psql --version
       - name: Migrasjoner og RLS-tester
         run: scripts/test-db.sh
         env:
