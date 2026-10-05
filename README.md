@@ -64,7 +64,7 @@ Test: åpne appen, gå gjennom skjermene, slå av nettet i DevTools (*Network �
 
 ## Push-varsler
 
-Av for alle til hver person selv slår dem på under *Mer → Varsler* (per telefon/PC). Standardvalg når de slås på: ny feil, ny hendelse i kalenderen og påminnelse dagen før en hendelse. «Noen skal på hytta» og «Nytt gjøremål» kan slås på. Man får aldri varsel om noe man har gjort selv. På iPhone må appen være lagt til på hjemskjermen.
+Av for alle til hver person selv slår dem på under *Mer → Varsler* (per telefon/PC). Standardvalg når de slås på: ny feil, ny hendelse i kalenderen, påminnelse dagen før en hendelse, og påminnelse dagen før mitt eget opphold starter (for å sjekke handleliste og gjøremål). «Noen skal på hytta» og «Nytt gjøremål» kan slås på. Man får aldri varsel om noe man har gjort selv. På iPhone må appen være lagt til på hjemskjermen.
 
 Slik virker det (`supabase/migrations/20261007090000_push.sql`):
 

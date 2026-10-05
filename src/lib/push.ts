@@ -4,15 +4,23 @@ import { supabase } from './supabase'
 // Push-varsler. Av til personen selv slår dem på. «På» gjelder denne enheten
 // (nettleseren har et abonnement); hvilke varsler man vil ha gjelder personen.
 
-export type PushPrefs = { issues: boolean; events: boolean; reminders: boolean; stays: boolean; tasks: boolean }
+export type PushPrefs = {
+  issues: boolean
+  events: boolean
+  reminders: boolean
+  trip: boolean
+  stays: boolean
+  tasks: boolean
+}
 
 /** Det man får når man slår på varsler. Samme standard som i databasen. */
-export const DEFAULT_PREFS: PushPrefs = { issues: true, events: true, reminders: true, stays: false, tasks: false }
+export const DEFAULT_PREFS: PushPrefs = { issues: true, events: true, reminders: true, trip: true, stays: false, tasks: false }
 
 export const PREF_LABELS: { key: keyof PushPrefs; label: string; meta: string }[] = [
   { key: 'issues', label: 'Ny feil eller mangel', meta: 'Når noen melder en feil' },
   { key: 'events', label: 'Ny hendelse i kalenderen', meta: 'F.eks. dugnad' },
   { key: 'reminders', label: 'Påminnelse dagen før', meta: 'Om hendelser i kalenderen' },
+  { key: 'trip', label: 'Dagen før jeg skal på hytta', meta: 'Sjekk handleliste og gjøremål før du drar' },
   { key: 'stays', label: 'Noen skal på hytta', meta: 'Når et opphold legges inn' },
   { key: 'tasks', label: 'Nytt gjøremål', meta: 'Når noen legger til et gjøremål' },
 ]
@@ -89,7 +97,7 @@ export async function disablePush(): Promise<void> {
 }
 
 export async function loadPrefs(): Promise<PushPrefs> {
-  const { data, error } = await supabase.from('notification_prefs').select('issues, events, reminders, stays, tasks').maybeSingle()
+  const { data, error } = await supabase.from('notification_prefs').select('issues, events, reminders, trip, stays, tasks').maybeSingle()
   if (error) throw error
   return data ?? DEFAULT_PREFS
 }

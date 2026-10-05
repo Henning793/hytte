@@ -5,7 +5,7 @@
 --   2. Når noe nytt legges inn (feil, hendelse, opphold, gjøremål), kaller en
 --      trigger Edge Function «push» via pg_net.
 --   3. Hver dag kl. 16 UTC kaller pg_cron den samme funksjonen for å minne om
---      hendelser som starter i morgen.
+--      hendelser og egne opphold som starter i morgen.
 --   4. Funksjonen finner mottakerne (alle i hytta unntatt den som gjorde det,
 --      og som har den typen varsel på) og sender.
 --
@@ -36,6 +36,8 @@ create table public.notification_prefs (
   issues boolean not null default true,
   events boolean not null default true,
   reminders boolean not null default true,
+  -- Dagen før mitt eget opphold starter: sjekk handleliste og gjøremål før avreise.
+  trip boolean not null default true,
   stays boolean not null default false,
   tasks boolean not null default false,
   updated_at timestamptz not null default now()

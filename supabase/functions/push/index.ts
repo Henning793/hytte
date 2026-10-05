@@ -2,7 +2,7 @@
 //
 // Kalles bare fra databasen (se migrasjonen 20261007090000_push.sql):
 //   { "table": "issues" | "calendar_events" | "stays" | "tasks", "id": "<uuid>" }  når noe nytt legges inn
-//   { "kind": "reminders" }                                                          hver dag, for hendelser i morgen
+//   { "kind": "reminders" }                                                          hver dag, for hendelser og egne opphold i morgen
 // Kallet må ha headeren x-push-secret med hemmeligheten fra Vault.
 //
 // Utrulling: supabase functions deploy push --no-verify-jwt
@@ -10,20 +10,22 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 
-type Pref = 'issues' | 'events' | 'reminders' | 'stays' | 'tasks'
+type Pref = 'issues' | 'events' | 'reminders' | 'trip' | 'stays' | 'tasks'
 
 type Message = {
   cabinId: string
   pref: Pref
   /** Den som gjorde det får ikke varsel. */
   actor: string | null
+  /** Bare til denne personen (påminnelse om eget opphold). */
+  only?: string
   title: string
   body: string
   url: string
   tag: string
 }
 
-const DEFAULTS: Record<Pref, boolean> = { issues: true, events: true, reminders: true, stays: false, tasks: false }
+const DEFAULTS: Record<Pref, boolean> = { issues: true, events: true, reminders: true, trip: true, stays: false, tasks: false }
 
 const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, {
   auth: { persistSession: false },
@@ -147,6 +149,33 @@ async function reminders(): Promise<Message[]> {
       tag: `reminder-${e.id}`,
     })
   }
+  // Egne opphold som starter i morgen: tid for å sjekke handleliste og gjøremål.
+  // Gjelder ikke opphold som fortsetter fra i dag (man er der allerede).
+  const { data: stays } = await db
+    .from('stays')
+    .select('id, cabin_id, user_id')
+    .eq('start_date', tomorrow)
+    .not('user_id', 'is', null)
+  for (const s of stays ?? []) {
+    const { count } = await db
+      .from('stays')
+      .select('id', { count: 'exact', head: true })
+      .eq('cabin_id', s.cabin_id)
+      .eq('user_id', s.user_id)
+      .lte('start_date', osloDate(new Date()))
+      .gte('end_date', osloDate(new Date()))
+    if (count) continue
+    out.push({
+      cabinId: s.cabin_id,
+      pref: 'trip',
+      actor: null,
+      only: s.user_id,
+      title: `I morgen skal du på ${await cabinName(s.cabin_id)}`,
+      body: 'Sjekk handlelisten og gjøremålene før du drar.',
+      url: '/',
+      tag: `trip-${s.id}`,
+    })
+  }
   return out
 }
 
@@ -156,7 +185,9 @@ async function reminders(): Promise<Message[]> {
 
 async function send(msg: Message): Promise<number> {
   const { data: members } = await db.from('cabin_members').select('user_id').eq('cabin_id', msg.cabinId)
-  const userIds = (members ?? []).map((m) => m.user_id as string).filter((u) => u !== msg.actor)
+  const userIds = (members ?? [])
+    .map((m) => m.user_id as string)
+    .filter((u) => u !== msg.actor && (!msg.only || u === msg.only))
   if (!userIds.length) return 0
 
   const { data: prefs } = await db.from('notification_prefs').select('*').in('user_id', userIds)
