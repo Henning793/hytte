@@ -103,6 +103,11 @@ div.ha-li { cursor:default; }
 /* Checkbox row */
 .ha-check { display:flex; align-items:center; gap:var(--space-4); min-height:var(--tap-min); padding:var(--space-3) var(--space-4); width:100%; border:0; border-top:1px solid var(--line); background:transparent; text-align:left; cursor:pointer; }
 .ha-check:first-child { border-top:0; }
+/* Rad med avkrysning og en blyant til høyre (handlelisten). */
+.check-row { display:flex; align-items:center; border-top:1px solid var(--line); }
+.check-row:first-child { border-top:0; }
+.check-row .ha-check { border-top:0; flex:1; min-width:0; padding-right:0; }
+.edit-btn { flex-shrink:0; width:48px; height:48px; margin-right:var(--space-2); display:inline-flex; align-items:center; justify-content:center; border:0; border-radius:var(--radius-md); background:transparent; color:var(--ink-muted); cursor:pointer; }
 .ha-box { width:32px; height:32px; flex:none; border:2px solid var(--line-strong); border-radius:var(--radius-sm); display:grid; place-items:center; background:var(--surface-raised); color:var(--on-primary); }
 .ha-box .ha-ico { width:22px; height:22px; stroke-width:3; opacity:0; }
 .ha-check[aria-checked="true"] .ha-box { background:var(--primary); border-color:var(--primary); }

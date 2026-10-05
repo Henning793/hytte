@@ -1,7 +1,10 @@
 import { useState, type FormEvent } from 'react'
+import { Pencil } from 'lucide-react'
 import { CheckBox } from '../components/CheckBox'
 import { ConfirmSheet } from '../components/ConfirmSheet'
+import { Field } from '../components/Field'
 import { PendingMark } from '../components/OfflineBanner'
+import { Sheet } from '../components/Sheet'
 import { useToast } from '../components/Toast'
 import { useCurrentCabin } from '../lib/cabins'
 import { deleteRows, insertRow, updateRow, usePendingIds, useTable } from '../lib/data'
@@ -19,6 +22,7 @@ export function Shopping() {
   const pending = usePendingIds()
   const [text, setText] = useState('')
   const [confirming, setConfirming] = useState(false)
+  const [changing, setChanging] = useState<ShoppingItem | null>(null)
 
   const open = (rows ?? []).filter((i) => !i.done).sort((a, b) => a.created_at.localeCompare(b.created_at))
   const bought = (rows ?? []).filter((i) => i.done).sort((a, b) => (b.bought_at ?? '').localeCompare(a.bought_at ?? ''))
@@ -51,16 +55,21 @@ export function Shopping() {
   }
 
   const item = (i: ShoppingItem) => (
-    <button key={i.id} type="button" className="ha-check" role="checkbox" aria-checked={i.done} onClick={() => toggle(i)}>
-      <CheckBox />
-      <span className="ha-li-main">
-        <span className="ha-li-title">{i.name}</span>
-        <span className="ha-li-meta">
-          <PendingMark show={pending.has(i.id)} />
-          {i.done ? `Kjøpt av ${name(i.bought_by)}` : `Lagt til av ${name(i.created_by)}`}
+    <div key={i.id} className="check-row">
+      <button type="button" className="ha-check" role="checkbox" aria-checked={i.done} onClick={() => toggle(i)}>
+        <CheckBox />
+        <span className="ha-li-main">
+          <span className="ha-li-title">{i.name}</span>
+          <span className="ha-li-meta">
+            <PendingMark show={pending.has(i.id)} />
+            {i.done ? `Kjøpt av ${name(i.bought_by)}` : `Lagt til av ${name(i.created_by)}`}
+          </span>
         </span>
-      </span>
-    </button>
+      </button>
+      <button type="button" className="edit-btn" aria-label={`Endre «${i.name}»`} onClick={() => setChanging(i)}>
+        <Pencil className="ha-ico" aria-hidden="true" />
+      </button>
+    </div>
   )
 
   return (
@@ -100,6 +109,7 @@ export function Shopping() {
           </div>
         </>
       )}
+      {changing && <EditItemSheet item={changing} onClose={() => setChanging(null)} />}
       {confirming && (
         <ConfirmSheet
           title={`Fjerne ${count(bought.length, 'kjøpt vare', 'kjøpte varer')}?`}
@@ -111,5 +121,51 @@ export function Shopping() {
         </ConfirmSheet>
       )}
     </div>
+  )
+}
+
+/** Endre navnet på en vare. */
+function EditItemSheet({ item, onClose }: { item: ShoppingItem; onClose: () => void }) {
+  const toast = useToast()
+  const [value, setValue] = useState(item.name)
+  const [error, setError] = useState<string>()
+
+  function save(ev: FormEvent) {
+    ev.preventDefault()
+    const n = value.trim()
+    if (!n) {
+      setError('Skriv navnet på varen.')
+      return
+    }
+    onClose()
+    if (n === item.name) return
+    updateRow<ShoppingItem>('shopping_items', item.cabin_id, item.id, { name: n }).then(
+      () => toast('Varen er endret'),
+      () => toast('Endringen ble ikke lagret. Prøv igjen.'),
+    )
+  }
+
+  return (
+    <Sheet label="Endre vare" onClose={onClose}>
+      <form className="stack" onSubmit={save} noValidate>
+        <h2 className="t-heading">Endre vare</h2>
+        <Field
+          label="Vare"
+          value={value}
+          maxLength={100}
+          error={error}
+          onChange={(e) => {
+            setValue(e.target.value)
+            setError(undefined)
+          }}
+        />
+        <button type="submit" className="ha-btn ha-btn-primary ha-btn-block">
+          Lagre
+        </button>
+        <button type="button" className="ha-btn ha-btn-ghost" onClick={onClose}>
+          Avbryt
+        </button>
+      </form>
+    </Sheet>
   )
 }
