@@ -97,7 +97,9 @@ export type ChecklistRun = {
 export type Stay = {
   id: string
   cabin_id: string
-  user_id: string
+  /** Medlemmet oppholdet gjelder, eller null når det gjelder noen som ikke bruker appen. */
+  user_id: string | null
+  guest_name: string | null
   start_date: string
   end_date: string
   note: string | null

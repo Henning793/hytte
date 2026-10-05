@@ -1,5 +1,7 @@
 // Felles regler for kalenderen, brukt av både kalenderskjermen og Hjem.
+import { useMemo } from 'react'
 import { overlaps } from './dates'
+import { useColors, useNames } from './members'
 import type { CalendarEvent, Stay } from './types'
 
 export const byStart = <T extends { start_date: string; end_date: string; id: string }>(a: T, b: T) =>
@@ -29,4 +31,20 @@ export function assignLanes(stays: Stay[]): Map<string, number> {
 /** «kl. 10.00» for hendelser med klokkeslett. */
 export function formatTime(e: CalendarEvent): string | null {
   return e.start_time ? `kl. ${e.start_time.slice(0, 5).replace(':', '.')}` : null
+}
+
+/** Farge for opphold som gjelder noen som ikke bruker appen. */
+export const GUEST_COLOR = '#8f7a5c'
+
+/** Navn og farge på den et opphold gjelder: et medlem, eller et navn som er skrevet inn. */
+export function useStayPerson(cabinId: string) {
+  const name = useNames(cabinId)
+  const color = useColors(cabinId)
+  return useMemo(
+    () => ({
+      who: (s: Stay) => s.guest_name ?? name(s.user_id),
+      tint: (s: Stay) => (s.user_id ? color(s.user_id) : GUEST_COLOR),
+    }),
+    [name, color],
+  )
 }

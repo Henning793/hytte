@@ -3,11 +3,10 @@ import { CalendarPlus, ChevronLeft, ChevronRight, UserRoundCheck } from 'lucide-
 import { PendingMark } from '../../components/OfflineBanner'
 import { TopBar } from '../../components/TopBar'
 import { useCurrentCabin } from '../../lib/cabins'
-import { assignLanes, byStart, formatTime, within } from '../../lib/calendar'
+import { assignLanes, byStart, formatTime, useStayPerson, within } from '../../lib/calendar'
 import { formatLongDay, formatMonth, formatRange, isoWeek, monthWeeks, toIso, todayIso } from '../../lib/dates'
 import { usePendingIds, useTable } from '../../lib/data'
 import { holidaysBetween, type Holiday } from '../../lib/holidays'
-import { useColors, useNames } from '../../lib/members'
 import type { CalendarEvent, Stay } from '../../lib/types'
 import { useMe } from '../../lib/useMe'
 
@@ -28,8 +27,7 @@ export function Calendar() {
 
   const stays = useTable<Stay>('stays', cabin.id).rows
   const events = useTable<CalendarEvent>('calendar_events', cabin.id).rows
-  const name = useNames(cabin.id)
-  const color = useColors(cabin.id)
+  const { who, tint } = useStayPerson(cabin.id)
   const pending = usePendingIds()
 
   const weeks = monthWeeks(year, month)
@@ -131,7 +129,7 @@ export function Calendar() {
                                 s.start_date === day || i === 0 ? 'starts' : '',
                                 s.end_date === day || i === 6 ? 'ends' : '',
                               ].join(' ')}
-                              style={{ background: color(s.user_id) }}
+                              style={{ background: tint(s) }}
                             />
                           ) : (
                             <span key={lane} className="cal-bar" />
@@ -160,7 +158,7 @@ export function Calendar() {
           {dayStays.length > 0 || dayEvents.length > 0 ? (
             <div className="ha-list">
               {dayStays.map((s) => (
-                <StayRow key={s.id} stay={s} name={name(s.user_id)} color={color(s.user_id)} pending={pending.has(s.id)} />
+                <StayRow key={s.id} stay={s} name={who(s)} color={tint(s)} pending={pending.has(s.id)} />
               ))}
               {dayEvents.map((e) => (
                 <EventRow key={e.id} event={e} pending={pending.has(e.id)} />
@@ -195,7 +193,7 @@ export function Calendar() {
             <div className="ha-list">
               {mergeByDate(monthStays, monthEvents, monthHolidays).map((item) =>
                 item.type === 'stay' ? (
-                  <StayRow key={item.row.id} stay={item.row} name={name(item.row.user_id)} color={color(item.row.user_id)} pending={pending.has(item.row.id)} />
+                  <StayRow key={item.row.id} stay={item.row} name={who(item.row)} color={tint(item.row)} pending={pending.has(item.row.id)} />
                 ) : item.type === 'event' ? (
                   <EventRow key={item.row.id} event={item.row} pending={pending.has(item.row.id)} />
                 ) : (

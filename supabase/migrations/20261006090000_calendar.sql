@@ -6,17 +6,20 @@ alter table public.profiles
   add column color text check (color ~ '^#[0-9a-f]{6}$');
 
 -- Opphold: «Kari er på hytta 10.–14. okt.». Flere kan være der samtidig.
+-- Gjelder enten et medlem (user_id) eller noen som ikke bruker appen (guest_name, f.eks. «Mormor»).
 create table public.stays (
   id uuid primary key default gen_random_uuid(),
   cabin_id uuid not null references public.cabins (id) on delete cascade,
-  user_id uuid not null references public.profiles (id) on delete cascade default auth.uid(),
+  user_id uuid references public.profiles (id) on delete cascade,
+  guest_name text check (char_length(btrim(guest_name)) between 1 and 60),
   start_date date not null,
   end_date date not null,
   note text check (char_length(note) <= 200),
   created_by uuid references public.profiles (id) on delete set null default auth.uid(),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  check (end_date >= start_date)
+  check (end_date >= start_date),
+  check ((user_id is null) <> (guest_name is null))
 );
 create index stays_cabin_idx on public.stays (cabin_id, start_date);
 
@@ -70,12 +73,12 @@ create policy "Medlemmer legger inn opphold" on public.stays
   with check (
     public.is_member(cabin_id)
     and created_by = (select auth.uid())
-    and public.is_cabin_member(cabin_id, user_id)
+    and (user_id is null or public.is_cabin_member(cabin_id, user_id))
   );
 create policy "Medlemmer endrer opphold" on public.stays
   for update to authenticated
   using (public.is_member(cabin_id))
-  with check (public.is_member(cabin_id) and public.is_cabin_member(cabin_id, user_id));
+  with check (public.is_member(cabin_id) and (user_id is null or public.is_cabin_member(cabin_id, user_id)));
 create policy "Eier eller admin sletter opphold" on public.stays
   for delete to authenticated
   using (

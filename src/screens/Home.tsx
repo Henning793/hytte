@@ -3,12 +3,12 @@ import { Camera, DoorOpen } from 'lucide-react'
 import { CabinSwitcher } from '../components/CabinSwitcher'
 import { StatusBadge } from '../components/StatusBadge'
 import { useCurrentCabin } from '../lib/cabins'
-import { byStart, formatTime } from '../lib/calendar'
+import { byStart, formatTime, useStayPerson } from '../lib/calendar'
 import { newestFirst, sortOpen, taskMeta } from '../lib/content'
 import { formatRange, todayIso } from '../lib/dates'
 import { useTable } from '../lib/data'
 import { count } from '../lib/format'
-import { useColors, useNames } from '../lib/members'
+import { useNames } from '../lib/members'
 import type { CalendarEvent, Issue, ShoppingItem, Stay, Task } from '../lib/types'
 
 export function Home() {
@@ -20,7 +20,7 @@ export function Home() {
   const items = useTable<ShoppingItem>('shopping_items', cabin.id).rows
   const stays = useTable<Stay>('stays', cabin.id).rows
   const events = useTable<CalendarEvent>('calendar_events', cabin.id).rows
-  const color = useColors(cabin.id)
+  const { who, tint } = useStayPerson(cabin.id)
 
   const openIssues = (issues ?? []).filter((i) => i.status !== 'fikset').sort(newestFirst)
   const openTasks = (tasks ?? []).filter((t) => !t.done).sort(sortOpen)
@@ -53,16 +53,16 @@ export function Home() {
           {hereNow.length > 0 ? (
             <span className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
               {hereNow.map((s) => (
-                <span key={s.id} className="cal-dot" style={{ background: color(s.user_id) }} aria-hidden="true" />
+                <span key={s.id} className="cal-dot" style={{ background: tint(s) }} aria-hidden="true" />
               ))}
-              <span className="t-body-lg">{names(hereNow.map((s) => name(s.user_id)))} er der nå</span>
+              <span className="t-body-lg">{names(hereNow.map(who))} er der nå</span>
             </span>
           ) : (
             stays && <span className="muted">Ingen er der nå.</span>
           )}
           {nextStay && (
             <span className="t-caption">
-              Neste: {name(nextStay.user_id)} · {formatRange(nextStay.start_date, nextStay.end_date)}
+              Neste: {who(nextStay)} · {formatRange(nextStay.start_date, nextStay.end_date)}
             </span>
           )}
           {nextEvent && (

@@ -200,18 +200,24 @@ select tests.ok(tests.affected($$delete from checklist_runs$$) = 0, 'medlemmer k
 -- Kalender: opphold, hendelser og farge
 -- ---------------------------------------------------------------------------
 select tests.login('00000000-0000-0000-0000-00000000000b');  -- Kari
-insert into stays (id, cabin_id, start_date, end_date) values
-  ('55555555-0000-0000-0000-00000000000b', 'aaaaaaaa-0000-0000-0000-000000000001', '2026-10-10', '2026-10-14');
-select tests.ok((select user_id from stays where id = '55555555-0000-0000-0000-00000000000b') = auth.uid(),
-  'opphold gjelder den som legger det inn');
+insert into stays (id, cabin_id, user_id, start_date, end_date) values
+  ('55555555-0000-0000-0000-00000000000b', 'aaaaaaaa-0000-0000-0000-000000000001', auth.uid(), '2026-10-10', '2026-10-14');
+insert into stays (cabin_id, guest_name, start_date, end_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000001', 'Mormor', '2026-10-10', '2026-10-12');
+select tests.ok(tests.rows($$select 1 from stays where guest_name = 'Mormor'$$) = 1, 'opphold kan gjelde noen som ikke bruker appen');
+select tests.fails($$insert into stays (cabin_id, start_date, end_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000001', '2026-10-10', '2026-10-12')$$, 'opphold må gjelde noen');
+select tests.fails($$insert into stays (cabin_id, user_id, guest_name, start_date, end_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000001', auth.uid(), 'Mormor', '2026-10-10', '2026-10-12')$$, 'opphold gjelder enten et medlem eller et navn');
+delete from stays where guest_name = 'Mormor';
 insert into stays (id, cabin_id, user_id, start_date, end_date) values
   ('55555555-0000-0000-0000-00000000000c', 'aaaaaaaa-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000a', '2026-10-12', '2026-10-13');
 select tests.ok(tests.rows('select 1 from stays') = 2, 'medlemmer kan legge inn opphold for andre i hytta, også samtidig');
 select tests.fails($$insert into stays (cabin_id, user_id, start_date, end_date) values
   ('aaaaaaaa-0000-0000-0000-000000000001', '00000000-0000-0000-0000-00000000000c', '2026-10-12', '2026-10-13')$$,
   'opphold kan ikke gjelde noen utenfor hytta');
-select tests.fails($$insert into stays (cabin_id, start_date, end_date) values
-  ('aaaaaaaa-0000-0000-0000-000000000001', '2026-10-12', '2026-10-11')$$, 'opphold kan ikke slutte før det starter');
+select tests.fails($$insert into stays (cabin_id, user_id, start_date, end_date) values
+  ('aaaaaaaa-0000-0000-0000-000000000001', auth.uid(), '2026-10-12', '2026-10-11')$$, 'opphold kan ikke slutte før det starter');
 insert into calendar_events (id, cabin_id, title, start_date, end_date) values
   ('66666666-0000-0000-0000-00000000000b', 'aaaaaaaa-0000-0000-0000-000000000001', 'Dugnad', '2026-10-17', '2026-10-17');
 select tests.ok(tests.affected($$update profiles set color = '#2d5a47' where id = auth.uid()$$) = 1, 'egen farge kan endres');
