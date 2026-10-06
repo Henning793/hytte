@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router'
 import { AppLayout } from './components/AppLayout'
 import { GuestOnly, RequireAuth, RequireCabin } from './components/Guards'
+import { Moved } from './components/Moved'
 import { ForgotPassword } from './screens/auth/ForgotPassword'
 import { Login } from './screens/auth/Login'
 import { NewPassword } from './screens/auth/NewPassword'
@@ -23,9 +24,6 @@ import { History } from './screens/history/History'
 import { HistoryDetail } from './screens/history/HistoryDetail'
 import { HistoryForm } from './screens/history/HistoryForm'
 import { Home } from './screens/Home'
-import { IssueDetail } from './screens/issues/IssueDetail'
-import { IssueForm } from './screens/issues/IssueForm'
-import { Issues } from './screens/issues/Issues'
 import { More } from './screens/More'
 import { Notifications } from './screens/Notifications'
 import { Shopping } from './screens/Shopping'
@@ -64,14 +62,15 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Home /> },
-      { path: 'gjoremal', element: <Tasks /> },
-      { path: 'gjoremal/ny', element: <TaskForm /> },
-      { path: 'gjoremal/:id', element: <TaskDetail /> },
-      { path: 'gjoremal/:id/endre', element: <TaskForm /> },
-      { path: 'feil', element: <Issues /> },
-      { path: 'feil/ny', element: <IssueForm /> },
-      { path: 'feil/:id', element: <IssueDetail /> },
-      { path: 'feil/:id/endre', element: <IssueForm /> },
+      { path: 'oppgaver', element: <Tasks /> },
+      { path: 'oppgaver/ny', element: <TaskForm /> },
+      { path: 'oppgaver/:id', element: <TaskDetail /> },
+      { path: 'oppgaver/:id/endre', element: <TaskForm /> },
+      { path: 'kalender', element: <Calendar /> },
+      { path: 'kalender/opphold/ny', element: <StayForm /> },
+      { path: 'kalender/opphold/:id', element: <StayForm /> },
+      { path: 'kalender/hendelse/ny', element: <EventForm /> },
+      { path: 'kalender/hendelse/:id', element: <EventForm /> },
       { path: 'handleliste', element: <Shopping /> },
       { path: 'mer', element: <More /> },
       { path: 'mer/dokumenter', element: <Documents /> },
@@ -79,11 +78,6 @@ export const router = createBrowserRouter([
       { path: 'mer/info', element: <Info /> },
       { path: 'mer/info/endre', element: <InfoEdit /> },
       { path: 'mer/sjekkliste', element: <Checklist /> },
-      { path: 'mer/kalender', element: <Calendar /> },
-      { path: 'mer/kalender/opphold/ny', element: <StayForm /> },
-      { path: 'mer/kalender/opphold/:id', element: <StayForm /> },
-      { path: 'mer/kalender/hendelse/ny', element: <EventForm /> },
-      { path: 'mer/kalender/hendelse/:id', element: <EventForm /> },
       { path: 'mer/historikk', element: <History /> },
       { path: 'mer/historikk/ny', element: <HistoryForm /> },
       { path: 'mer/historikk/:id', element: <HistoryDetail /> },
@@ -91,6 +85,12 @@ export const router = createBrowserRouter([
       { path: 'mer/medlemmer', element: <Members /> },
       { path: 'mer/hytter', element: <MyCabins /> },
       { path: 'mer/varsler', element: <Notifications /> },
+
+      // Gamle adresser, fra varsler og bokmerker før feil og gjøremål ble til Oppgaver.
+      { path: 'gjoremal/*', element: <Moved from="/gjoremal" to="/oppgaver" /> },
+      { path: 'feil/ny', element: <Navigate to="/oppgaver/ny" state={{ kind: 'feil' }} replace /> },
+      { path: 'feil/*', element: <Moved from="/feil" to="/oppgaver" /> },
+      { path: 'mer/kalender/*', element: <Moved from="/mer/kalender" to="/kalender" /> },
     ],
   },
 

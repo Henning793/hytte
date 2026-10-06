@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Sheet } from './Sheet'
 
 type Props = {
-  /** Spørsmålet, f.eks. «Slette gjøremålet?» */
+  /** Spørsmålet, f.eks. «Slette oppgaven?» */
   title: string
   children?: ReactNode
   confirmLabel: string

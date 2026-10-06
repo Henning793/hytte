@@ -22,11 +22,11 @@ export function StayForm() {
   const { rows } = useTable<Stay>('stays', cabin.id)
   const existing = id ? rows?.find((s) => s.id === id) : undefined
 
-  if (id && !rows) return <TopBar backTo="/mer/kalender" backLabel="Kalender" />
+  if (id && !rows) return <TopBar backTo="/kalender" backLabel="Kalender" />
   if (id && !existing) {
     return (
       <>
-        <TopBar backTo="/mer/kalender" backLabel="Kalender" />
+        <TopBar backTo="/kalender" backLabel="Kalender" />
         <div className="scroll">
           <p className="empty">Oppholdet finnes ikke lenger.</p>
         </div>
@@ -62,7 +62,7 @@ function StayFormInner({ existing }: { existing?: Stay }) {
   const [busy, setBusy] = useState(false)
   const [confirming, setConfirming] = useState(false)
 
-  const back = `/mer/kalender?dag=${existing?.start_date ?? startDay}`
+  const back = `/kalender?dag=${existing?.start_date ?? startDay}`
   const valid = from && to && to >= from
   // Hvem andre er der samtidig? Nyttig å vite før man drar.
   const others = valid ? within(stays, from, to).filter((s) => s.id !== existing?.id && (who === OTHER || s.user_id !== who)).sort(byStart) : []
@@ -93,7 +93,7 @@ function StayFormInner({ existing }: { existing?: Stay }) {
         await insertRow<Stay>('stays', { ...draftMeta(cabin.id, me), ...fields })
         toast(who === me ? 'Du står i kalenderen' : `${person.guest_name ?? name(who)} står i kalenderen`)
       }
-      navigate(`/mer/kalender?dag=${from}`, { replace: true })
+      navigate(`/kalender?dag=${from}`, { replace: true })
     } catch {
       setBusy(false)
       setFormError('Oppholdet ble ikke lagret. Prøv igjen.')

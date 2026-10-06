@@ -19,11 +19,11 @@ export function EventForm() {
   const { rows } = useTable<CalendarEvent>('calendar_events', cabin.id)
   const existing = id ? rows?.find((e) => e.id === id) : undefined
 
-  if (id && !rows) return <TopBar backTo="/mer/kalender" backLabel="Kalender" />
+  if (id && !rows) return <TopBar backTo="/kalender" backLabel="Kalender" />
   if (id && !existing) {
     return (
       <>
-        <TopBar backTo="/mer/kalender" backLabel="Kalender" />
+        <TopBar backTo="/kalender" backLabel="Kalender" />
         <div className="scroll">
           <p className="empty">Hendelsen finnes ikke lenger.</p>
         </div>
@@ -54,7 +54,7 @@ function EventFormInner({ existing }: { existing?: CalendarEvent }) {
   const [busy, setBusy] = useState(false)
   const [confirming, setConfirming] = useState(false)
 
-  const back = `/mer/kalender?dag=${existing?.start_date ?? startDay}`
+  const back = `/kalender?dag=${existing?.start_date ?? startDay}`
   const canDelete = existing && (existing.created_by === me || cabin.role === 'admin')
 
   async function submit(ev: FormEvent) {
@@ -88,7 +88,7 @@ function EventFormInner({ existing }: { existing?: CalendarEvent }) {
         await insertRow<CalendarEvent>('calendar_events', { ...draftMeta(cabin.id, me), ...fields })
         toast('Hendelsen er lagt til')
       }
-      navigate(`/mer/kalender?dag=${from}`, { replace: true })
+      navigate(`/kalender?dag=${from}`, { replace: true })
     } catch {
       setBusy(false)
       setFormError('Hendelsen ble ikke lagret. Prøv igjen.')

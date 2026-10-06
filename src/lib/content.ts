@@ -2,15 +2,16 @@
 import { useToast } from '../components/Toast'
 import { updateRow } from './data'
 import { formatDay, formatSize } from './format'
-import type { Doc, DocCategory, Issue, IssueStatus, Task } from './types'
+import type { Doc, DocCategory, Task } from './types'
 import { useMe } from './useMe'
 
 type NameOf = (id: string | null) => string
 
-export const statusLabel: Record<IssueStatus, string> = { ny: 'Ny', pagar: 'Pågår', fikset: 'Fikset' }
-
-/** Åpne gjøremål: de med frist først (tidligst øverst), så resten i rekkefølgen de kom inn. */
+/** Åpne oppgaver: feil først (nyeste øverst), så de med frist (tidligst øverst), så resten i rekkefølgen de kom inn. */
 export function sortOpen(a: Task, b: Task) {
+  if (a.kind === 'feil' && b.kind === 'feil') return b.created_at.localeCompare(a.created_at)
+  if (a.kind === 'feil') return -1
+  if (b.kind === 'feil') return 1
   if (a.due_date && b.due_date) return a.due_date.localeCompare(b.due_date)
   if (a.due_date) return -1
   if (b.due_date) return 1
@@ -21,7 +22,7 @@ export function taskMeta(t: Task, name: NameOf) {
   const parts: string[] = []
   if (t.responsible_user_id) parts.push(name(t.responsible_user_id))
   if (t.due_date) parts.push(`frist ${formatDay(t.due_date)}`)
-  parts.push(`av ${name(t.created_by)}`)
+  parts.push(t.kind === 'feil' ? `meldt av ${name(t.created_by)} ${formatDay(t.created_at)}` : `av ${name(t.created_by)}`)
   return parts.join(' · ')
 }
 
@@ -33,13 +34,6 @@ export function useToggleTask() {
     updateRow<Task>('tasks', t.cabin_id, t.id, { done: !t.done }, { done_by: t.done ? null : me }).catch(() =>
       toast('Endringen ble ikke lagret. Prøv igjen.'),
     )
-}
-
-/** Åpne feil: nyeste først. */
-export const newestFirst = (a: Issue, b: Issue) => b.created_at.localeCompare(a.created_at)
-
-export function issueMeta(i: Issue, name: NameOf) {
-  return `Meldt av ${name(i.created_by)} · ${formatDay(i.created_at)}`
 }
 
 /** «Bare Ola kan slette …», eller «admin» hvis den som la det inn ikke er med lenger. */

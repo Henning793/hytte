@@ -17,12 +17,12 @@ export type PushPrefs = {
 export const DEFAULT_PREFS: PushPrefs = { issues: true, events: true, reminders: true, trip: true, stays: false, tasks: false }
 
 export const PREF_LABELS: { key: keyof PushPrefs; label: string; meta: string }[] = [
-  { key: 'issues', label: 'Ny feil eller mangel', meta: 'Når noen melder en feil' },
+  { key: 'issues', label: 'Ny feil', meta: 'Når noen melder at noe er ødelagt' },
   { key: 'events', label: 'Ny hendelse i kalenderen', meta: 'F.eks. dugnad' },
   { key: 'reminders', label: 'Påminnelse dagen før', meta: 'Om hendelser i kalenderen' },
-  { key: 'trip', label: 'Dagen før jeg skal på hytta', meta: 'Sjekk handleliste og gjøremål før du drar' },
+  { key: 'trip', label: 'Dagen før jeg skal på hytta', meta: 'Sjekk handleliste og oppgaver før du drar' },
   { key: 'stays', label: 'Noen skal på hytta', meta: 'Når et opphold legges inn' },
-  { key: 'tasks', label: 'Nytt gjøremål', meta: 'Når noen legger til et gjøremål' },
+  { key: 'tasks', label: 'Ny oppgave', meta: 'Når noen legger til en oppgave som ikke er en feil' },
 ]
 
 export const pushSupported = () =>

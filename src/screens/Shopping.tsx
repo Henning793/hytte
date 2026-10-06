@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useLocation } from 'react-router'
 import { Pencil } from 'lucide-react'
 import { CheckBox } from '../components/CheckBox'
 import { ConfirmSheet } from '../components/ConfirmSheet'
@@ -17,6 +18,8 @@ export function Shopping() {
   const cabin = useCurrentCabin()
   const me = useMe()
   const toast = useToast()
+  // Fra «Noe som mangler?» på Hjem: rett til feltet for ny vare.
+  const addRequested = !!(useLocation().state as { add?: boolean } | null)?.add
   const { rows } = useTable<ShoppingItem>('shopping_items', cabin.id)
   const name = useNames(cabin.id)
   const pending = usePendingIds()
@@ -89,6 +92,7 @@ export function Shopping() {
           placeholder="Legg til vare …"
           maxLength={100}
           enterKeyHint="done"
+          autoFocus={addRequested}
           value={text}
           onChange={(e) => setText(e.target.value)}
         />

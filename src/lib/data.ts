@@ -148,7 +148,7 @@ export function useSyncState(): SyncState {
 // Utboksen
 // ---------------------------------------------------------------------------
 
-export type ContentTable = 'tasks' | 'issues' | 'shopping_items' | 'documents' | 'checklist_items' | 'stays' | 'calendar_events' | 'history_entries'
+export type ContentTable = 'tasks' | 'shopping_items' | 'documents' | 'checklist_items' | 'stays' | 'calendar_events' | 'history_entries'
 type Row = { id: string; cabin_id: string; created_at: string }
 type Upload = { file: Blob; cabinId: string; folder: string; field: string; ext: string; type: string }
 

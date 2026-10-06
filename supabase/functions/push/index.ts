@@ -1,7 +1,7 @@
 // Edge Function «push»: sender push-varsler til de i hytta som har slått dem på.
 //
 // Kalles bare fra databasen (se migrasjonen 20261007090000_push.sql):
-//   { "table": "issues" | "calendar_events" | "stays" | "tasks", "id": "<uuid>" }  når noe nytt legges inn
+//   { "table": "calendar_events" | "stays" | "tasks", "id": "<uuid>" }            når noe nytt legges inn
 //   { "kind": "reminders" }                                                          hver dag, for hendelser og egne opphold i morgen
 //   { "kind": "test", "user_id": "<uuid>" }                                          testvarsel til én person (kjøres for hånd)
 // Kallet må ha headeren x-push-secret med hemmeligheten fra Vault.
@@ -68,19 +68,6 @@ async function firstName(id: string | null): Promise<string> {
 }
 
 async function messageForRow(table: string, id: string): Promise<Message[]> {
-  if (table === 'issues') {
-    const { data: r } = await db.from('issues').select('cabin_id, title, created_by').eq('id', id).single()
-    if (!r) return []
-    return [{
-      cabinId: r.cabin_id,
-      pref: 'issues',
-      actor: r.created_by,
-      title: `Ny feil på ${await cabinName(r.cabin_id)}`,
-      body: `${await firstName(r.created_by)}: ${r.title}`,
-      url: `/feil/${id}`,
-      tag: `issue-${id}`,
-    }]
-  }
   if (table === 'calendar_events') {
     const { data: r } = await db
       .from('calendar_events')
@@ -94,7 +81,7 @@ async function messageForRow(table: string, id: string): Promise<Message[]> {
       actor: r.created_by,
       title: `Ny hendelse på ${await cabinName(r.cabin_id)}`,
       body: `${r.title}, ${formatDates(r.start_date, r.end_date)}${clock(r.start_time)}`,
-      url: '/mer/kalender',
+      url: '/kalender',
       tag: `event-${id}`,
     }]
   }
@@ -112,20 +99,21 @@ async function messageForRow(table: string, id: string): Promise<Message[]> {
       actor: r.created_by,
       title: `${who} skal på ${await cabinName(r.cabin_id)}`,
       body: formatDates(r.start_date, r.end_date),
-      url: '/mer/kalender',
+      url: '/kalender',
       tag: `stay-${id}`,
     }]
   }
   if (table === 'tasks') {
-    const { data: r } = await db.from('tasks').select('cabin_id, title, done, created_by').eq('id', id).single()
+    const { data: r } = await db.from('tasks').select('cabin_id, title, kind, done, created_by').eq('id', id).single()
     if (!r || r.done) return []
+    const fault = r.kind === 'feil'
     return [{
       cabinId: r.cabin_id,
-      pref: 'tasks',
+      pref: fault ? 'issues' : 'tasks',
       actor: r.created_by,
-      title: `Nytt gjøremål på ${await cabinName(r.cabin_id)}`,
+      title: `${fault ? 'Ny feil' : 'Ny oppgave'} på ${await cabinName(r.cabin_id)}`,
       body: `${await firstName(r.created_by)}: ${r.title}`,
-      url: `/gjoremal/${id}`,
+      url: `/oppgaver/${id}`,
       tag: `task-${id}`,
     }]
   }
@@ -146,11 +134,11 @@ async function reminders(): Promise<Message[]> {
       actor: null,
       title: `I morgen: ${e.title}`,
       body: `${await cabinName(e.cabin_id)}${clock(e.start_time)}`,
-      url: '/mer/kalender',
+      url: '/kalender',
       tag: `reminder-${e.id}`,
     })
   }
-  // Egne opphold som starter i morgen: tid for å sjekke handleliste og gjøremål.
+  // Egne opphold som starter i morgen: tid for å sjekke handleliste og oppgaver.
   // Gjelder ikke opphold som fortsetter fra i dag (man er der allerede).
   const { data: stays } = await db
     .from('stays')
@@ -172,7 +160,7 @@ async function reminders(): Promise<Message[]> {
       actor: null,
       only: s.user_id,
       title: `I morgen skal du på ${await cabinName(s.cabin_id)}`,
-      body: 'Sjekk handlelisten og gjøremålene før du drar.',
+      body: 'Sjekk handlelisten og oppgavene før du drar.',
       url: '/',
       tag: `trip-${s.id}`,
     })

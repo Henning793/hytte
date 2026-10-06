@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { Outlet, useSearchParams } from 'react-router'
 import { useCabins, useCurrentCabin } from '../lib/cabins'
 import { useTable } from '../lib/data'
-import type { Issue, ShoppingItem } from '../lib/types'
+import type { ShoppingItem, Task } from '../lib/types'
 import { BottomNav } from './BottomNav'
 import { OfflineBanner } from './OfflineBanner'
 
@@ -26,7 +26,7 @@ export function AppLayout() {
     )
   }, [fromNotification, cabins, select, setParams])
 
-  const issues = useTable<Issue>('issues', cabin.id).rows
+  const tasks = useTable<Task>('tasks', cabin.id).rows
   const items = useTable<ShoppingItem>('shopping_items', cabin.id).rows
   return (
     <>
@@ -35,7 +35,7 @@ export function AppLayout() {
         <Outlet />
       </main>
       <BottomNav
-        openIssues={issues?.filter((i) => i.status !== 'fikset').length}
+        openFaults={tasks?.filter((t) => t.kind === 'feil' && !t.done).length}
         shoppingItems={items?.filter((i) => !i.done).length}
       />
     </>

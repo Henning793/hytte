@@ -1,25 +1,36 @@
-import { useId, useState, type FormEvent } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
+import { Camera, RotateCcw, Trash2 } from 'lucide-react'
 import { Field, FieldError } from '../../components/Field'
 import { Segmented } from '../../components/Segmented'
 import { TopBar } from '../../components/TopBar'
 import { useToast } from '../../components/Toast'
 import { useCurrentCabin } from '../../lib/cabins'
 import { insertRow, updateRow, useTable } from '../../lib/data'
+import { compressImage, removeFile, useFileUrl } from '../../lib/files'
 import { useMembers } from '../../lib/members'
 import { draftMeta, type Task, type TaskKind } from '../../lib/types'
 import { useMe } from '../../lib/useMe'
 
-/** «Nytt gjøremål» og «Endre gjøremål». */
+/** «Ny oppgave», «Meld feil» og «Endre oppgave». */
 export function TaskForm() {
   const { id } = useParams()
   const cabin = useCurrentCabin()
   const { rows } = useTable<Task>('tasks', cabin.id)
   const existing = id ? rows?.find((t) => t.id === id) : undefined
 
-  if (id && !rows) return null
-  if (id && !existing) return <p className="empty">Fant ikke gjøremålet.</p>
-  // key: skjemaet starter på nytt med riktige verdier når gjøremålet er lastet.
+  if (id && !rows) return <TopBar backTo="/oppgaver" backLabel="Oppgaver" />
+  if (id && !existing) {
+    return (
+      <>
+        <TopBar backTo="/oppgaver" backLabel="Oppgaver" />
+        <div className="scroll">
+          <p className="empty">Oppgaven finnes ikke lenger.</p>
+        </div>
+      </>
+    )
+  }
+  // key: skjemaet starter på nytt med riktige verdier når oppgaven er lastet.
   return <TaskFormInner key={existing?.id ?? 'ny'} existing={existing} />
 }
 
@@ -31,10 +42,14 @@ function TaskFormInner({ existing }: { existing?: Task }) {
   const location = useLocation()
   const { rows: members } = useMembers(cabin.id)
   const fieldId = useId()
+  const camera = useRef<HTMLInputElement>(null)
 
-  const state = location.state as { kind?: TaskKind; back?: string } | null
-  const initialKind = state?.kind ?? 'gjoremal'
-  const [kind, setKind] = useState<TaskKind>(existing?.kind ?? initialKind)
+  const state = location.state as { kind?: TaskKind } | null
+  const [kind, setKind] = useState<TaskKind>(existing?.kind ?? state?.kind ?? 'oppgave')
+  const [photo, setPhoto] = useState<File | null>(null)
+  // Bildet som er lagret fra før; null når det er fjernet i skjemaet.
+  const [keptPhoto, setKeptPhoto] = useState(existing?.photo_path ?? null)
+  const keptUrl = useFileUrl(photo ? null : keptPhoto)
   const [title, setTitle] = useState(existing?.title ?? '')
   const [description, setDescription] = useState(existing?.description ?? '')
   const [responsible, setResponsible] = useState(existing?.responsible_user_id ?? '')
@@ -42,11 +57,18 @@ function TaskFormInner({ existing }: { existing?: Task }) {
   const [error, setError] = useState<string>()
   const [formError, setFormError] = useState<string>()
   const [busy, setBusy] = useState(false)
+  const fault = kind === 'feil'
+
+  const preview = useMemo(() => (photo ? URL.createObjectURL(photo) : null), [photo])
+  useEffect(() => {
+    if (!preview) return
+    return () => URL.revokeObjectURL(preview)
+  }, [preview])
 
   async function submit(ev: FormEvent) {
     ev.preventDefault()
     if (!title.trim()) {
-      setError('Skriv kort hva som skal gjøres.')
+      setError(fault ? 'Skriv kort hva som er feil, for eksempel «Lekker under vasken».' : 'Skriv kort hva som skal gjøres.')
       return
     }
     const fields = {
@@ -57,26 +79,31 @@ function TaskFormInner({ existing }: { existing?: Task }) {
       due_date: due || null,
     }
     setBusy(true)
+    setFormError(undefined)
     try {
+      // Bildet krympes nå og lastes opp sammen med oppgaven, også senere hvis det ikke er nett.
+      const image = photo ? await compressImage(photo) : null
+      const upload = image ? { file: image, folder: 'tasks', field: 'photo_path' as const } : undefined
       if (existing) {
-        await updateRow<Task>('tasks', cabin.id, existing.id, fields)
-        toast('Gjøremålet er endret')
-        navigate(`/gjoremal/${existing.id}`, { replace: true })
+        const old = existing.photo_path
+        const photoChanged = !!image || keptPhoto !== old
+        await updateRow<Task>('tasks', cabin.id, existing.id, photoChanged && !image ? { ...fields, photo_path: null } : fields, {}, upload)
+        // Det gamle bildet trengs ikke lenger (bilder som ikke er lastet opp ennå, har ingen fil).
+        if (photoChanged && old && !old.startsWith('local:')) void removeFile(old)
+        toast('Oppgaven er endret')
+        navigate(`/oppgaver/${existing.id}`, { replace: true })
       } else {
-        await insertRow<Task>('tasks', {
-          ...draftMeta(cabin.id, me),
-          ...fields,
-          done: false,
-          done_by: null,
-          done_at: null,
-        })
-        toast('Gjøremålet er lagt til')
-        // Tilbake til listen med samme filter som før.
-        navigate(state?.back ? `/gjoremal?${state.back}` : '/gjoremal', { replace: true })
+        await insertRow<Task>(
+          'tasks',
+          { ...draftMeta(cabin.id, me), ...fields, photo_path: null, done: false, done_by: null, done_at: null },
+          upload,
+        )
+        toast(fault ? 'Feilen er meldt' : 'Oppgaven er lagt til')
+        navigate('/oppgaver', { replace: true })
       }
     } catch {
       setBusy(false)
-      setFormError('Gjøremålet ble ikke lagret. Prøv igjen.')
+      setFormError('Oppgaven ble ikke lagret. Prøv igjen.')
     }
   }
 
@@ -84,18 +111,65 @@ function TaskFormInner({ existing }: { existing?: Task }) {
     <>
       <TopBar backLabel="Avbryt" />
       <form className="scroll" onSubmit={submit} noValidate>
-        <h1 className="t-title">{existing ? 'Endre gjøremål' : 'Nytt gjøremål'}</h1>
+        <h1 className="t-title">{existing ? 'Endre oppgave' : fault ? 'Meld feil' : 'Ny oppgave'}</h1>
         <Segmented<TaskKind>
-          label="Type"
+          label="Hva gjelder det?"
           value={kind}
           options={[
-            { value: 'gjoremal', label: 'Gjøremål' },
-            { value: 'vedlikehold', label: 'Vedlikehold' },
+            { value: 'feil', label: 'Noe er ødelagt' },
+            { value: 'oppgave', label: 'Noe må gjøres' },
           ]}
           onChange={setKind}
         />
+        {/* capture åpner kameraet direkte på iPhone og Android. */}
+        <input
+          ref={camera}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="sr-only"
+          tabIndex={-1}
+          aria-hidden="true"
+          onChange={(e) => {
+            const file = e.target.files?.[0]
+            if (file) setPhoto(file)
+            e.target.value = ''
+          }}
+        />
+        {preview || keptPhoto ? (
+          <div className="stack">
+            <div className="photo">
+              {preview || keptUrl ? <img src={preview ?? keptUrl ?? ''} alt="Bildet som hører til oppgaven" /> : <div style={{ height: 200 }} />}
+            </div>
+            <div className="row" style={{ gap: 8, flexWrap: 'wrap' }}>
+              <button type="button" className="ha-btn ha-btn-ghost" style={{ paddingLeft: 0 }} onClick={() => camera.current?.click()}>
+                <RotateCcw className="ha-ico" aria-hidden="true" />
+                Ta nytt bilde
+              </button>
+              <button
+                type="button"
+                className="ha-btn ha-btn-ghost"
+                onClick={() => {
+                  setPhoto(null)
+                  setKeptPhoto(null)
+                }}
+              >
+                <Trash2 className="ha-ico" aria-hidden="true" />
+                Fjern bildet
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button type="button" className="photo-slot" onClick={() => camera.current?.click()}>
+            <Camera className="ha-ico" aria-hidden="true" />
+            Ta bilde
+            <span className="t-caption" style={{ fontWeight: 400 }}>
+              Valgfritt, men hjelper de andre
+            </span>
+          </button>
+        )}
         <Field
-          label="Hva skal gjøres?"
+          label={fault ? 'Hva er feil?' : 'Hva skal gjøres?'}
           value={title}
           maxLength={200}
           error={error}
@@ -111,9 +185,15 @@ function TaskFormInner({ existing }: { existing?: Task }) {
           <textarea
             id={`${fieldId}-desc`}
             className="ha-input"
+            aria-describedby={fault ? `${fieldId}-hint` : undefined}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
           />
+          {fault && (
+            <span className="ha-hint" id={`${fieldId}-hint`}>
+              Hvor er det, og hva har du gjort så langt?
+            </span>
+          )}
         </div>
         <div className="ha-field">
           <label htmlFor={`${fieldId}-resp`}>
@@ -147,7 +227,7 @@ function TaskFormInner({ existing }: { existing?: Task }) {
         </div>
         {formError && <FieldError message={formError} />}
         <button type="submit" className="ha-btn ha-btn-primary ha-btn-block" disabled={busy}>
-          {existing ? 'Lagre endringene' : 'Lagre gjøremål'}
+          {busy ? 'Lagrer …' : existing ? 'Lagre endringene' : fault ? 'Send feilmelding' : 'Lagre oppgave'}
         </button>
       </form>
     </>

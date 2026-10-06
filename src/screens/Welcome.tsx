@@ -24,7 +24,7 @@ export function Welcome() {
           </div>
           <h1 className="t-display">Velkommen til Hytteappen</h1>
           <p className="t-body-lg muted">
-            Gjøremål, feil og mangler, handleliste og koder – samlet på ett sted for alle som deler hytta.
+            Oppgaver, handleliste, kalender og koder – samlet på ett sted for alle som deler hytta.
           </p>
         </div>
         <div className="stack">

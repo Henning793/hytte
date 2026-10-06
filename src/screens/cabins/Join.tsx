@@ -28,7 +28,7 @@ function Benefits() {
     <div className="ha-card">
       <div className="row">
         <ListChecks className="ha-ico" aria-hidden="true" />
-        <span>Se og legg til gjøremål og feil</span>
+        <span>Se og legg til oppgaver og feil</span>
       </div>
       <div className="row">
         <ShoppingCart className="ha-ico" aria-hidden="true" />
