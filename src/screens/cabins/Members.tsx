@@ -101,7 +101,7 @@ export function Members() {
           <div className="stack">
             <h2 className="list-h">Slette hytta</h2>
             <p className="t-caption">
-              Sletter {cabin.name} for alle medlemmene, med gjøremål, feil, handleliste, dokumenter, kalender og
+              Sletter {cabin.name} for alle medlemmene, med oppgaver, handleliste, dokumenter, kalender og
               historikk.
             </p>
             <button type="button" className="ha-btn ha-btn-danger ha-btn-block" onClick={() => setDeleting(true)}>
@@ -262,7 +262,7 @@ function DeleteCabinSheet({ onClose }: { onClose: () => void }) {
       <div className="stack" style={{ gap: 4 }}>
         <h2 className="t-heading">Slette {cabin.name}?</h2>
         <p className="muted">
-          Hytta forsvinner for alle medlemmene, med alt som er lagt inn: gjøremål, feil, handleliste, dokumenter,
+          Hytta forsvinner for alle medlemmene, med alt som er lagt inn: oppgaver, handleliste, dokumenter,
           bilder, info og koder, kalender og historikk. Det kan ikke angres.
         </p>
       </div>

@@ -8,21 +8,20 @@ import { formatFullDay } from '../../lib/dates'
 import { usePendingIds, useTable } from '../../lib/data'
 import { historyItems, matches, type HistoryItem } from '../../lib/history'
 import { useNames } from '../../lib/members'
-import type { HistoryEntry, Issue, Task } from '../../lib/types'
+import type { HistoryEntry, Task } from '../../lib/types'
 
 export function History() {
   const cabin = useCurrentCabin()
   const entries = useTable<HistoryEntry>('history_entries', cabin.id).rows
   const tasks = useTable<Task>('tasks', cabin.id).rows
-  const issues = useTable<Issue>('issues', cabin.id).rows
   const name = useNames(cabin.id)
   const pending = usePendingIds()
   const [query, setQuery] = useState('')
 
-  const all = historyItems(entries, tasks, issues)
+  const all = historyItems(entries, tasks)
   const shown = all.filter((i) => matches(i, query))
   const years = [...new Set(shown.map((i) => i.date.slice(0, 4)))]
-  const loaded = entries && tasks && issues
+  const loaded = entries && tasks
 
   return (
     <>
@@ -30,7 +29,7 @@ export function History() {
       <div className="scroll">
         <div className="stack" style={{ gap: 4 }}>
           <h1 className="t-title">Historikk</h1>
-          <p className="t-caption">Når ting sist ble gjort på hytta. Fullførte gjøremål og fiksede feil kommer med av seg selv.</p>
+          <p className="t-caption">Når ting sist ble gjort på hytta. Fullførte oppgaver og fiksede feil kommer med av seg selv.</p>
         </div>
         <Link className="ha-btn ha-btn-primary ha-btn-block" to="/mer/historikk/ny">
           <Plus className="ha-ico" aria-hidden="true" />
@@ -73,12 +72,10 @@ export function History() {
   )
 }
 
-const label: Record<HistoryItem['type'], string | null> = { entry: null, task: null, issue: 'Feil fikset' }
-
 function Row({ item, by, pending }: { item: HistoryItem; by: string; pending: boolean }) {
-  const to = item.type === 'entry' ? `/mer/historikk/${item.id}` : item.type === 'task' ? `/gjoremal/${item.id}` : `/feil/${item.id}`
-  const badge = item.type === 'task' ? (item.row.kind === 'vedlikehold' ? 'Vedlikehold' : 'Gjøremål') : label[item.type]
-  const photo = item.type === 'entry' ? item.row.photo_path : item.type === 'issue' ? item.row.photo_path : null
+  const to = item.type === 'entry' ? `/mer/historikk/${item.id}` : `/oppgaver/${item.id}`
+  const badge = item.type === 'task' ? (item.row.kind === 'feil' ? 'Feil fikset' : 'Oppgave') : null
+  const photo = item.row.photo_path
   return (
     <Link className="ha-li" to={to}>
       <span className="ha-li-main">

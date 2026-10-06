@@ -130,11 +130,21 @@ select tests.ok(tests.affected($$update cabins set name = 'Kari sin' $$) = 0, 'm
 select tests.ok(tests.affected($$delete from cabins$$) = 0, 'medlemmer kan ikke slette hytta');
 
 -- ---------------------------------------------------------------------------
--- Gjøremål, feil, handleliste
+-- Oppgaver, feil, handleliste
 -- ---------------------------------------------------------------------------
 select tests.login('00000000-0000-0000-0000-00000000000a');
 insert into tasks (id, cabin_id, title) values ('11111111-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000001', 'Måke taket');
+-- Den gamle appen melder feil i issues; de havner i tasks.
 insert into issues (id, cabin_id, title) values ('22222222-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000001', 'Lekker kran');
+select tests.ok((select kind from tasks where id = '22222222-0000-0000-0000-00000000000a') = 'feil'
+  and (select created_by from tasks where id = '22222222-0000-0000-0000-00000000000a') = auth.uid()
+  and tests.rows('select 1 from issues') = 0,
+  'feil fra den gamle appen blir en oppgave merket som feil');
+insert into tasks (id, cabin_id, title, kind) values ('11111111-0000-0000-0000-00000000000d', 'aaaaaaaa-0000-0000-0000-000000000001', 'Beise', 'vedlikehold');
+select tests.ok((select kind from tasks where id = '11111111-0000-0000-0000-00000000000d') = 'oppgave',
+  'vedlikehold fra den gamle appen blir en vanlig oppgave');
+select tests.fails($$insert into issues (cabin_id, title) values ('bbbbbbbb-0000-0000-0000-000000000002', 'Inntrenger')$$,
+  'den gamle veien for feil følger reglene for oppgaver');
 insert into shopping_items (id, cabin_id, name) values
   ('33333333-0000-0000-0000-00000000000a', 'aaaaaaaa-0000-0000-0000-000000000001', 'Melk'),
   ('33333333-0000-0000-0000-00000000000b', 'aaaaaaaa-0000-0000-0000-000000000001', 'Kaffe');
@@ -157,9 +167,9 @@ select tests.ok(tests.affected($$delete from tasks where id = '11111111-0000-000
   'medlemmer kan ikke slette andres gjøremål');
 select tests.ok(tests.affected($$delete from tasks where id = '11111111-0000-0000-0000-00000000000b'$$) = 1,
   'medlemmer kan slette egne gjøremål');
-select tests.ok(tests.affected($$update issues set status = 'pagar' where id = '22222222-0000-0000-0000-00000000000a'$$) = 1,
-  'alle medlemmer kan endre status på feil');
-select tests.ok(tests.affected($$delete from issues where id = '22222222-0000-0000-0000-00000000000a'$$) = 0,
+select tests.ok(tests.affected($$update tasks set done = true where id = '22222222-0000-0000-0000-00000000000a'$$) = 1,
+  'alle medlemmer kan merke feil som fikset');
+select tests.ok(tests.affected($$delete from tasks where id = '22222222-0000-0000-0000-00000000000a'$$) = 0,
   'medlemmer kan ikke slette andres feil');
 select tests.ok(tests.affected($$update shopping_items set done = true where name = 'Melk'$$) = 1, 'kryss av vare');
 select tests.ok((select bought_by from shopping_items where name = 'Melk') = auth.uid(), 'vare får «Kjøpt av»');
@@ -283,7 +293,7 @@ select tests.ok(tests.rows($$select 1 from cabin_members where cabin_id = 'aaaaa
 select tests.ok(tests.rows($$select 1 from profiles where id <> auth.uid()$$) = 0, 'Per ser ikke andres profiler');
 select tests.fails($$insert into tasks (cabin_id, title) values ('aaaaaaaa-0000-0000-0000-000000000001', 'Inntrenger')$$,
   'Per kan ikke legge inn gjøremål i Furulia');
-select tests.ok(tests.affected($$update issues set status = 'fikset'$$) = 0, 'Per kan ikke endre Furulias feil');
+select tests.ok(tests.affected($$update tasks set done = true$$) = 0, 'Per kan ikke endre Furulias oppgaver');
 select tests.ok(tests.affected($$update cabin_info set keybox_code = '0000' where cabin_id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 0,
   'Per kan ikke endre Furulias koder');
 select tests.ok(tests.affected($$delete from shopping_items$$) = 0, 'Per kan ikke slette Furulias varer');

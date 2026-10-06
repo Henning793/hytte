@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import {
   Bell,
-  CalendarDays,
   Check,
   ChevronRight,
   FileText,
@@ -26,7 +25,6 @@ import { useMe } from '../lib/useMe'
 import { setThemePreference, useTheme } from '../lib/theme'
 
 const links: { to: string; label: string; icon: LucideIcon }[] = [
-  { to: '/mer/kalender', label: 'Kalender', icon: CalendarDays },
   { to: '/mer/historikk', label: 'Historikk', icon: History },
   { to: '/mer/dokumenter', label: 'Dokumenter', icon: FileText },
   { to: '/mer/info', label: 'Info og koder', icon: Info },

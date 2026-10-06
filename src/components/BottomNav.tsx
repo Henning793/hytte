@@ -1,21 +1,21 @@
 import { NavLink } from 'react-router'
-import { House, ListChecks, Menu, ShoppingCart, Wrench, type LucideIcon } from 'lucide-react'
+import { CalendarDays, House, ListChecks, Menu, ShoppingCart, type LucideIcon } from 'lucide-react'
 
 type Tab = { to: string; label: string; icon: LucideIcon; end?: boolean; count?: number }
 
 type Props = {
-  /** Antall åpne feil, vises som tall-merke på Feil-fanen. */
-  openIssues?: number
+  /** Antall åpne feil, vises som tall-merke på Oppgaver-fanen. */
+  openFaults?: number
   /** Antall varer på handlelisten. */
   shoppingItems?: number
 }
 
-export function BottomNav({ openIssues = 0, shoppingItems = 0 }: Props) {
+export function BottomNav({ openFaults = 0, shoppingItems = 0 }: Props) {
   const tabs: Tab[] = [
     { to: '/', label: 'Hjem', icon: House, end: true },
-    { to: '/gjoremal', label: 'Gjøremål', icon: ListChecks },
-    { to: '/feil', label: 'Feil', icon: Wrench, count: openIssues },
+    { to: '/oppgaver', label: 'Oppgaver', icon: ListChecks, count: openFaults },
     { to: '/handleliste', label: 'Handleliste', icon: ShoppingCart, count: shoppingItems },
+    { to: '/kalender', label: 'Kalender', icon: CalendarDays },
     { to: '/mer', label: 'Mer', icon: Menu },
   ]
 
@@ -28,7 +28,7 @@ export function BottomNav({ openIssues = 0, shoppingItems = 0 }: Props) {
           </span>
           {label}
           {count ? (
-            <span className={label === 'Feil' ? 'dot' : 'dot dot-neutral'} aria-label={`${count} ${label === 'Feil' ? 'åpne' : 'varer'}`}>
+            <span className={to === '/oppgaver' ? 'dot' : 'dot dot-neutral'} aria-label={to === '/oppgaver' ? `${count} åpne feil` : `${count} varer`}>
               {count}
             </span>
           ) : null}

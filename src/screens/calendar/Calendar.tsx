@@ -1,7 +1,6 @@
 import { Link, useNavigate, useSearchParams } from 'react-router'
 import { CalendarPlus, ChevronLeft, ChevronRight, UserRoundCheck } from 'lucide-react'
 import { PendingMark } from '../../components/OfflineBanner'
-import { TopBar } from '../../components/TopBar'
 import { useCurrentCabin } from '../../lib/cabins'
 import { assignLanes, byStart, formatTime, useStayPerson, within } from '../../lib/calendar'
 import { formatLongDay, formatMonth, formatRange, isoWeek, monthWeeks, toIso, todayIso } from '../../lib/dates'
@@ -60,8 +59,7 @@ export function Calendar() {
 
   return (
     <>
-      <TopBar backTo="/mer" backLabel="Mer" />
-      <div className="scroll">
+      <div className="scroll" style={{ paddingTop: 20 }}>
         <h1 className="t-title">Kalender</h1>
 
         <div className="stack">
@@ -171,12 +169,12 @@ export function Calendar() {
             <button
               type="button"
               className="ha-tile ha-tile-primary cal-tile"
-              onClick={() => navigate(myStay ? `/mer/kalender/opphold/${myStay.id}` : `/mer/kalender/opphold/ny?dato=${selected}`)}
+              onClick={() => navigate(myStay ? `/kalender/opphold/${myStay.id}` : `/kalender/opphold/ny?dato=${selected}`)}
             >
               <UserRoundCheck className="ha-ico" aria-hidden="true" />
               {myStay ? 'Endre oppholdet mitt' : 'Jeg er på hytta'}
             </button>
-            <button type="button" className="ha-tile ha-tile-secondary cal-tile" onClick={() => navigate(`/mer/kalender/hendelse/ny?dato=${selected}`)}>
+            <button type="button" className="ha-tile ha-tile-secondary cal-tile" onClick={() => navigate(`/kalender/hendelse/ny?dato=${selected}`)}>
               <CalendarPlus className="ha-ico" aria-hidden="true" />
               Ny hendelse
             </button>
@@ -219,7 +217,7 @@ export function Calendar() {
 
 function StayRow({ stay, name, color, pending }: { stay: Stay; name: string; color: string; pending: boolean }) {
   return (
-    <Link className="ha-li" to={`/mer/kalender/opphold/${stay.id}`}>
+    <Link className="ha-li" to={`/kalender/opphold/${stay.id}`}>
       <span className="cal-dot" style={{ background: color }} aria-hidden="true" />
       <span className="ha-li-main">
         <span className="ha-li-title">{name} er på hytta</span>
@@ -237,7 +235,7 @@ function StayRow({ stay, name, color, pending }: { stay: Stay; name: string; col
 function EventRow({ event, pending }: { event: CalendarEvent; pending: boolean }) {
   const time = formatTime(event)
   return (
-    <Link className="ha-li" to={`/mer/kalender/hendelse/${event.id}`}>
+    <Link className="ha-li" to={`/kalender/hendelse/${event.id}`}>
       <span className="cal-dot event" aria-hidden="true" />
       <span className="ha-li-main">
         <span className="ha-li-title">{event.title}</span>

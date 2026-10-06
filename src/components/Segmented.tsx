@@ -5,7 +5,7 @@ type Props<T extends string> = {
   onChange: (value: T) => void
 }
 
-/** Segmentert valg (maks tre valg), f.eks. Alle · Gjøremål · Vedlikehold. */
+/** Segmentert valg (maks tre valg), f.eks. Noe er ødelagt · Noe må gjøres. */
 export function Segmented<T extends string>({ label, value, options, onChange }: Props<T>) {
   return (
     <div className="ha-seg" role="group" aria-label={label}>

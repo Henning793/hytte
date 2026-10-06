@@ -1,6 +1,7 @@
 // Radene slik de ligger i databasen (se supabase/migrations).
 
-export type TaskKind = 'gjoremal' | 'vedlikehold'
+/** «feil»: noe er ødelagt og må fikses. «oppgave»: alt annet som må gjøres. */
+export type TaskKind = 'oppgave' | 'feil'
 
 export type Task = {
   id: string
@@ -8,25 +9,12 @@ export type Task = {
   title: string
   description: string | null
   kind: TaskKind
+  photo_path: string | null
   responsible_user_id: string | null
   due_date: string | null
   done: boolean
   done_by: string | null
   done_at: string | null
-  created_by: string | null
-  created_at: string
-  updated_at: string
-}
-
-export type IssueStatus = 'ny' | 'pagar' | 'fikset'
-
-export type Issue = {
-  id: string
-  cabin_id: string
-  title: string
-  description: string | null
-  status: IssueStatus
-  photo_path: string | null
   created_by: string | null
   created_at: string
   updated_at: string

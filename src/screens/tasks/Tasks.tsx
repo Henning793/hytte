@@ -1,50 +1,35 @@
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import { ChevronRight, Plus } from 'lucide-react'
 import { CheckBox } from '../../components/CheckBox'
+import { FaultBadge } from '../../components/FaultBadge'
 import { PendingMark } from '../../components/OfflineBanner'
-import { Segmented } from '../../components/Segmented'
 import { useCurrentCabin } from '../../lib/cabins'
 import { sortOpen, taskMeta, useToggleTask } from '../../lib/content'
 import { usePendingIds, useTable } from '../../lib/data'
 import { formatDay } from '../../lib/format'
 import { useNames } from '../../lib/members'
-import type { Task, TaskKind } from '../../lib/types'
-
-type Filter = 'alle' | TaskKind
+import type { Task } from '../../lib/types'
 
 export function Tasks() {
   const cabin = useCurrentCabin()
   const navigate = useNavigate()
-  const [params, setParams] = useSearchParams()
-  const filter = (params.get('vis') as Filter | null) ?? 'alle'
   const { rows } = useTable<Task>('tasks', cabin.id)
   const name = useNames(cabin.id)
   const toggle = useToggleTask()
   const pending = usePendingIds()
 
-  const visible = (rows ?? []).filter((t) => filter === 'alle' || t.kind === filter)
-  const open = visible.filter((t) => !t.done).sort(sortOpen)
-  const done = visible.filter((t) => t.done).sort((a, b) => (b.done_at ?? '').localeCompare(a.done_at ?? ''))
+  const open = (rows ?? []).filter((t) => !t.done).sort(sortOpen)
+  const done = (rows ?? []).filter((t) => t.done).sort((a, b) => (b.done_at ?? '').localeCompare(a.done_at ?? ''))
 
   return (
     <div className="scroll" style={{ paddingTop: 20 }}>
-      <h1 className="t-title">Gjøremål</h1>
-      <Segmented<Filter>
-        label="Filter"
-        value={filter}
-        options={[
-          { value: 'alle', label: 'Alle' },
-          { value: 'gjoremal', label: 'Gjøremål' },
-          { value: 'vedlikehold', label: 'Vedlikehold' },
-        ]}
-        onChange={(v) => setParams(v === 'alle' ? {} : { vis: v }, { replace: true })}
-      />
-      <Link className="ha-btn ha-btn-primary ha-btn-block" to="/gjoremal/ny" state={{ kind: filter === 'vedlikehold' ? 'vedlikehold' : 'gjoremal', back: params.toString() }}>
+      <h1 className="t-title">Oppgaver</h1>
+      <Link className="ha-btn ha-btn-primary ha-btn-block" to="/oppgaver/ny">
         <Plus className="ha-ico" aria-hidden="true" />
-        Nytt gjøremål
+        Ny oppgave
       </Link>
 
-      {rows && open.length === 0 && <div className="empty">Ingen gjøremål her ennå.</div>}
+      {rows && open.length === 0 && <div className="empty">Ingenting som må fikses eller gjøres. Fint!</div>}
       {open.length > 0 && (
         <div className="ha-list">
           {open.map((t) => (
@@ -64,7 +49,7 @@ export function Tasks() {
                 type="button"
                 className="ha-li-main"
                 style={{ border: 0, background: 'transparent', textAlign: 'left', cursor: 'pointer', padding: '4px 0', minHeight: 56, justifyContent: 'center' }}
-                onClick={() => navigate(`/gjoremal/${t.id}`)}
+                onClick={() => navigate(`/oppgaver/${t.id}`)}
               >
                 <span className="ha-li-title">{t.title}</span>
                 <span className="ha-li-meta">
@@ -72,6 +57,7 @@ export function Tasks() {
                   {taskMeta(t, name)}
                 </span>
               </button>
+              {t.kind === 'feil' && <FaultBadge />}
               <ChevronRight className="ha-ico ha-chev" aria-hidden="true" />
             </div>
           ))}
