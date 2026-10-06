@@ -4,7 +4,7 @@
 --   1. Appen lagrer enhetens push-abonnement i push_subscriptions.
 --   2. Når noe nytt legges inn (feil, hendelse, opphold, gjøremål), kaller en
 --      trigger Edge Function «push» via pg_net.
---   3. Hver dag kl. 16 UTC kaller pg_cron den samme funksjonen for å minne om
+--   3. Hver dag kl. 12 norsk tid kaller pg_cron den samme funksjonen for å minne om
 --      hendelser og egne opphold som starter i morgen.
 --   4. Funksjonen finner mottakerne (alle i hytta unntatt den som gjorde det,
 --      og som har den typen varsel på) og sender.

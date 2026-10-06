@@ -69,7 +69,7 @@ Av for alle til hver person selv slår dem på under *Mer → Varsler* (per tele
 Slik virker det (`supabase/migrations/20261007090000_push.sql`):
 
 - Appen lagrer enhetens abonnement med `save_push_subscription()` og valgene i `notification_prefs`.
-- Når noe nytt legges inn, kaller en trigger Edge Function `push` (`supabase/functions/push/`) via `pg_net`. Hver dag kl. 16 UTC kaller `pg_cron` den samme funksjonen for påminnelser.
+- Når noe nytt legges inn, kaller en trigger Edge Function `push` (`supabase/functions/push/`) via `pg_net`. Hver dag kl. 12 norsk tid (sommer og vinter) kaller `pg_cron` den samme funksjonen for påminnelser; jobben går kl. 10 og 11 UTC, og funksjonen sender bare når klokka er 12 i Norge (`20261009090000_push_kl12.sql`).
 - Funksjonen henter nøklene fra Vault med `push_settings()` og sender med Web Push.
 
 Oppsett én gang (ingen miljøvariabler i Netlify trengs):

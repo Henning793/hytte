@@ -2,7 +2,7 @@
 //
 // Kalles bare fra databasen (se migrasjonen 20261007090000_push.sql):
 //   { "table": "calendar_events" | "stays" | "tasks", "id": "<uuid>" }            når noe nytt legges inn
-//   { "kind": "reminders" }                                                          hver dag, for hendelser og egne opphold i morgen
+//   { "kind": "reminders" }                                                          kl. 10 og 11 UTC, sender bare når klokka er 12 i Norge
 //   { "kind": "test", "user_id": "<uuid>" }                                          testvarsel til én person (kjøres for hånd)
 // Kallet må ha headeren x-push-secret med hemmeligheten fra Vault.
 //
@@ -37,6 +37,10 @@ const db = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SE
 // ---------------------------------------------------------------------------
 
 const osloDate = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Oslo' }).format(d)
+const osloHour = (d: Date) => Number(new Intl.DateTimeFormat('en-GB', { hour: '2-digit', hourCycle: 'h23', timeZone: 'Europe/Oslo' }).format(d))
+
+/** Påminnelsene sendes kl. 12 norsk tid hele året. */
+const REMINDER_HOUR = 12
 const fromIso = (iso: string) => new Date(`${iso}T12:00:00Z`)
 const dayMonth = new Intl.DateTimeFormat('nb-NO', { day: 'numeric', month: 'short', timeZone: 'UTC' })
 const weekdayDay = new Intl.DateTimeFormat('nb-NO', { weekday: 'long', day: 'numeric', month: 'short', timeZone: 'UTC' })
@@ -121,6 +125,8 @@ async function messageForRow(table: string, id: string): Promise<Message[]> {
 }
 
 async function reminders(): Promise<Message[]> {
+  // pg_cron går i UTC og kaller både kl. 10 og 11; bare det kallet som treffer kl. 12 i Norge sender.
+  if (osloHour(new Date()) !== REMINDER_HOUR) return []
   const tomorrow = osloDate(new Date(Date.now() + 24 * 60 * 60 * 1000))
   const { data } = await db
     .from('calendar_events')
