@@ -37,6 +37,7 @@ export function AppLayout() {
         <Outlet />
       </main>
       <BottomNav
+        openTasks={tasks?.filter((t) => !t.done).length}
         openFaults={tasks?.filter((t) => t.kind === 'feil' && !t.done).length}
         shoppingItems={items?.filter((i) => !i.done).length}
       />
