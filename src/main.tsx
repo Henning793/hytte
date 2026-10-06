@@ -5,6 +5,7 @@ import { ToastProvider } from './components/Toast'
 import { AuthProvider } from './lib/auth'
 import { CabinProvider } from './lib/cabins'
 import './lib/theme'
+import './lib/update'
 import './styles/hytte.css'
 import { router } from './router'
 

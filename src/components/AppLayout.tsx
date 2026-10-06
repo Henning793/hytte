@@ -5,6 +5,7 @@ import { useTable } from '../lib/data'
 import type { ShoppingItem, Task } from '../lib/types'
 import { BottomNav } from './BottomNav'
 import { OfflineBanner } from './OfflineBanner'
+import { UpdateBanner } from './UpdateBanner'
 
 /** Ramme for skjermene inne i en hytte: innhold øverst, bunnmeny nederst. */
 export function AppLayout() {
@@ -31,6 +32,7 @@ export function AppLayout() {
   return (
     <>
       <main className="screen">
+        <UpdateBanner />
         <OfflineBanner />
         <Outlet />
       </main>
