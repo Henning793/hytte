@@ -11,6 +11,7 @@ import {
   LogOut,
   Moon,
   Palette,
+  RefreshCw,
   Users,
   Warehouse,
   type LucideIcon,
@@ -23,6 +24,7 @@ import { PALETTE, saveMyColor, useColors } from '../lib/members'
 import { usePushEnabled } from '../lib/push'
 import { useMe } from '../lib/useMe'
 import { setThemePreference, useTheme } from '../lib/theme'
+import { APP_VERSION, BUILD_TIME, applyUpdate, checkForUpdate, useUpdateReady } from '../lib/update'
 
 const links: { to: string; label: string; icon: LucideIcon }[] = [
   { to: '/mer/historikk', label: 'Historikk', icon: History },
@@ -99,6 +101,7 @@ export function More() {
             </span>
             <span className="cal-dot" style={{ background: myColor, width: 24, height: 24 }} aria-hidden="true" />
           </button>
+          <UpdateRow />
           <button
             type="button"
             className="ha-li"
@@ -117,6 +120,43 @@ export function More() {
 
       {choosingColor && <ColorSheet current={myColor} onClose={() => setChoosingColor(false)} />}
     </div>
+  )
+}
+
+const buildTime = BUILD_TIME.toLocaleString('nb-NO', {
+  day: 'numeric',
+  month: 'short',
+  hour: '2-digit',
+  minute: '2-digit',
+})
+
+/** «Se etter oppdatering», med versjonen man har nå. */
+function UpdateRow() {
+  const ready = useUpdateReady()
+  const toast = useToast()
+  const [checking, setChecking] = useState(false)
+
+  async function check() {
+    if (ready) return applyUpdate()
+    setChecking(true)
+    const result = await checkForUpdate()
+    setChecking(false)
+    if (result === 'latest') toast('Du har nyeste versjon')
+    if (result === 'offline') toast('Fikk ikke sjekket. Du er uten nett.')
+  }
+
+  return (
+    <button type="button" className="ha-li" onClick={check} disabled={checking}>
+      <RefreshCw className="ha-ico" aria-hidden="true" />
+      <span className="ha-li-main">
+        <span className="ha-li-title">
+          {ready ? 'Oppdater til ny versjon' : checking ? 'Ser etter oppdatering …' : 'Se etter oppdatering'}
+        </span>
+        <span className="ha-li-meta">
+          Versjon {APP_VERSION} · {buildTime}
+        </span>
+      </span>
+    </button>
   )
 }
 

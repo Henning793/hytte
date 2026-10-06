@@ -2,11 +2,20 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
+// Netlify setter COMMIT_REF; lokalt viser vi bare versjonsnummeret.
+const version = process.env.npm_package_version ?? '0.0.0'
+const commit = process.env.COMMIT_REF?.slice(0, 7)
+
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(commit ? `${version} (${commit})` : version),
+    __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
+  },
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // Ny versjon venter til brukeren trykker «Oppdater» (se src/lib/update.ts).
+      registerType: 'prompt',
       includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
       manifest: {
         name: 'Hytteappen',
