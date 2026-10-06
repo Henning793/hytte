@@ -27,6 +27,7 @@ import { IssueDetail } from './screens/issues/IssueDetail'
 import { IssueForm } from './screens/issues/IssueForm'
 import { Issues } from './screens/issues/Issues'
 import { More } from './screens/More'
+import { Notifications } from './screens/Notifications'
 import { Shopping } from './screens/Shopping'
 import { TaskDetail } from './screens/tasks/TaskDetail'
 import { TaskForm } from './screens/tasks/TaskForm'
@@ -89,6 +90,7 @@ export const router = createBrowserRouter([
       { path: 'mer/historikk/:id/endre', element: <HistoryForm /> },
       { path: 'mer/medlemmer', element: <Members /> },
       { path: 'mer/hytter', element: <MyCabins /> },
+      { path: 'mer/varsler', element: <Notifications /> },
     ],
   },
 

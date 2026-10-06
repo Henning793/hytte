@@ -27,6 +27,8 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
+        // Viser push-varsler og åpner appen når man trykker på dem.
+        importScripts: ['push-sw.js'],
         navigateFallback: '/index.html',
         runtimeCaching: [
           {

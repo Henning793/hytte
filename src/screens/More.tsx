@@ -21,6 +21,7 @@ import { useToast } from '../components/Toast'
 import { useAuth } from '../lib/auth'
 import { useCurrentCabin } from '../lib/cabins'
 import { PALETTE, saveMyColor, useColors } from '../lib/members'
+import { usePushEnabled } from '../lib/push'
 import { useMe } from '../lib/useMe'
 import { setThemePreference, useTheme } from '../lib/theme'
 
@@ -32,10 +33,6 @@ const links: { to: string; label: string; icon: LucideIcon }[] = [
   { to: '/mer/sjekkliste', label: 'Sjekklister', icon: ListTodo },
   { to: '/mer/medlemmer', label: 'Medlemmer', icon: Users },
   { to: '/mer/hytter', label: 'Mine hytter', icon: Warehouse },
-]
-
-const comingSoon: { label: string; icon: LucideIcon }[] = [
-  { label: 'Varsler', icon: Bell },
 ]
 
 export function More() {
@@ -50,6 +47,7 @@ export function More() {
   const me = useMe()
   const myColor = useColors(cabin.id)(me)
   const [choosingColor, setChoosingColor] = useState(false)
+  const [pushOn] = usePushEnabled()
 
   return (
     <div className="scroll">
@@ -87,6 +85,14 @@ export function More() {
               onClick={() => setThemePreference(dark ? 'light' : 'dark')}
             />
           </div>
+          <Link to="/mer/varsler" className="ha-li">
+            <Bell className="ha-ico" aria-hidden="true" />
+            <span className="ha-li-main">
+              <span className="ha-li-title">Varsler</span>
+              {pushOn !== null && <span className="ha-li-meta">{pushOn ? 'På' : 'Av'}</span>}
+            </span>
+            <ChevronRight className="ha-ico ha-chev" aria-hidden="true" />
+          </Link>
           <button type="button" className="ha-li" onClick={() => setChoosingColor(true)}>
             <Palette className="ha-ico" aria-hidden="true" />
             <span className="ha-li-main">
@@ -111,17 +117,6 @@ export function More() {
         </div>
       </div>
 
-      <div className="ha-list">
-        {comingSoon.map(({ label, icon: Icon }) => (
-          <div key={label} className="ha-li soon">
-            <Icon className="ha-ico" aria-hidden="true" />
-            <span className="ha-li-main">
-              <span className="ha-li-title">{label}</span>
-            </span>
-            <span className="ha-badge ha-badge-neutral">Kommer</span>
-          </div>
-        ))}
-      </div>
       {choosingColor && <ColorSheet current={myColor} onClose={() => setChoosingColor(false)} />}
     </div>
   )

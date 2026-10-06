@@ -414,4 +414,33 @@ select tests.ok(
   'alt som hørte til hytta er borte');
 select tests.ok(tests.rows($$select 1 from public.profiles where id = '00000000-0000-0000-0000-00000000000d'$$) = 1,
   'medlemmene har fortsatt kontoen sin');
+-- ---------------------------------------------------------------------------
+-- Push-varsler
+-- ---------------------------------------------------------------------------
+set role authenticated;
+select tests.login('00000000-0000-0000-0000-00000000000b');  -- Kari
+select public.save_push_subscription('https://push.example/kari-telefon', 'p', 'a');
+select tests.ok(tests.rows($$select 1 from push_subscriptions$$) = 1, 'ser eget push-abonnement');
+select tests.fails($$insert into push_subscriptions (endpoint, p256dh, auth) values ('https://push.example/x', 'p', 'a')$$,
+  'abonnement lagres bare via save_push_subscription');
+insert into notification_prefs (stays) values (true);
+select tests.fails($$insert into notification_prefs (user_id) values ('00000000-0000-0000-0000-00000000000a')$$,
+  'kan ikke lagre varselvalg for andre');
+select tests.ok(public.push_public_key() is null, 'ingen VAPID-nøkkel før den er satt opp');
+select tests.fails($$select public.push_settings()$$, 'appen får ikke lese de hemmelige nøklene');
+select tests.fails($$select public.request_push('{}')$$, 'appen kan ikke be om utsending selv');
+
+select tests.login('00000000-0000-0000-0000-00000000000a');  -- Ola
+select tests.ok(tests.rows($$select 1 from push_subscriptions$$) = 0, 'ser ikke andres push-abonnement');
+select tests.ok(tests.rows($$select 1 from notification_prefs$$) = 0, 'ser ikke andres varselvalg');
+select tests.ok(tests.affected($$delete from push_subscriptions$$) = 0, 'kan ikke slette andres abonnement');
+-- Ola logger inn på samme telefon etter Kari.
+select public.save_push_subscription('https://push.example/kari-telefon', 'p2', 'a2');
+select tests.ok(tests.rows($$select 1 from push_subscriptions$$) = 1, 'ny bruker på samme telefon tar over abonnementet');
+select tests.login('00000000-0000-0000-0000-00000000000b');
+select tests.ok(tests.rows($$select 1 from push_subscriptions$$) = 0, 'forrige bruker får ikke lenger varsler på telefonen');
+select tests.ok(tests.affected($$update notification_prefs set user_id = '00000000-0000-0000-0000-00000000000a', tasks = true$$) = 1
+  and tests.rows($$select 1 from notification_prefs where tasks$$) = 1, 'varselvalg kan ikke flyttes til en annen');
+reset role;
+
 \echo 'Alle RLS-tester bestått.'

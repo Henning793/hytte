@@ -61,3 +61,28 @@ Alle tabeller har Row Level Security. Kort fortalt:
 - Ved utlogging slettes alt som er lagret på telefonen, også endringer som ikke er sendt.
 
 Test: åpne appen, gå gjennom skjermene, slå av nettet i DevTools (*Network → Offline*) og last siden på nytt.
+
+## Push-varsler
+
+Av for alle til hver person selv slår dem på under *Mer → Varsler* (per telefon/PC). Standardvalg når de slås på: ny feil, ny hendelse i kalenderen, påminnelse dagen før en hendelse, og påminnelse dagen før mitt eget opphold starter (for å sjekke handleliste og gjøremål). «Noen skal på hytta» og «Nytt gjøremål» kan slås på. Man får aldri varsel om noe man har gjort selv. På iPhone må appen være lagt til på hjemskjermen.
+
+Slik virker det (`supabase/migrations/20261007090000_push.sql`):
+
+- Appen lagrer enhetens abonnement med `save_push_subscription()` og valgene i `notification_prefs`.
+- Når noe nytt legges inn, kaller en trigger Edge Function `push` (`supabase/functions/push/`) via `pg_net`. Hver dag kl. 16 UTC kaller `pg_cron` den samme funksjonen for påminnelser.
+- Funksjonen henter nøklene fra Vault med `push_settings()` og sender med Web Push.
+
+Oppsett én gang (ingen miljøvariabler i Netlify trengs):
+
+1. Lag VAPID-nøkler: `npx web-push generate-vapid-keys`.
+2. Kjør migrasjonen, og legg nøklene i Vault (*SQL Editor*):
+   ```sql
+   select vault.create_secret('https://<ref>.supabase.co/functions/v1/push', 'push_url');
+   select vault.create_secret(encode(extensions.gen_random_bytes(32), 'hex'), 'push_secret');
+   select vault.create_secret('<public key>', 'push_vapid_public');
+   select vault.create_secret('<private key>', 'push_vapid_private');
+   select vault.create_secret('mailto:<din e-post>', 'push_vapid_subject');
+   ```
+3. Rull ut funksjonen uten JWT-sjekk (den sjekker `x-push-secret` selv): `supabase functions deploy push --no-verify-jwt`.
+
+Mangler noe av dette, lagres alt som før, men ingen varsler sendes.
