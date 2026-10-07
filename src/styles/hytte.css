@@ -261,7 +261,10 @@ button.edit-main .ha-li-title { padding-right:20px; }
 .is-home { background:var(--accent-soft); color:var(--on-accent-soft); }
 .ferry-dir { display:flex; align-items:center; gap:6px; font-size:16px; font-weight:600; }
 .ferry-dir-ico { width:20px; height:20px; flex:none; }
-.ferry-next { font-size:24px; line-height:30px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--ink); }
-.ferry-half.is-main .ferry-next { font-size:34px; line-height:40px; }
+.ferry-time-row { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+/* Klokkeslett og ikon krymper litt på smale telefoner, så ikonet får plass ved siden av. */
+.ferry-time-row .ferry-dir-ico { width:clamp(20px, 6vw, 28px); height:clamp(20px, 6vw, 28px); }
+.ferry-next { font-size:clamp(20px, 6.4vw, 24px); line-height:30px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--ink); }
+.ferry-half.is-main .ferry-next { font-size:clamp(24px, 8vw, 34px); line-height:40px; }
 .ferry-sub { font-size:15px; line-height:20px; }
 .ferry-leg { display:flex; align-items:center; gap:8px; margin:0; padding:var(--space-2) var(--space-3); border-radius:var(--radius-md); font-size:17px; font-weight:600; }
