@@ -255,7 +255,7 @@ button.edit-main .ha-li-title { padding-right:20px; }
 .ferry-struck { text-decoration:line-through; text-decoration-thickness:2px; font-weight:400; }
 .ferry-tags { display:flex; gap:6px; flex-wrap:wrap; }
 .ferry-halves { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-3); }
-/* Grønn med hytte mot hytta, gul med hus hjem, samme farger på kortet og fergesiden. */
+/* Grønn med skog mot hytta, gul med hus hjem, samme farger på kortet og fergesiden. */
 .ferry-half { display:flex; flex-direction:column; gap:2px; padding:var(--space-3); border-radius:var(--radius-md); min-width:0; }
 .is-out { background:var(--primary-soft); color:var(--on-primary-soft); }
 .is-home { background:var(--accent-soft); color:var(--on-accent-soft); }

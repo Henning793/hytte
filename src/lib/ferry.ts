@@ -242,12 +242,15 @@ export async function searchFerryStops(text: string): Promise<(FerryStop & { lab
 /** «Nedgården fergeleie» → «Nedgården». */
 export const shortName = (name: string) => name.replace(/\s+(fergeleie|ferjeleie|ferjekai|fergekai|kai|brygge)$/i, '') || name
 
-/** Er jeg på hytta i dag (et eget opphold i kalenderen)? Da er ferga hjem den viktigste. */
+/**
+ * Er jeg på hytta i dag (et eget opphold i kalenderen)? Da er ferga hjem den viktigste.
+ * Første dag i oppholdet er reisedagen ut, så da gjelder ferga til hytta.
+ */
 export function useAtCabin(cabinId: string): boolean {
   const me = useMe()
   const stays = useTable<Stay>('stays', cabinId).rows
   const today = todayIso()
-  return (stays ?? []).some((s) => s.user_id === me && s.start_date <= today && s.end_date >= today)
+  return (stays ?? []).some((s) => s.user_id === me && s.start_date < today && s.end_date >= today)
 }
 
 /** Retningen som er mest aktuell nå, og den andre. */

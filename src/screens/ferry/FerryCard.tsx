@@ -9,7 +9,7 @@ const weekday = new Intl.DateTimeFormat('nb-NO', { weekday: 'long', timeZone: 'E
 
 /**
  * «Neste ferge» på Hjem: den neste avgangen hver vei. Vises bare når hytta har valgt brygger.
- * Ferga mot hytta er grønn med hytte, ferga hjem er gul med hus. Er man på hytta i dag
+ * Ferga mot hytta er grønn med skog, ferga hjem er gul med hus. Er man på hytta i dag
  * (eget opphold i kalenderen), står ferga hjem først og størst.
  */
 export function FerryCard() {
