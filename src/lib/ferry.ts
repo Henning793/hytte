@@ -96,19 +96,19 @@ query ($home: String!, $cabin: String!, $start: DateTime!, $range: Int!) {
   cabin: stopPlace(id: $cabin) { ...calls }
 }
 fragment calls on StopPlace {
-  estimatedCalls(startTime: $start, timeRange: $range, numberOfDepartures: 500, includeCancelledTrips: true) {
+  estimatedCalls(startTime: $start, timeRange: $range, numberOfDepartures: 500, includeCancelledTrips: true, whiteListedModes: [water]) {
     aimedDepartureTime
     expectedDepartureTime
     cancellation
     forBoarding
     stopPositionInPattern
-    quay { stopPlace { id } }
+    quay { stopPlace { id parent { id } } }
     bookingArrangements { bookingNote bookingContact { phone url } }
     situations { id summary { value language } description { value language } }
     serviceJourney {
       line { authority { name url } }
       passingTimes {
-        quay { stopPlace { id } }
+        quay { stopPlace { id parent { id } } }
         arrival { time dayOffset }
         departure { time dayOffset }
         forAlighting
@@ -120,20 +120,23 @@ fragment calls on StopPlace {
 
 type Text = { value: string; language: string | null }
 type Booking = { bookingNote: string | null; bookingContact: { phone: string | null; url: string | null } | null } | null
-type Passing = {
-  quay: { stopPlace: { id: string } | null }
+// Store knutepunkter (f.eks. Skjærhalden med buss og båt) er en «forelder» i Entur,
+// mens avgangene står på fergeleiet under den. Brygga treffer begge.
+type Place = { quay: { stopPlace: { id: string; parent: { id: string } | null } | null } }
+const at = (p: Place | null | undefined, id: string) => p?.quay.stopPlace?.id === id || p?.quay.stopPlace?.parent?.id === id
+
+type Passing = Place & {
   arrival: { time: string | null; dayOffset: number | null } | null
   departure: { time: string | null; dayOffset: number | null } | null
   forAlighting: boolean
   bookingArrangements: Booking
 }
-type Call = {
+type Call = Place & {
   aimedDepartureTime: string
   expectedDepartureTime: string
   cancellation: boolean
   forBoarding: boolean
   stopPositionInPattern: number
-  quay: { stopPlace: { id: string } | null }
   bookingArrangements: Booking
   situations: { id: string; summary: Text[]; description: Text[] }[]
   serviceJourney: { line: { authority: { name: string; url: string | null } | null }; passingTimes: (Passing | null)[] }
@@ -193,16 +196,16 @@ const plus = (iso: string, secs: number) => new Date(Date.parse(iso) + secs * 10
 function trips(calls: Call[], from: string, to: string): Departure[] {
   const result: Departure[] = []
   for (const c of calls) {
-    if (!c.forBoarding || c.quay.stopPlace?.id !== from) continue
+    if (!c.forBoarding || !at(c, from)) continue
     const stops = c.serviceJourney.passingTimes
-    let at = c.stopPositionInPattern
-    if (stops[at]?.quay.stopPlace?.id !== from) at = stops.findIndex((p) => p?.quay.stopPlace?.id === from)
-    if (at < 0) continue
-    const arrival = stops.slice(at + 1).find((p) => p?.quay.stopPlace?.id === to && p.forAlighting)
-    const leave = seconds(stops[at]?.departure ?? null)
+    let pos = c.stopPositionInPattern
+    if (!at(stops[pos], from)) pos = stops.findIndex((p) => at(p, from))
+    if (pos < 0) continue
+    const arrival = stops.slice(pos + 1).find((p) => at(p, to) && p?.forAlighting)
+    const leave = seconds(stops[pos]?.departure ?? null)
     const reach = seconds(arrival?.arrival ?? arrival?.departure ?? null)
     if (!arrival || leave === null || reach === null) continue
-    const booking = c.bookingArrangements ?? stops[at]?.bookingArrangements ?? arrival.bookingArrangements
+    const booking = c.bookingArrangements ?? stops[pos]?.bookingArrangements ?? arrival.bookingArrangements
     result.push({
       aimed: c.aimedDepartureTime,
       aimedArrival: plus(c.aimedDepartureTime, reach - leave),
