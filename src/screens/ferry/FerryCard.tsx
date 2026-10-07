@@ -20,10 +20,10 @@ export function FerryCard() {
     const day = next && osloDay(next.aimed) !== osloDay(now) ? (osloDay(next.aimed) === osloDay(now + 86_400_000) ? 'I morgen' : capitalize(weekday.format(new Date(next.aimed)))) : null
     return (
       <span className="ferry-half">
-        <span className="ferry-dir">{dir === 'out' ? 'Ut til hytta' : 'Hjem'}</span>
+        <span className="ferry-dir">Fra {legOf(ferry, dir).from.name}</span>
         <span className="ferry-next">{next ? formatClock(next.expected) : '–'}</span>
         <span className="t-caption">
-          {next ? [day, next.booking ? 'Må bestilles' : null].filter(Boolean).join(' · ') || `Fra ${legOf(ferry, dir).from.name}` : data ? 'Ingen avganger' : failed ? 'Ikke hentet' : 'Henter …'}
+          {next ? [day, next.booking ? 'Må bestilles' : null].filter(Boolean).join(' · ') || `Til ${legOf(ferry, dir).to.name}` : data ? 'Ingen avganger' : failed ? 'Ikke hentet' : 'Henter …'}
         </span>
       </span>
     )

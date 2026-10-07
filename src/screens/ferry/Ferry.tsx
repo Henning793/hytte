@@ -62,13 +62,13 @@ export function Ferry() {
               label="Retning"
               value={dir}
               options={[
-                { value: 'out', label: 'Ut til hytta' },
-                { value: 'home', label: 'Hjem' },
+                { value: 'out', label: `Fra ${ferry.home.name}` },
+                { value: 'home', label: `Fra ${ferry.cabin.name}` },
               ]}
               onChange={setDir}
             />
             <p className="t-body-lg" style={{ margin: 0 }}>
-              {leg.from.name} → {leg.to.name}
+              Til {leg.to.name}
             </p>
 
             <div className="cal-head">
