@@ -36,7 +36,8 @@ function entry(key: string, fetcher: () => Promise<unknown[]>): Entry {
 /** Viser siste lagrede versjon til den ferske er hentet. */
 function hydrate(key: string, e: Entry) {
   void idbGet<unknown[]>(cacheKey(key)).then((rows) => {
-    if (rows && e.snapshot.rows === null) publish(key, e, { rows: withPending(key, rows), failed: false })
+    // Feilet hentingen allerede (uten nett), skal det fortsatt synes.
+    if (rows && e.snapshot.rows === null) publish(key, e, { rows: withPending(key, rows), failed: e.snapshot.failed })
   })
 }
 

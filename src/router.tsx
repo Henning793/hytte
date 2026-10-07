@@ -23,6 +23,7 @@ import { NoCabin } from './screens/cabins/NoCabin'
 import { History } from './screens/history/History'
 import { HistoryDetail } from './screens/history/HistoryDetail'
 import { HistoryForm } from './screens/history/HistoryForm'
+import { Ferry } from './screens/ferry/Ferry'
 import { Home } from './screens/Home'
 import { More } from './screens/More'
 import { Notifications } from './screens/Notifications'
@@ -72,6 +73,7 @@ export const router = createBrowserRouter([
       { path: 'kalender/hendelse/ny', element: <EventForm /> },
       { path: 'kalender/hendelse/:id', element: <EventForm /> },
       { path: 'handleliste', element: <Shopping /> },
+      { path: 'ferge', element: <Ferry /> },
       { path: 'mer', element: <More /> },
       { path: 'mer/dokumenter', element: <Documents /> },
       { path: 'mer/dokumenter/:id', element: <DocumentView /> },

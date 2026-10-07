@@ -4,6 +4,7 @@ import { ChevronRight, DoorOpen, ListChecks, ShoppingCart, Wrench } from 'lucide
 import { CabinSwitcher } from '../components/CabinSwitcher'
 import { FaultBadge } from '../components/FaultBadge'
 import { Sheet } from '../components/Sheet'
+import { FerryCard } from './ferry/FerryCard'
 import { useCurrentCabin } from '../lib/cabins'
 import { byStart, formatTime, useStayPerson } from '../lib/calendar'
 import { sortOpen, taskMeta } from '../lib/content'
@@ -97,6 +98,8 @@ export function Home() {
             )}
           </button>
         )}
+
+        <FerryCard />
       </div>
       {choosing && (
         <Sheet label="Hva gjelder det?" onClose={() => setChoosing(false)}>
