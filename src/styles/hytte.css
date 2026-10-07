@@ -136,7 +136,7 @@ div.ha-li { cursor:default; }
 .ha-offline.is-update { background:var(--primary); color:var(--on-primary); border:0; min-height:48px; padding:0 18px 0 14px; cursor:pointer; font:inherit; font-size:17px; font-weight:700; }
 
 /* Cabin switcher */
-.home-head { display:flex; align-items:center; gap:var(--space-3); padding:14px 16px 0; min-height:64px; }
+.home-head { display:flex; align-items:center; gap:var(--space-3); padding:8px 16px 0; min-height:64px; }
 .ha-switch { display:inline-flex; align-items:center; gap:var(--space-2); min-height:48px; padding:0 var(--space-2) 0 0; border:0; background:transparent; font-size:26px; line-height:32px; font-weight:700; cursor:pointer; color:var(--ink); }
 .ha-switch.is-static { cursor:default; }
 .ha-avatar { width:44px; height:44px; border-radius:var(--radius-md); background:var(--accent); color:var(--on-primary); display:grid; place-items:center; font-size:20px; font-weight:700; flex:none; overflow:hidden; }
@@ -156,6 +156,13 @@ div.ha-li { cursor:default; }
 .ha-tile .ha-ico { width:30px; height:30px; }
 .ha-tile-primary { background:var(--primary); color:var(--on-primary); }
 .ha-tile-secondary { background:var(--surface-raised); color:var(--ink); border:2px solid var(--line-strong); }
+/* Hjem: tettere enn ellers, så alle kortene (også Neste ferge) får plass uten scrolling på en vanlig telefon. */
+.home { gap:var(--space-4); padding-top:var(--space-2); padding-bottom:var(--space-4); }
+.home .ha-card { gap:var(--space-2); padding:14px var(--space-4); }
+.home .ha-tile { padding:var(--space-3) var(--space-4); }
+.home .ha-tile .ha-ico { width:26px; height:26px; }
+.home .ferry-half { padding:var(--space-2) var(--space-3); }
+.home .ferry-half.is-main .ferry-next { line-height:36px; }
 
 /* Toast */
 .toast-wrap { position:absolute; left:16px; right:16px; bottom:104px; display:flex; justify-content:center; z-index:30; pointer-events:none; }

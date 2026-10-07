@@ -26,7 +26,7 @@ export function Home() {
   return (
     <>
       <CabinSwitcher />
-      <div className="scroll" style={{ paddingTop: 12 }}>
+      <div className="scroll home">
         <div className="tiles">
           <button type="button" className="ha-tile ha-tile-primary" onClick={() => setChoosing(true)}>
             <Wrench className="ha-ico" aria-hidden="true" />
