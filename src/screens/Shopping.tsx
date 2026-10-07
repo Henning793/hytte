@@ -81,6 +81,8 @@ export function Shopping() {
         <h1 className="t-title">Handleliste</h1>
         {rows && <span className="t-caption">{count(open.length, 'vare', 'varer')}</span>}
       </div>
+      {open.length > 0 && <div className="ha-list">{open.map(item)}</div>}
+      {rows && open.length === 0 && <div className="empty">Alt er kjøpt. Skriv en vare under for å legge den til.</div>}
       <form className="quickadd" onSubmit={add}>
         <label htmlFor="sh-add" className="sr-only">
           Ny vare
@@ -93,6 +95,11 @@ export function Shopping() {
           maxLength={100}
           enterKeyHint="done"
           autoFocus={addRequested}
+          // Hold feltet synlig over tastaturet på mobil nå som det står nederst.
+          onFocus={(e) => {
+            const el = e.currentTarget
+            setTimeout(() => el.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300)
+          }}
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
@@ -100,8 +107,6 @@ export function Shopping() {
           Legg til
         </button>
       </form>
-      {open.length > 0 && <div className="ha-list">{open.map(item)}</div>}
-      {rows && open.length === 0 && <div className="empty">Alt er kjøpt. Skriv en vare over for å legge den til.</div>}
       {bought.length > 0 && (
         <>
           <h2 className="list-h">Kjøpt</h2>
