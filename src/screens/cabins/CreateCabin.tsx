@@ -51,7 +51,7 @@ export function CreateCabin() {
         const path = await uploadImage(id, 'cabin', photo)
         await supabase.from('cabins').update({ photo_path: path }).eq('id', id)
       } catch {
-        toast('Hytta er opprettet, men bildet ble ikke lastet opp')
+        toast('Hytta er opprettet, men bildet kom ikke opp. Legg det til under Mer → Medlemmer.')
       }
     }
     await refresh()
