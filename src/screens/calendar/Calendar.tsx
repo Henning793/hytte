@@ -106,6 +106,7 @@ export function Calendar() {
                   if (!day.startsWith(selected.slice(0, 7))) classes.push('is-other')
                   if (i === 6 || holiday?.red) classes.push('is-red')
                   if (day === today) classes.push('is-today')
+                  if (evs.length > 0) classes.push('has-event')
                   return (
                     <button
                       key={day}
@@ -135,7 +136,6 @@ export function Calendar() {
                         )}
                       </span>
                       <span className="cal-marks" aria-hidden="true">
-                        {evs.length > 0 && <span className="cal-event" />}
                         {extra > 0 && <span className="cal-extra">+{extra}</span>}
                       </span>
                     </button>
