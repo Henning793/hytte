@@ -3,7 +3,8 @@ import { ChevronLeft, ChevronRight, ExternalLink, Pencil, Phone, Ship, TriangleA
 import { TopBar } from '../../components/TopBar'
 import { useCurrentCabin } from '../../lib/cabins'
 import { addDays, formatLongDay } from '../../lib/dates'
-import { FERRY_DAYS, formatClock, legOf, osloDay, useFerry, useNow, type Departure, type Direction } from '../../lib/ferry'
+import { FERRY_DAYS, directionsFor, formatClock, legOf, osloDay, useAtCabin, useFerry, useNow, type Departure, type Direction } from '../../lib/ferry'
+import { DirectionIcon } from './DirectionIcon'
 import { useCabinInfo } from '../../lib/info'
 import { Segmented } from '../../components/Segmented'
 import { FerrySetup } from './FerrySetup'
@@ -17,7 +18,10 @@ export function Ferry() {
   const { data, failed } = useFerry(cabin.id, ferry)
   const now = useNow()
   const today = osloDay(now)
-  const [dir, setDir] = useState<Direction>('out')
+  const atCabin = useAtCabin(cabin.id)
+  // Står man på hytta i dag, viser siden ferga hjem først.
+  const [chosen, setDir] = useState<Direction | null>(null)
+  const dir = chosen ?? directionsFor(atCabin)[0]
   const [day, setDay] = useState(today)
   const [editing, setEditing] = useState(false)
   const [showPast, setShowPast] = useState(false)
@@ -67,8 +71,9 @@ export function Ferry() {
               ]}
               onChange={setDir}
             />
-            <p className="t-body-lg" style={{ margin: 0 }}>
-              Til {leg.to.name}
+            <p className={`ferry-leg is-${dir}`}>
+              <DirectionIcon dir={dir} />
+              {dir === 'out' ? 'Til hytta' : 'Hjem'}: {leg.from.name} → {leg.to.name}
             </p>
 
             <div className="cal-head">

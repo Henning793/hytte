@@ -255,6 +255,13 @@ button.edit-main .ha-li-title { padding-right:20px; }
 .ferry-struck { text-decoration:line-through; text-decoration-thickness:2px; font-weight:400; }
 .ferry-tags { display:flex; gap:6px; flex-wrap:wrap; }
 .ferry-halves { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-3); }
-.ferry-half { display:flex; flex-direction:column; gap:2px; padding:var(--space-3); border-radius:var(--radius-md); background:var(--surface-sunk); min-width:0; }
-.ferry-dir { font-size:16px; font-weight:600; color:var(--ink-muted); }
-.ferry-next { font-size:32px; line-height:38px; font-weight:700; font-variant-numeric:tabular-nums; }
+/* Grønn med hytte mot hytta, gul med hus hjem, samme farger på kortet og fergesiden. */
+.ferry-half { display:flex; flex-direction:column; gap:2px; padding:var(--space-3); border-radius:var(--radius-md); min-width:0; }
+.is-out { background:var(--primary-soft); color:var(--on-primary-soft); }
+.is-home { background:var(--accent-soft); color:var(--on-accent-soft); }
+.ferry-dir { display:flex; align-items:center; gap:6px; font-size:16px; font-weight:600; }
+.ferry-dir-ico { width:20px; height:20px; flex:none; }
+.ferry-next { font-size:24px; line-height:30px; font-weight:700; font-variant-numeric:tabular-nums; color:var(--ink); }
+.ferry-half.is-main .ferry-next { font-size:34px; line-height:40px; }
+.ferry-sub { font-size:15px; line-height:20px; }
+.ferry-leg { display:flex; align-items:center; gap:8px; margin:0; padding:var(--space-2) var(--space-3); border-radius:var(--radius-md); font-size:17px; font-weight:600; }

@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
-import { upsertSingle, useQuery } from './data'
+import { todayIso } from './dates'
+import { upsertSingle, useQuery, useTable } from './data'
 import { infoKey } from './info'
-import type { Ferry, FerryStop } from './types'
+import type { Ferry, FerryStop, Stay } from './types'
+import { useMe } from './useMe'
 
 // Fergeavganger fra Entur (åpent API for all kollektivtrafikk i Norge, ingen nøkkel).
 // Avgangene for de neste 14 dagene lagres som en vanlig liste i data.ts, så de
@@ -239,3 +241,14 @@ export async function searchFerryStops(text: string): Promise<(FerryStop & { lab
 
 /** «Nedgården fergeleie» → «Nedgården». */
 export const shortName = (name: string) => name.replace(/\s+(fergeleie|ferjeleie|ferjekai|fergekai|kai|brygge)$/i, '') || name
+
+/** Er jeg på hytta i dag (et eget opphold i kalenderen)? Da er ferga hjem den viktigste. */
+export function useAtCabin(cabinId: string): boolean {
+  const me = useMe()
+  const stays = useTable<Stay>('stays', cabinId).rows
+  const today = todayIso()
+  return (stays ?? []).some((s) => s.user_id === me && s.start_date <= today && s.end_date >= today)
+}
+
+/** Retningen som er mest aktuell nå, og den andre. */
+export const directionsFor = (atCabin: boolean): [Direction, Direction] => (atCabin ? ['home', 'out'] : ['out', 'home'])
