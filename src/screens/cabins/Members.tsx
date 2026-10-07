@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
-import { Copy, MessageSquare, Trash2, UserPlus } from 'lucide-react'
+import { Copy, ImagePlus, MessageSquare, Trash2, UserPlus } from 'lucide-react'
 import { PersonAvatar } from '../../components/CabinAvatar'
 import { Field, FieldError } from '../../components/Field'
 import { Sheet } from '../../components/Sheet'
@@ -10,6 +10,7 @@ import { useAuth } from '../../lib/auth'
 import { useCabins, useCurrentCabin } from '../../lib/cabins'
 import { reload } from '../../lib/data'
 import { deleteCabin } from '../../lib/deleteCabin'
+import { removeFile, uploadImage, useFileUrl } from '../../lib/files'
 import { membersKey, useMembers, type Member } from '../../lib/members'
 import { inviteLink } from '../../lib/invite'
 import { supabase } from '../../lib/supabase'
@@ -97,6 +98,8 @@ export function Members() {
           </div>
         )}
 
+        {isAdmin && <CabinPhoto />}
+
         {isAdmin && (
           <div className="stack">
             <h2 className="list-h">Slette hytta</h2>
@@ -136,6 +139,105 @@ export function Members() {
         </Sheet>
       )}
     </>
+  )
+}
+
+/** Admin legger til, bytter eller fjerner hyttebildet. */
+function CabinPhoto() {
+  const cabin = useCurrentCabin()
+  const { refresh } = useCabins()
+  const toast = useToast()
+  const fileInput = useRef<HTMLInputElement>(null)
+  const url = useFileUrl(cabin.photo_path)
+  const [busy, setBusy] = useState<'upload' | 'remove' | null>(null)
+
+  async function save(path: string | null) {
+    const old = cabin.photo_path
+    const { error } = await supabase.from('cabins').update({ photo_path: path }).eq('id', cabin.id)
+    if (error) throw error
+    if (old) void removeFile(old)
+    await refresh()
+  }
+
+  async function upload(file: File) {
+    if (!navigator.onLine) {
+      toast('Du må ha nett for å bytte hyttebildet.')
+      return
+    }
+    setBusy('upload')
+    let path: string | null = null
+    try {
+      path = await uploadImage(cabin.id, 'cabin', file)
+      await save(path)
+      toast('Hyttebildet er lagret')
+    } catch {
+      // Bildet kom opp, men hytta ble ikke oppdatert: rydd bort filen.
+      if (path) void removeFile(path)
+      toast('Bildet ble ikke lagret. Sjekk at du har nett, og prøv igjen.')
+    }
+    setBusy(null)
+  }
+
+  async function remove() {
+    if (!navigator.onLine) {
+      toast('Du må ha nett for å fjerne hyttebildet.')
+      return
+    }
+    setBusy('remove')
+    try {
+      await save(null)
+      toast('Hyttebildet er fjernet')
+    } catch {
+      toast('Bildet ble ikke fjernet. Sjekk at du har nett, og prøv igjen.')
+    }
+    setBusy(null)
+  }
+
+  return (
+    <div className="stack">
+      <h2 className="list-h">Hyttebilde</h2>
+      <input
+        ref={fileInput}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) void upload(file)
+          e.target.value = ''
+        }}
+      />
+      {cabin.photo_path ? (
+        <>
+          <div className="photo">{url && <img src={url} alt={`Bilde av ${cabin.name}`} />}</div>
+          <div className="row">
+            <button
+              type="button"
+              className="ha-btn ha-btn-secondary grow"
+              disabled={busy !== null}
+              onClick={() => fileInput.current?.click()}
+            >
+              {busy === 'upload' ? 'Laster opp …' : 'Bytt bilde'}
+            </button>
+            <button type="button" className="ha-btn ha-btn-ghost grow" disabled={busy !== null} onClick={remove}>
+              {busy === 'remove' ? 'Fjerner …' : 'Fjern bildet'}
+            </button>
+          </div>
+        </>
+      ) : (
+        <button
+          type="button"
+          className="photo-slot"
+          disabled={busy !== null}
+          onClick={() => fileInput.current?.click()}
+        >
+          <ImagePlus className="ha-ico" aria-hidden="true" />
+          {busy === 'upload' ? 'Laster opp …' : 'Legg til bilde'}
+        </button>
+      )}
+    </div>
   )
 }
 
