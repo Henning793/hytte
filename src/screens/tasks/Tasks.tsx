@@ -24,11 +24,6 @@ export function Tasks() {
   return (
     <div className="scroll" style={{ paddingTop: 20 }}>
       <h1 className="t-title">Oppgaver</h1>
-      <Link className="ha-btn ha-btn-primary ha-btn-block" to="/oppgaver/ny">
-        <Plus className="ha-ico" aria-hidden="true" />
-        Ny oppgave
-      </Link>
-
       {rows && open.length === 0 && <div className="empty">Ingenting som må fikses eller gjøres. Fint!</div>}
       {open.length > 0 && (
         <div className="ha-list">
@@ -63,6 +58,11 @@ export function Tasks() {
           ))}
         </div>
       )}
+
+      <Link className="ha-btn ha-btn-primary ha-btn-block" to="/oppgaver/ny">
+        <Plus className="ha-ico" aria-hidden="true" />
+        Ny oppgave
+      </Link>
 
       {done.length > 0 && (
         <>
