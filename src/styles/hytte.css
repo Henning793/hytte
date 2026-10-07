@@ -254,3 +254,7 @@ button.edit-main .ha-li-title { padding-right:20px; }
 .ferry-row.is-past .ferry-time { font-weight:400; }
 .ferry-struck { text-decoration:line-through; text-decoration-thickness:2px; font-weight:400; }
 .ferry-tags { display:flex; gap:6px; flex-wrap:wrap; }
+.ferry-halves { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:var(--space-3); }
+.ferry-half { display:flex; flex-direction:column; gap:2px; padding:var(--space-3); border-radius:var(--radius-md); background:var(--surface-sunk); min-width:0; }
+.ferry-dir { font-size:16px; font-weight:600; color:var(--ink-muted); }
+.ferry-next { font-size:32px; line-height:38px; font-weight:700; font-variant-numeric:tabular-nums; }
