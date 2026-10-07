@@ -244,3 +244,13 @@ button.edit-main .ha-li-title { padding-right:20px; }
 .search { position:relative; display:flex; align-items:center; }
 .search > .ha-ico { position:absolute; left:16px; color:var(--ink-muted); pointer-events:none; }
 .search .ha-input { padding-left:52px; }
+
+/* Ferge */
+.ferry-list { list-style:none; margin:0; padding:0; }
+.ferry-row { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:var(--space-2) var(--space-3); min-height:56px; padding:var(--space-2) var(--space-4); border-top:1px solid var(--line); }
+.ferry-row:first-child { border-top:0; }
+.ferry-row.is-past { color:var(--ink-muted); }
+.ferry-time { font-size:21px; line-height:28px; font-weight:700; font-variant-numeric:tabular-nums; }
+.ferry-row.is-past .ferry-time { font-weight:400; }
+.ferry-struck { text-decoration:line-through; text-decoration-thickness:2px; font-weight:400; }
+.ferry-tags { display:flex; gap:6px; flex-wrap:wrap; }

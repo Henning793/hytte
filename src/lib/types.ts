@@ -56,9 +56,16 @@ export type CabinInfo = {
   trash_info: string | null
   store_info: string | null
   notes: string | null
+  ferry: Ferry | null
   updated_by: string | null
   updated_at: string
 }
+
+/** En brygge i Entur (NSR:StopPlace:…). */
+export type FerryStop = { id: string; name: string }
+
+/** Brygga dere reiser fra (home) og brygga ved hytta (cabin). */
+export type Ferry = { home: FerryStop; cabin: FerryStop }
 
 export type ChecklistKind = 'ankomst' | 'avreise'
 

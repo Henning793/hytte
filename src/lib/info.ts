@@ -14,7 +14,7 @@ export function useCabinInfo(cabinId: string): { info: CabinInfo | null; loaded:
   return { info: rows?.[0] ?? null, loaded: rows !== null }
 }
 
-export type InfoFields = Omit<CabinInfo, 'cabin_id' | 'updated_by' | 'updated_at'>
+export type InfoFields = Omit<CabinInfo, 'cabin_id' | 'ferry' | 'updated_by' | 'updated_at'>
 
 export function saveInfo(cabinId: string, fields: InfoFields): Promise<void> {
   return upsertSingle(infoKey(cabinId), 'cabin_info', { cabin_id: cabinId }, fields)
