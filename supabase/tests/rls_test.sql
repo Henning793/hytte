@@ -328,6 +328,31 @@ select tests.fails($$select public.join_cabin((select token from tests.saved))$$
 select tests.ok(public.join_cabin(tests.token('aaaaaaaa-0000-0000-0000-000000000001')) is not null, 'ny lenke virker');
 select tests.ok(tests.rows('select 1 from profiles') = 3, 'nytt medlem ser de andre i hytta');
 
+-- Lenken virker i 24 timer
+select tests.login('00000000-0000-0000-0000-00000000000a');
+select tests.ok((select expires_at from cabin_invites) between now() + interval '23 hours 59 minutes' and now() + interval '24 hours',
+  'ny lenke virker i 24 timer');
+reset role;
+update public.cabin_invites set expires_at = now() - interval '1 minute'
+  where cabin_id = 'aaaaaaaa-0000-0000-0000-000000000001';
+set role authenticated;
+select tests.login('00000000-0000-0000-0000-00000000000c');  -- Per, ikke med i Furulia
+select tests.ok((select expired from public.invite_preview(tests.token('aaaaaaaa-0000-0000-0000-000000000001'))),
+  'invite_preview sier at lenken er utløpt');
+select tests.fails($$select public.join_cabin(tests.token('aaaaaaaa-0000-0000-0000-000000000001'))$$,
+  'utløpt lenke gir ikke medlemskap');
+select tests.ok(tests.rows($$select 1 from cabin_members where cabin_id = 'aaaaaaaa-0000-0000-0000-000000000001'$$) = 0,
+  'Per ble ikke med via utløpt lenke');
+select tests.login('00000000-0000-0000-0000-00000000000b');  -- Kari, allerede med
+select tests.ok(public.join_cabin(tests.token('aaaaaaaa-0000-0000-0000-000000000001')) = 'aaaaaaaa-0000-0000-0000-000000000001',
+  'den som allerede er med kommer inn selv om lenken er utløpt');
+select tests.login('00000000-0000-0000-0000-00000000000a');
+select public.new_invite_link('aaaaaaaa-0000-0000-0000-000000000001');
+select tests.ok((select expires_at > now() + interval '23 hours' from cabin_invites), 'fornyet lenke får nye 24 timer');
+select tests.login('00000000-0000-0000-0000-00000000000c');
+select tests.ok(not (select expired from public.invite_preview(tests.token('aaaaaaaa-0000-0000-0000-000000000001'))),
+  'fornyet lenke er ikke utløpt');
+
 select tests.login('00000000-0000-0000-0000-00000000000a');
 select tests.ok(tests.affected($$delete from cabin_members where user_id = '00000000-0000-0000-0000-00000000000b'$$) = 1,
   'admin fjerner Kari');
