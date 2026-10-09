@@ -4,6 +4,8 @@ import { RouterProvider } from 'react-router/dom'
 import { ToastProvider } from './components/Toast'
 import { AuthProvider } from './lib/auth'
 import { CabinProvider } from './lib/cabins'
+// Må lastes før appen tegnes: fanger nettleserens installeringstilbud.
+import './lib/install'
 import './lib/theme'
 import './lib/update'
 import './styles/hytte.css'

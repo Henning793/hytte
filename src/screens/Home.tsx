@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { ChevronRight, DoorOpen, ListChecks, ShoppingCart, Wrench } from 'lucide-react'
 import { CabinSwitcher } from '../components/CabinSwitcher'
 import { FaultBadge } from '../components/FaultBadge'
+import { InstallCard } from '../components/InstallApp'
 import { Sheet } from '../components/Sheet'
 import { FerryCard } from './ferry/FerryCard'
 import { useCurrentCabin } from '../lib/cabins'
@@ -27,6 +28,8 @@ export function Home() {
     <>
       <CabinSwitcher />
       <div className="scroll home">
+        <InstallCard />
+
         <div className="tiles">
           <button type="button" className="ha-tile ha-tile-primary" onClick={() => setChoosing(true)}>
             <Wrench className="ha-ico" aria-hidden="true" />

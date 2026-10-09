@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import {
   Bell,
   Check,
+  Download,
   ChevronRight,
   FileText,
   History,
@@ -17,6 +18,7 @@ import {
   Warehouse,
   type LucideIcon,
 } from 'lucide-react'
+import { useInstallApp } from '../components/InstallApp'
 import { Sheet } from '../components/Sheet'
 import { useToast } from '../components/Toast'
 import { useAuth } from '../lib/auth'
@@ -103,6 +105,7 @@ export function More() {
             </span>
             <span className="cal-dot" style={{ background: myColor, width: 24, height: 24 }} aria-hidden="true" />
           </button>
+          <InstallRow />
           <UpdateRow />
           <button
             type="button"
@@ -122,6 +125,25 @@ export function More() {
 
       {choosingColor && <ColorSheet current={myColor} onClose={() => setChoosingColor(false)} />}
     </div>
+  )
+}
+
+/** «Installer appen», bare i en nettleser som kan installere den – også etter at kortet på Hjem er lukket. */
+function InstallRow() {
+  const { method, install, guide } = useInstallApp()
+  if (method === 'none') return guide
+  return (
+    <>
+      <button type="button" className="ha-li" onClick={install}>
+        <Download className="ha-ico" aria-hidden="true" />
+        <span className="ha-li-main">
+          <span className="ha-li-title">Installer appen</span>
+          <span className="ha-li-meta">Legg den på hjemskjermen</span>
+        </span>
+        <ChevronRight className="ha-ico ha-chev" aria-hidden="true" />
+      </button>
+      {guide}
+    </>
   )
 }
 
