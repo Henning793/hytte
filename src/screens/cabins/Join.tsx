@@ -15,11 +15,13 @@ type Preview = {
   invited_by: string | null
   member_count: number
   already_member: boolean
+  expired: boolean
 }
 
 type State =
   | { kind: 'loading' }
   | { kind: 'invalid' }
+  | { kind: 'expired'; cabinName: string }
   | { kind: 'offline' }
   | { kind: 'ready'; preview: Preview }
 
@@ -98,7 +100,13 @@ function JoinLoggedIn({ token }: { token: string }) {
         forgetInvite()
         setState({ kind: 'invalid' })
       } else {
-        setState({ kind: 'ready', preview: data[0] as Preview })
+        const preview = data[0] as Preview
+        if (preview.expired && !preview.already_member) {
+          forgetInvite()
+          setState({ kind: 'expired', cabinName: preview.cabin_name })
+        } else {
+          setState({ kind: 'ready', preview })
+        }
       }
     })
     return () => {
@@ -118,8 +126,10 @@ function JoinLoggedIn({ token }: { token: string }) {
     if (error) {
       setBusy(false)
       setError(
-        error.hint === 'invalid_token'
-          ? 'Invitasjonslenken er utløpt. Be den som inviterte deg om en ny lenke.'
+        error.hint === 'expired_token'
+          ? 'Invitasjonslenken er utløpt. Den virker bare i 24 timer. Be den som inviterte deg om en ny lenke.'
+          : error.hint === 'invalid_token'
+          ? 'Invitasjonslenken virker ikke lenger. Be den som inviterte deg om en ny lenke.'
           : 'Noe gikk galt. Sjekk at du har nett, og prøv igjen.',
       )
       return
@@ -138,11 +148,15 @@ function JoinLoggedIn({ token }: { token: string }) {
       <main className="screen">
         <div className="scroll" style={{ paddingTop: 40, justifyContent: 'space-between' }}>
           <div className="stack-lg">
-            <h1 className="t-title">{state.kind === 'offline' ? 'Du er uten nett' : 'Lenken virker ikke'}</h1>
+            <h1 className="t-title">
+              {state.kind === 'offline' ? 'Du er uten nett' : state.kind === 'expired' ? 'Lenken er utløpt' : 'Lenken virker ikke'}
+            </h1>
             <p className="t-body-lg">
               {state.kind === 'offline'
                 ? 'Å bli med i en hytte trenger nett. Åpne lenken igjen når du har dekning.'
-                : 'Invitasjonslenken er utløpt. Be den som inviterte deg om en ny lenke.'}
+                : state.kind === 'expired'
+                ? `Invitasjoner til ${state.cabinName} virker bare i 24 timer. Be den som inviterte deg om en ny lenke.`
+                : 'Invitasjonslenken virker ikke lenger. Be den som inviterte deg om en ny lenke.'}
             </p>
           </div>
           <button type="button" className="ha-btn ha-btn-secondary ha-btn-block" onClick={leave}>

@@ -12,7 +12,7 @@ import { reload } from '../../lib/data'
 import { deleteCabin } from '../../lib/deleteCabin'
 import { removeFile, uploadImage, useFileUrl } from '../../lib/files'
 import { membersKey, useMembers, type Member } from '../../lib/members'
-import { inviteLink } from '../../lib/invite'
+import { inviteLink, inviteValidity } from '../../lib/invite'
 import { supabase } from '../../lib/supabase'
 
 export function Members() {
@@ -243,23 +243,32 @@ function CabinPhoto() {
 
 function InviteSheet({ cabinId, cabinName, onClose }: { cabinId: string; cabinName: string; onClose: () => void }) {
   const toast = useToast()
-  const [token, setToken] = useState<string | null>(null)
+  const [invite, setInvite] = useState<{ token: string; expires_at: string } | null>(null)
   const [failed, setFailed] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
     supabase
       .from('cabin_invites')
-      .select('token')
+      .select('token, expires_at')
       .eq('cabin_id', cabinId)
       .maybeSingle()
       .then(({ data, error }) => {
         if (error || !data) setFailed(true)
-        else setToken(data.token)
+        else setInvite(data)
       })
   }, [cabinId])
 
-  const link = token ? inviteLink(token) : null
+  // Oppdater «virker i … til» mens arket er åpent, så det snur til «utløpt» av seg selv.
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 30_000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  const validity = invite ? inviteValidity(invite.expires_at, now) : null
+  const expired = invite !== null && validity === null
+  const link = invite && !expired ? inviteLink(invite.token) : null
   const message = link ? `Bli med i ${cabinName} i Hytteappen: ${link}` : ''
 
   async function share() {
@@ -293,20 +302,27 @@ function InviteSheet({ cabinId, cabinName, onClose }: { cabinId: string; cabinNa
       toast('Fikk ikke laget ny lenke. Sjekk at du har nett.')
       return
     }
-    setToken(data as string)
-    toast('Ny lenke laget. Den gamle virker ikke lenger.')
+    // Serveren gir lenken 24 timer; klokka her brukes bare til visning.
+    setNow(Date.now())
+    setInvite({ token: data as string, expires_at: new Date(Date.now() + 24 * 3_600_000).toISOString() })
+    toast(expired ? 'Ny lenke laget. Den virker i 24 timer.' : 'Ny lenke laget. Den gamle virker ikke lenger.')
   }
 
   return (
     <Sheet label="Inviter til hytta" onClose={onClose}>
       <div className="stack" style={{ gap: 4 }}>
         <h2 className="t-heading">Inviter til {cabinName}</h2>
-        <p className="muted">Alle som har lenken kan bli med. Send den på SMS til dem du vil invitere.</p>
+        <p className="muted">Alle som har lenken kan bli med i 24 timer. Send den på SMS til dem du vil invitere.</p>
       </div>
       {failed ? (
         <FieldError message="Fikk ikke hentet lenken. Sjekk at du har nett." />
+      ) : expired ? (
+        <FieldError message="Lenken er utløpt. Lag en ny lenke for å invitere flere." />
       ) : (
-        <div className="link-box">{link ?? 'Henter lenke …'}</div>
+        <div className="stack" style={{ gap: 4 }}>
+          <div className="link-box">{link ?? 'Henter lenke …'}</div>
+          {validity && <p className="t-caption">{validity}</p>}
+        </div>
       )}
       <button type="button" className="ha-btn ha-btn-primary ha-btn-block" disabled={!link} onClick={share}>
         <MessageSquare className="ha-ico" aria-hidden="true" />
@@ -317,11 +333,16 @@ function InviteSheet({ cabinId, cabinName, onClose }: { cabinId: string; cabinNa
           <Copy className="ha-ico" aria-hidden="true" />
           Kopier
         </button>
-        <button type="button" className="ha-btn ha-btn-secondary grow" disabled={busy} onClick={renew}>
+        <button
+          type="button"
+          className={`ha-btn grow ${expired ? 'ha-btn-primary' : 'ha-btn-secondary'}`}
+          disabled={busy}
+          onClick={renew}
+        >
           Lag ny lenke
         </button>
       </div>
-      <p className="t-caption">«Lag ny lenke» gjør den gamle ugyldig.</p>
+      <p className="t-caption">«Lag ny lenke» gjør den gamle ugyldig og gir 24 nye timer.</p>
     </Sheet>
   )
 }
