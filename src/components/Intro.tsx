@@ -17,7 +17,7 @@ const scenes: Scene[] = [
     art: ShoppingArt,
   },
   {
-    title: 'Neste ferge på Hjem',
+    title: 'Neste ferge',
     text: 'Se neste avgang begge veier, rett fra rutetabellen og med forsinkelser.',
     art: FerryArt,
   },
