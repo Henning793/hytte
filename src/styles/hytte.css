@@ -288,3 +288,79 @@ button.edit-main .ha-li-title { padding-right:20px; }
 .install-steps li { display:flex; align-items:center; gap:var(--space-3); font-size:17px; line-height:24px; }
 .install-step-icon { flex:none; width:48px; height:48px; display:grid; place-items:center; border-radius:var(--radius-md); background:var(--surface-sunk); color:var(--primary); font-size:20px; font-weight:700; }
 .install-url { margin:0; padding:var(--space-3) var(--space-4); border-radius:var(--radius-md); background:var(--surface-sunk); font-size:17px; overflow-wrap:anywhere; }
+
+/* --- Velkomstintro (se Intro.tsx) --- */
+.intro { position:absolute; inset:0; z-index:40; background:var(--surface); display:flex; flex-direction:column; gap:var(--space-4); padding:calc(env(safe-area-inset-top) + var(--space-1)) var(--space-4) max(var(--space-6), env(safe-area-inset-bottom)); }
+.intro:focus { outline:none; }
+.intro-top { display:flex; align-items:center; justify-content:space-between; min-height:var(--tap-min); padding-left:var(--space-1); margin-right:calc(-1 * var(--space-3)); }
+.intro-stage { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding:var(--space-4); border-radius:var(--radius-lg); background:var(--surface-sunk); overflow:hidden; touch-action:pan-y; user-select:none; -webkit-user-select:none; }
+.intro-art { width:100%; max-width:420px; flex:none; pointer-events:none; transform-origin:center; }
+.intro-text { display:flex; flex-direction:column; gap:var(--space-2); min-height:124px; }
+.intro-dots { display:flex; justify-content:center; gap:var(--space-2); }
+.intro-dot { width:8px; height:8px; border-radius:4px; background:var(--line-strong); overflow:hidden; transition:width .2s ease; }
+.intro-dot.is-done, .intro-dot.is-current { background:var(--primary); }
+.intro-dot.is-current { width:32px; }
+.intro-nav { display:flex; gap:var(--space-3); }
+.intro-nav .ha-btn { flex:1; }
+.intro-nav .ha-btn-primary { flex:2; }
+.intro-upload .progress { display:block; }
+.iv-bar { display:block; height:100%; width:100%; background:var(--primary); border-radius:5px; transform-origin:left; animation:iv-fill 1.4s ease-in-out var(--d, 0s) both; }
+.intro-push { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-3) var(--space-4); border-radius:var(--radius-lg); background:var(--surface-raised); border:1px solid var(--line); box-shadow:0 8px 24px rgba(0,0,0,.12); }
+.intro-push img { border-radius:9px; flex:none; }
+.intro-push-title { font-size:17px; line-height:22px; font-weight:700; }
+.intro-photo { border-radius:var(--radius-md); overflow:hidden; }
+.intro-photo svg { display:block; width:100%; height:auto; }
+.iv-tile { fill:var(--accent-soft); }
+.iv-tap { fill:var(--line-strong); }
+.iv-sink { fill:var(--surface-raised); stroke:var(--line-strong); stroke-width:2; }
+.iv-drop { fill:var(--focus); animation:iv-drip 1.4s ease-in .9s infinite both; }
+.intro-toast { display:flex; justify-content:center; }
+.intro-input { display:flex; align-items:center; flex:1; min-width:0; }
+.intro-route { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-2) var(--space-4); border-radius:var(--radius-pill); background:var(--surface-raised); border:1px solid var(--line); }
+.intro-dock { font-size:15px; font-weight:600; color:var(--ink-muted); }
+.intro-water { flex:1; position:relative; height:44px; }
+.intro-water::before { content:""; position:absolute; left:0; right:0; top:50%; border-top:2px dashed var(--line-strong); }
+.intro-boat { position:absolute; top:2px; left:calc(100% - 40px); width:40px; height:40px; border-radius:50%; display:grid; place-items:center; background:var(--primary); color:var(--on-primary); }
+.intro-boat .ha-ico { width:22px; height:22px; }
+.intro-pills { display:grid; justify-items:center; }
+.intro-pills > * { grid-area:1 / 1; }
+
+/* Bitene står ferdige i CSS-en og animeres inn fra start, så redusert bevegelse viser sluttbildet. */
+.iv-in { animation:iv-in .5s cubic-bezier(.2,.7,.2,1) var(--d, 0s) both; }
+.iv-pop { animation:iv-pop .5s cubic-bezier(.2,.7,.2,1) var(--d, 0s) both; }
+.iv-out { opacity:0; animation:iv-out .35s ease var(--d, 0s) both; }
+.iv-type { display:inline-block; animation:iv-type .8s steps(14, end) var(--d, 0s) both; }
+.iv-press { animation:iv-press .3s ease var(--d, 0s) both; }
+.iv-in.iv-press { animation:iv-in .5s cubic-bezier(.2,.7,.2,1) var(--d, 0s) both, iv-press .3s ease var(--t, 0s) both; }
+.iv-drop-in { animation:iv-drop-in .5s cubic-bezier(.2,.7,.2,1) var(--d, 0s) both; }
+.iv-flip { animation:iv-switch .2s ease var(--t, 0s) both; }
+.iv-flip::after { animation:iv-knob .2s ease var(--t, 0s) both; }
+.iv-grow { overflow:hidden; animation:iv-grow .45s cubic-bezier(.2,.7,.2,1) var(--d, 0s) both; }
+.iv-sail { animation:iv-sail 3.2s ease-in-out var(--d, 0s) infinite alternate both; }
+.iv-tick .ha-box { animation:iv-box .25s ease var(--t, 0s) both; }
+.iv-tick .ha-box .ha-ico { animation:iv-fade .2s ease calc(var(--t, 0s) + .1s) both; }
+.iv-tick .ha-li-title { animation:iv-strike .3s ease var(--t, 0s) both; }
+.iv-swap { display:inline-grid; }
+.iv-swap > * { grid-area:1 / 1; display:inline-flex; align-items:center; gap:4px; }
+.iv-was { opacity:0; animation:iv-out .3s ease var(--s, 0s) both; }
+.iv-now { animation:iv-fade .3s ease calc(var(--s, 0s) + .15s) both; }
+@keyframes iv-in { from { opacity:0; transform:translateY(12px); } }
+@keyframes iv-pop { from { opacity:0; transform:scale(.94); } }
+@keyframes iv-out { from { opacity:1; } to { opacity:0; } }
+@keyframes iv-fade { from { opacity:0; } }
+@keyframes iv-type { from { clip-path:inset(0 100% 0 0); } }
+@keyframes iv-press { 50% { transform:scale(.94); } }
+@keyframes iv-grow { from { max-height:0; min-height:0; padding-top:0; padding-bottom:0; opacity:0; } to { max-height:80px; } }
+@keyframes iv-sail { from { left:0; } }
+@keyframes iv-box { from { background:var(--surface-raised); border-color:var(--line-strong); } }
+@keyframes iv-strike { from { color:var(--ink); text-decoration-color:transparent; } }
+@keyframes iv-drip { 0% { opacity:0; transform:translateY(-4px); } 20% { opacity:1; } 80% { opacity:1; transform:translateY(16px); } 100% { opacity:0; transform:translateY(18px); } }
+@keyframes iv-fill { from { transform:scaleX(0); } }
+@keyframes iv-drop-in { from { opacity:0; transform:translateY(-24px); } }
+@keyframes iv-switch { from { background:var(--line-strong); } }
+@keyframes iv-knob { from { left:4px; } }
+
+/* --- Tips og triks --- */
+.tip-head { display:flex; align-items:center; gap:var(--space-3); }
+.tip-ico { flex:none; width:48px; height:48px; display:grid; place-items:center; border-radius:var(--radius-md); background:var(--primary-soft); color:var(--on-primary-soft); }
+.tip .ha-btn-ghost { align-self:flex-start; margin:-4px 0 -8px calc(-1 * var(--space-3)); }
