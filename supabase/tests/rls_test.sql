@@ -476,6 +476,10 @@ select tests.login('00000000-0000-0000-0000-00000000000b');
 select tests.ok(tests.rows($$select 1 from push_subscriptions$$) = 0, 'forrige bruker får ikke lenger varsler på telefonen');
 select tests.ok(tests.affected($$update notification_prefs set user_id = '00000000-0000-0000-0000-00000000000a', tasks = true$$) = 1
   and tests.rows($$select 1 from notification_prefs where tasks$$) = 1, 'varselvalg kan ikke flyttes til en annen');
+insert into notification_prefs (user_id, push_enabled) values ('00000000-0000-0000-0000-00000000000b', true)
+  on conflict (user_id) do update set push_enabled = excluded.push_enabled;
+select tests.ok(tests.rows($$select 1 from notification_prefs where push_enabled and stays$$) = 1,
+  'varsler på huskes uten å endre valgene');
 reset role;
 
 \echo 'Alle RLS-tester bestått.'
