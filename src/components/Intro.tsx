@@ -1,10 +1,7 @@
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
-import { Bell, Check, Clock, CloudOff, Ship, Wrench } from 'lucide-react'
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
+import { Bell, Check, ChevronRight, Clock, CloudOff, Ship, Upload, Wrench } from 'lucide-react'
 import { DirectionIcon } from '../screens/ferry/DirectionIcon'
 import { FaultBadge } from './FaultBadge'
-
-/** Hvor lenge hver scene står før introen går videre av seg selv. */
-const SCENE_MS = 5500
 
 type Scene = { title: string; text: string; art: () => ReactNode }
 
@@ -25,38 +22,43 @@ const scenes: Scene[] = [
     art: FerryArt,
   },
   {
+    title: 'Dokumenter og manualer',
+    text: 'Last opp manualer, kontrakter og bilder som gjelder hytta, så finner alle dem når de trenger dem.',
+    art: DocsArt,
+  },
+  {
+    title: 'Historikk',
+    text: 'Fullførte oppgaver og fiksede feil havner i historikken, så dere ser når ting sist ble gjort.',
+    art: HistoryArt,
+  },
+  {
+    title: 'Velg dine varsler',
+    text: 'Slå på varsler under Mer, og velg selv hva du vil høre om, for eksempel nye feil eller dugnad.',
+    art: PushArt,
+  },
+  {
     title: 'Virker uten dekning',
     text: 'Les og endre alt på hytta, også uten nett. Endringene sendes av seg selv når du får dekning.',
     art: OfflineArt,
   },
 ]
 
-const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 /** Når en animert bit starter, i sekunder: d = kommer inn, t = krysses av, s = teksten byttes. */
 const at = (d: number, more: { t?: number; s?: number } = {}) =>
   ({ '--d': `${d}s`, ...(more.t !== undefined && { '--t': `${more.t}s` }), ...(more.s !== undefined && { '--s': `${more.s}s` }) }) as CSSProperties
 
 /**
- * Velkomstintroen: fire korte, animerte scener laget av appens egne kort og rader.
- * Går videre av seg selv til brukeren trykker selv, eller med redusert bevegelse.
+ * Velkomstintroen: korte, animerte scener laget av appens egne kort og rader.
+ * Brukeren blar selv med Forrige og Neste (eller sveip og piltaster).
  */
 export function Intro({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState(0)
-  const [auto, setAuto] = useState(() => !reducedMotion())
   const ref = useRef<HTMLDivElement>(null)
   const last = step === scenes.length - 1
   const scene = scenes[step]
   const Art = scene.art
 
-  useEffect(() => {
-    if (!auto || last) return
-    const t = setTimeout(() => setStep((s) => s + 1), SCENE_MS)
-    return () => clearTimeout(t)
-  }, [auto, last, step])
-
   function go(to: number) {
-    setAuto(false)
     setStep(Math.max(0, Math.min(scenes.length - 1, to)))
   }
 
@@ -99,6 +101,24 @@ export function Intro({ onClose }: { onClose: () => void }) {
   // Sveip til siden for neste eller forrige scene.
   const startX = useRef<number | null>(null)
 
+  // Scenene er laget i full størrelse; på lave skjermer krympes de så alt får plass.
+  const stage = useRef<HTMLDivElement>(null)
+  const art = useRef<HTMLDivElement>(null)
+  useLayoutEffect(() => {
+    const s = stage.current
+    const a = art.current
+    if (!s || !a) return
+    const fit = () => {
+      const pad = parseFloat(getComputedStyle(s).paddingTop) * 2
+      a.style.transform = `scale(${Math.min(1, (s.clientHeight - pad) / a.offsetHeight)})`
+    }
+    fit()
+    const observer = new ResizeObserver(fit)
+    observer.observe(s)
+    observer.observe(a)
+    return () => observer.disconnect()
+  }, [step])
+
   return (
     <div className="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title" tabIndex={-1} ref={ref}>
       <div className="intro-top">
@@ -113,6 +133,7 @@ export function Intro({ onClose }: { onClose: () => void }) {
       <div
         className="intro-stage"
         aria-hidden="true"
+        ref={stage}
         onPointerDown={(e) => (startX.current = e.clientX)}
         onPointerUp={(e) => {
           if (startX.current === null) return
@@ -121,7 +142,7 @@ export function Intro({ onClose }: { onClose: () => void }) {
           if (Math.abs(dx) > 50) go(step + (dx < 0 ? 1 : -1))
         }}
       >
-        <div className="intro-art" key={step}>
+        <div className="intro-art" key={step} ref={art}>
           <Art />
         </div>
       </div>
@@ -137,15 +158,20 @@ export function Intro({ onClose }: { onClose: () => void }) {
 
       <div className="intro-dots" aria-hidden="true">
         {scenes.map((s, i) => (
-          <span key={s.title} className={`intro-dot${i === step ? ' is-current' : ''}${i < step ? ' is-done' : ''}`}>
-            {i === step && auto && !last && <span className="intro-dot-fill" style={{ animationDuration: `${SCENE_MS}ms` }} />}
-          </span>
+          <span key={s.title} className={`intro-dot${i === step ? ' is-current' : ''}${i < step ? ' is-done' : ''}`} />
         ))}
       </div>
 
-      <button type="button" className="ha-btn ha-btn-primary ha-btn-block" onClick={last ? onClose : () => go(step + 1)}>
-        {last ? 'Kom i gang' : 'Neste'}
-      </button>
+      <div className="intro-nav">
+        {step > 0 && (
+          <button type="button" className="ha-btn ha-btn-secondary" onClick={() => go(step - 1)}>
+            Forrige
+          </button>
+        )}
+        <button type="button" className="ha-btn ha-btn-primary" onClick={last ? onClose : () => go(step + 1)}>
+          {last ? 'Kom i gang' : 'Neste'}
+        </button>
+      </div>
     </div>
   )
 }
@@ -328,6 +354,141 @@ function OfflineArt() {
           </span>
         </div>
       </div>
+    </div>
+  )
+}
+
+function DocsArt() {
+  return (
+    <div className="stack">
+      <span className="ha-btn ha-btn-primary ha-btn-block iv-in iv-press" style={at(0, { t: 0.5 })}>
+        <Upload className="ha-ico" />
+        Last opp
+      </span>
+      <div className="ha-card iv-in intro-upload" style={at(0.7, { s: 2.3 })}>
+        <span className="row">
+          <span className="doc-type">PDF</span>
+          <span className="ha-li-main">
+            <span className="ha-li-title">Varmepumpe – bruksanvisning</span>
+            <span className="ha-li-meta">
+              <span className="iv-swap">
+                <span className="iv-was">Laster opp …</span>
+                <span className="iv-now">
+                  <Check className="ha-ico ico-sm" />
+                  Lastet opp i Manualer
+                </span>
+              </span>
+            </span>
+          </span>
+        </span>
+        <span className="progress">
+          <span className="iv-bar" style={at(0.9)} />
+        </span>
+      </div>
+      <h3 className="list-h iv-in" style={at(0.2)}>
+        Manualer
+      </h3>
+      <div className="ha-list iv-in" style={at(0.2)}>
+        <DocRow name="Varmepumpe – bruksanvisning" meta="Lagt til av deg · nå" className="iv-grow" style={at(2.6)} />
+        <DocRow name="Peisovn" meta="Lagt til av Kari" />
+        <DocRow name="Strømskap" meta="Lagt til av Ola" img />
+      </div>
+    </div>
+  )
+}
+
+function DocRow({ name, meta, img, className = '', style }: { name: string; meta: string; img?: boolean; className?: string; style?: CSSProperties }) {
+  return (
+    <div className={`ha-li ${className}`} style={style}>
+      <span className={img ? 'doc-type img' : 'doc-type'}>{img ? 'Bilde' : 'PDF'}</span>
+      <span className="ha-li-main">
+        <span className="ha-li-title">{name}</span>
+        <span className="ha-li-meta">{meta}</span>
+      </span>
+      <ChevronRight className="ha-ico ha-chev" />
+    </div>
+  )
+}
+
+function HistoryArt() {
+  return (
+    <div className="stack">
+      <div className="ha-list iv-in" style={at(0)}>
+        <div className="ha-check iv-tick" aria-checked="true" style={at(0, { t: 0.8 })}>
+          <span className="ha-box">
+            <Check className="ha-ico" />
+          </span>
+          <span className="ha-li-main">
+            <span className="ha-li-title">Bytte batteri i røykvarsleren</span>
+            <span className="ha-li-meta">Oppgave</span>
+          </span>
+        </div>
+      </div>
+      <h3 className="list-h iv-in" style={at(1.2)}>
+        Historikk 2026
+      </h3>
+      <div className="ha-list iv-in" style={at(1.2)}>
+        <HistoryRow title="Bytte batteri i røykvarsleren" meta="11. okt. · deg" badge="Oppgave" className="iv-grow" style={at(1.9)} />
+        <HistoryRow title="Kranen på badet drypper" meta="2. sep. · Ola" badge="Feil fikset" />
+        <HistoryRow title="Malte terrassen" meta="14. juni · Kari" />
+      </div>
+    </div>
+  )
+}
+
+function HistoryRow({ title, meta, badge, className = '', style }: { title: string; meta: string; badge?: string; className?: string; style?: CSSProperties }) {
+  return (
+    <div className={`ha-li ${className}`} style={style}>
+      <span className="ha-li-main">
+        <span className="ha-li-title">{title}</span>
+        <span className="ha-li-meta">
+          {meta}
+          {badge && <span className="ha-badge ha-badge-neutral">{badge}</span>}
+        </span>
+      </span>
+      <ChevronRight className="ha-ico ha-chev" />
+    </div>
+  )
+}
+
+function PushArt() {
+  return (
+    <div className="stack">
+      <div className="intro-push iv-drop-in" style={at(3.2)}>
+        <img src="/icons/icon-192.png" alt="" width={36} height={36} />
+        <span className="ha-li-main">
+          <span className="intro-push-title">Ny feil på Furulia</span>
+          <span className="ha-li-meta">Kari: Det lekker fra taket i boden</span>
+        </span>
+      </div>
+      <div className="ha-list iv-in" style={at(0)}>
+        <div className="ha-li">
+          <Bell className="ha-ico" />
+          <span className="ha-li-main">
+            <span className="ha-li-title">Varsler på denne enheten</span>
+          </span>
+          <span className="switch iv-flip" aria-checked="true" style={at(0, { t: 0.7 })} />
+        </div>
+      </div>
+      <h3 className="list-h iv-in" style={at(1.2)}>
+        Varsle meg om
+      </h3>
+      <div className="ha-list iv-in" style={at(1.2)}>
+        <PrefRow label="Ny feil" on />
+        <PrefRow label="Ny hendelse i kalenderen" on flip={2.2} />
+        <PrefRow label="Ny oppgave" />
+      </div>
+    </div>
+  )
+}
+
+function PrefRow({ label, on, flip }: { label: string; on?: boolean; flip?: number }) {
+  return (
+    <div className="ha-li">
+      <span className="ha-li-main">
+        <span className="ha-li-title">{label}</span>
+      </span>
+      <span className={`switch${flip ? ' iv-flip' : ''}`} aria-checked={on} style={flip ? at(0, { t: flip }) : undefined} />
     </div>
   )
 }

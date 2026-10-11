@@ -294,18 +294,20 @@ button.edit-main .ha-li-title { padding-right:20px; }
 .intro:focus { outline:none; }
 .intro-top { display:flex; align-items:center; justify-content:space-between; min-height:var(--tap-min); padding-left:var(--space-1); margin-right:calc(-1 * var(--space-3)); }
 .intro-stage { flex:1; min-height:0; display:flex; align-items:center; justify-content:center; padding:var(--space-4); border-radius:var(--radius-lg); background:var(--surface-sunk); overflow:hidden; touch-action:pan-y; user-select:none; -webkit-user-select:none; }
-.intro-art { width:100%; max-width:420px; pointer-events:none; }
-/* Scenene er laget i full størrelse; på lave skjermer krympes de så alt får plass. */
-@media (max-height:780px) { .intro-art { zoom:.85; } }
-@media (max-height:700px) { .intro-art { zoom:.72; } }
-@media (max-height:620px) { .intro-art { zoom:.62; } }
+.intro-art { width:100%; max-width:420px; flex:none; pointer-events:none; transform-origin:center; }
 .intro-text { display:flex; flex-direction:column; gap:var(--space-2); min-height:124px; }
 .intro-dots { display:flex; justify-content:center; gap:var(--space-2); }
 .intro-dot { width:8px; height:8px; border-radius:4px; background:var(--line-strong); overflow:hidden; transition:width .2s ease; }
 .intro-dot.is-done, .intro-dot.is-current { background:var(--primary); }
 .intro-dot.is-current { width:32px; }
-.intro-dot.is-current:has(.intro-dot-fill) { background:var(--line-strong); }
-.intro-dot-fill { display:block; height:100%; background:var(--primary); transform-origin:left; animation:iv-fill linear both; }
+.intro-nav { display:flex; gap:var(--space-3); }
+.intro-nav .ha-btn { flex:1; }
+.intro-nav .ha-btn-primary { flex:2; }
+.intro-upload .progress { display:block; }
+.iv-bar { display:block; height:100%; width:100%; background:var(--primary); border-radius:5px; transform-origin:left; animation:iv-fill 1.4s ease-in-out var(--d, 0s) both; }
+.intro-push { display:flex; align-items:center; gap:var(--space-3); padding:var(--space-3) var(--space-4); border-radius:var(--radius-lg); background:var(--surface-raised); border:1px solid var(--line); box-shadow:0 8px 24px rgba(0,0,0,.12); }
+.intro-push img { border-radius:9px; flex:none; }
+.intro-push-title { font-size:17px; line-height:22px; font-weight:700; }
 .intro-photo { border-radius:var(--radius-md); overflow:hidden; }
 .intro-photo svg { display:block; width:100%; height:auto; }
 .iv-tile { fill:var(--accent-soft); }
@@ -329,6 +331,10 @@ button.edit-main .ha-li-title { padding-right:20px; }
 .iv-out { opacity:0; animation:iv-out .35s ease var(--d, 0s) both; }
 .iv-type { display:inline-block; animation:iv-type .8s steps(14, end) var(--d, 0s) both; }
 .iv-press { animation:iv-press .3s ease var(--d, 0s) both; }
+.iv-in.iv-press { animation:iv-in .5s cubic-bezier(.2,.7,.2,1) var(--d, 0s) both, iv-press .3s ease var(--t, 0s) both; }
+.iv-drop-in { animation:iv-drop-in .5s cubic-bezier(.2,.7,.2,1) var(--d, 0s) both; }
+.iv-flip { animation:iv-switch .2s ease var(--t, 0s) both; }
+.iv-flip::after { animation:iv-knob .2s ease var(--t, 0s) both; }
 .iv-grow { overflow:hidden; animation:iv-grow .45s cubic-bezier(.2,.7,.2,1) var(--d, 0s) both; }
 .iv-sail { animation:iv-sail 3.2s ease-in-out var(--d, 0s) infinite alternate both; }
 .iv-tick .ha-box { animation:iv-box .25s ease var(--t, 0s) both; }
@@ -350,6 +356,9 @@ button.edit-main .ha-li-title { padding-right:20px; }
 @keyframes iv-strike { from { color:var(--ink); text-decoration-color:transparent; } }
 @keyframes iv-drip { 0% { opacity:0; transform:translateY(-4px); } 20% { opacity:1; } 80% { opacity:1; transform:translateY(16px); } 100% { opacity:0; transform:translateY(18px); } }
 @keyframes iv-fill { from { transform:scaleX(0); } }
+@keyframes iv-drop-in { from { opacity:0; transform:translateY(-24px); } }
+@keyframes iv-switch { from { background:var(--line-strong); } }
+@keyframes iv-knob { from { left:4px; } }
 
 /* --- Tips og triks --- */
 .tip-head { display:flex; align-items:center; gap:var(--space-3); }
