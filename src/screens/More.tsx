@@ -8,6 +8,7 @@ import {
   FileText,
   History,
   Info,
+  Lightbulb,
   ListTodo,
   LogOut,
   Moon,
@@ -37,6 +38,7 @@ const links: { to: string; label: string; icon: LucideIcon }[] = [
   { to: '/mer/sjekkliste', label: 'Sjekklister', icon: ListTodo },
   { to: '/mer/medlemmer', label: 'Medlemmer', icon: Users },
   { to: '/mer/hytter', label: 'Mine hytter', icon: Warehouse },
+  { to: '/mer/tips', label: 'Tips og triks', icon: Lightbulb },
 ]
 
 export function More() {

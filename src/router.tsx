@@ -31,6 +31,7 @@ import { Shopping } from './screens/Shopping'
 import { TaskDetail } from './screens/tasks/TaskDetail'
 import { TaskForm } from './screens/tasks/TaskForm'
 import { Tasks } from './screens/tasks/Tasks'
+import { Tips } from './screens/Tips'
 import { Welcome } from './screens/Welcome'
 
 // Stiene er på norsk fordi de vises i adressefeltet og i invitasjonslenker.
@@ -87,6 +88,7 @@ export const router = createBrowserRouter([
       { path: 'mer/medlemmer', element: <Members /> },
       { path: 'mer/hytter', element: <MyCabins /> },
       { path: 'mer/varsler', element: <Notifications /> },
+      { path: 'mer/tips', element: <Tips /> },
 
       // Gamle adresser, fra varsler og bokmerker før feil og gjøremål ble til Oppgaver.
       { path: 'gjoremal/*', element: <Moved from="/gjoremal" to="/oppgaver" /> },
