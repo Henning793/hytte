@@ -3,6 +3,8 @@ import { supabase } from './supabase'
 
 // Push-varsler. Av til personen selv slår dem på. «På» gjelder denne enheten
 // (nettleseren har et abonnement); hvilke varsler man vil ha gjelder personen.
+// At personen har slått på varsler, huskes i databasen (push_enabled), så de
+// slås på igjen av seg selv etter utlogging, tømt buffer eller ny telefon-start.
 
 export type PushPrefs = {
   issues: boolean
@@ -43,11 +45,16 @@ async function deviceSubscription(): Promise<PushSubscription | null> {
   return (await reg?.pushManager.getSubscription()) ?? null
 }
 
+// Pågående gjenoppretting etter innlogging, så skjermen ikke viser «Av» midt i den.
+let restoring: Promise<void> = Promise.resolve()
+
 /** Er varsler på for denne enheten? Null mens det sjekkes. */
 export function usePushEnabled(): [boolean | null, (on: boolean) => void] {
   const [enabled, setEnabled] = useState<boolean | null>(null)
   useEffect(() => {
-    deviceSubscription().then(
+    // Venter på gjenopprettingen, men ikke i det uendelige.
+    const waited = Promise.race([restoring, new Promise((r) => setTimeout(r, 5000))])
+    waited.then(deviceSubscription).then(
       (s) => setEnabled(Boolean(s) && Notification.permission === 'granted'),
       () => setEnabled(false),
     )
@@ -65,10 +72,30 @@ function base64UrlToBytes(value: string): Uint8Array<ArrayBuffer> {
 
 export type EnableResult = 'on' | 'denied' | 'not-ready'
 
+async function currentUserId(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession()
+  return data.session?.user.id ?? null
+}
+
+/** Husker på personen om varsler er slått på. Valgene av varsler står urørt. */
+async function saveWanted(on: boolean): Promise<void> {
+  const userId = await currentUserId()
+  if (!userId) return
+  const { error } = await supabase.from('notification_prefs').upsert({ user_id: userId, push_enabled: on })
+  if (error) throw error
+}
+
 /** Spør om lov og abonnerer. Må kalles fra et trykk (iPhone krever det). */
 export async function enablePush(): Promise<EnableResult> {
   const permission = await Notification.requestPermission()
   if (permission !== 'granted') return 'denied'
+  const result = await subscribeDevice()
+  if (result === 'on') await saveWanted(true)
+  return result
+}
+
+/** Abonnerer enheten (gjenbruker abonnementet den har) og lagrer det på meg. */
+async function subscribeDevice(): Promise<'on' | 'not-ready'> {
   const { data: key, error } = await supabase.rpc('push_public_key')
   if (error) throw error
   if (!key) return 'not-ready'
@@ -89,11 +116,40 @@ export async function enablePush(): Promise<EnableResult> {
 
 /** Slår av varsler på denne enheten. Virker også uten nett, så langt det går. */
 export async function disablePush(): Promise<void> {
+  await saveWanted(false)
+  const sub = await deviceSubscription()
+  if (sub) {
+    const endpoint = sub.endpoint
+    await sub.unsubscribe().catch(() => undefined)
+    await supabase.from('push_subscriptions').delete().eq('endpoint', endpoint)
+  }
+}
+
+/**
+ * Ved utlogging: enheten skal ikke få varsler for denne personen lenger, men
+ * personens valg står, så varslene kommer tilbake ved neste innlogging.
+ * Abonnementet i nettleseren beholdes, så det kan tas i bruk igjen uten å spørre.
+ */
+export async function forgetDevice(): Promise<void> {
   const sub = await deviceSubscription()
   if (!sub) return
-  const endpoint = sub.endpoint
-  await sub.unsubscribe().catch(() => undefined)
-  await supabase.from('push_subscriptions').delete().eq('endpoint', endpoint)
+  const { error } = await supabase.from('push_subscriptions').delete().eq('endpoint', sub.endpoint)
+  // Uten nett: avslutt abonnementet, så varslene ikke når fram likevel.
+  if (error) await sub.unsubscribe().catch(() => undefined)
+}
+
+/**
+ * Etter innlogging: hadde personen varsler på, og har telefonen fortsatt gitt
+ * lov, slås de på igjen for denne enheten uten at man trenger å gjøre noe.
+ */
+export function restorePush(): Promise<void> {
+  restoring = (async () => {
+    if (!pushSupported() || Notification.permission !== 'granted') return
+    const { data } = await supabase.from('notification_prefs').select('push_enabled').maybeSingle()
+    if (!data?.push_enabled) return
+    await subscribeDevice()
+  })().catch(() => undefined)
+  return restoring
 }
 
 export async function loadPrefs(): Promise<PushPrefs> {

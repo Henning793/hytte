@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import type { Session } from '@supabase/supabase-js'
 import { openedFromRecoveryLink, supabase, supabaseConfigured } from './supabase'
 import { clearLocalData } from './data'
-import { disablePush } from './push'
+import { forgetDevice, restorePush } from './push'
 
 type AuthState = {
   session: Session | null
@@ -36,6 +36,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => data.subscription.unsubscribe()
   }, [])
 
+  // Hadde personen varsler på, slås de på igjen etter innlogging.
+  const userId = session?.user.id
+  useEffect(() => {
+    if (userId) restorePush()
+  }, [userId])
+
   const value: AuthState = {
     session,
     firstName: (session?.user.user_metadata.first_name as string | undefined) ?? '',
@@ -43,8 +49,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     recovering,
     // Lokal utlogging virker også uten nett.
     signOut: async () => {
-      // Telefonen skal ikke få varsler for denne brukeren etter utlogging.
-      await disablePush().catch(() => undefined)
+      // Telefonen skal ikke få varsler for denne brukeren etter utlogging,
+      // men valget om varsler huskes til neste innlogging.
+      await forgetDevice().catch(() => undefined)
       await supabase.auth.signOut({ scope: 'local' })
       // Neste som logger inn på telefonen skal ikke se denne brukerens data.
       await clearLocalData()
