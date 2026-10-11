@@ -1,11 +1,12 @@
-import { Link, Navigate } from 'react-router'
-import { Plus } from 'lucide-react'
+import { Link, Navigate, useNavigate } from 'react-router'
+import { LogOut, Plus } from 'lucide-react'
 import { useAuth } from '../../lib/auth'
 import { useCabins } from '../../lib/cabins'
 import { pendingInvite } from '../../lib/invite'
 
 export function NoCabin() {
-  const { firstName } = useAuth()
+  const { firstName, signOut } = useAuth()
+  const navigate = useNavigate()
   const { current, loading } = useCabins()
 
   if (loading) return null
@@ -31,6 +32,18 @@ export function NoCabin() {
           <Link className="ha-btn ha-btn-secondary ha-btn-block" to="/bli-med">
             Jeg har fått en invitasjonslenke
           </Link>
+          <button
+            type="button"
+            className="ha-btn ha-btn-ghost"
+            style={{ alignSelf: 'center' }}
+            onClick={async () => {
+              await signOut()
+              navigate('/velkommen', { replace: true })
+            }}
+          >
+            <LogOut className="ha-ico" aria-hidden="true" />
+            Logg ut
+          </button>
         </div>
       </div>
     </main>
